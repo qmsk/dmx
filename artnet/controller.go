@@ -10,7 +10,7 @@ import (
 
 type Config struct {
 	Listen    string `long:"artnet-listen" value-name:"ADDR" default:"0.0.0.0"`
-	Discovery string `long:"artnet-discovery" value-name:"ADDR" default:"255.255.255.255"`
+	Discovery []string `long:"artnet-discovery" value-name:"ADDR" default:"255.255.255.255"`
 
 	DiscoveryInterval time.Duration `long:"artnet-discovery-interval" value-name:"DURATION" default:"3s"`
 	DiscoveryTimeout  time.Duration `long:"artnet-discovery-timeout" value-name:"DURATION" default:"3s"`
@@ -24,7 +24,6 @@ func (config Config) Controller() (*Controller, error) {
 	}
 
 	listenAddr := net.JoinHostPort(config.Listen, fmt.Sprintf("%d", Port))
-	discoveryAddr := net.JoinHostPort(config.Discovery, fmt.Sprintf("%d", Port))
 
 	if udpAddr, err := net.ResolveUDPAddr("udp", listenAddr); err != nil {
 		return nil, err
@@ -36,10 +35,14 @@ func (config Config) Controller() (*Controller, error) {
 		}
 	}
 
-	if udpAddr, err := net.ResolveUDPAddr("udp", discoveryAddr); err != nil {
-		return nil, err
-	} else {
-		controller.discoveryAddr = udpAddr
+	for _, discovery := range config.Discovery {
+		discoveryAddr := net.JoinHostPort(discovery, fmt.Sprintf("%d", Port))
+
+		if udpAddr, err := net.ResolveUDPAddr("udp", discoveryAddr); err != nil {
+			return nil, err
+		} else {
+			controller.discoveryAddrs = append(controller.discoveryAddrs, udpAddr)
+		}
 	}
 
 	return &controller, nil
@@ -64,7 +67,7 @@ type Controller struct {
 	pollChan  chan pollEvent
 
 	// discovery handler
-	discoveryAddr  *net.UDPAddr // sending to broadcast
+	discoveryAddrs []*net.UDPAddr // sending to unicast/broadcast addresses
 	discoveryState atomic.Value
 	discoveryChan  chan Discovery
 }
@@ -144,17 +147,19 @@ func (controller *Controller) SendDMX(address Address, data Universe) error {
 
 			// send unicast to node; may have multiple outputs for the same universe
 			if err := node.SendDMX(address, data); err != nil {
-				return fmt.Errorf("artnet:Node %v: SendDMX %v: %v", node, address, err)
+				return fmt.Errorf("Node %v: SendDMX %v: %v", node, address, err)
 			}
 		}
 	}
 
 	if !matchNodes {
 		// send broadcast, did not find specific node
-		if err := controller.transport.SendDMX(controller.discoveryAddr, 0, address, data); err != nil {
-			return fmt.Errorf("artnet:SendDMX broadcast %v: %v", address, err)
-		} else {
-			controller.log.Debugf("broadcast SendDMX %v ", address)
+		for _, addr := range controller.discoveryAddrs {
+			if err := controller.transport.SendDMX(addr, 0, address, data); err != nil {
+				return fmt.Errorf("SendDMX broadcast %v: %v", address, err)
+			} else {
+				controller.log.Debugf("SendDMX %v: broadcast %v ", address, addr)
+			}
 		}
 	}
 

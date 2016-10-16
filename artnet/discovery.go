@@ -9,11 +9,23 @@ type Discovery struct {
 	Nodes map[string]*Node
 }
 
+func (controller *Controller) discoveryPoll() error {
+	for _, addr := range controller.discoveryAddrs {
+		if err := controller.transport.SendPoll(addr); err != nil {
+			return err
+		} else {
+			controller.log.Debugf("discovery: sendPoll %v", addr)
+		}
+	}
+
+	return nil
+}
+
 func (controller *Controller) discovery(pollChan chan pollEvent) {
 	var ticker = time.NewTicker(controller.config.DiscoveryInterval)
 	var nodes = make(map[string]*Node)
 
-	if err := controller.transport.SendPoll(controller.discoveryAddr); err != nil {
+	if err := controller.discoveryPoll(); err != nil {
 		controller.log.Fatalf("discovery: sendPoll: %v", err)
 	}
 
@@ -40,7 +52,7 @@ func (controller *Controller) discovery(pollChan chan pollEvent) {
 			// poll
 			controller.log.Debug("discovery: tick...")
 
-			if err := controller.transport.SendPoll(controller.discoveryAddr); err != nil {
+			if err := controller.discoveryPoll(); err != nil {
 				controller.log.Fatalf("discovery: sendPoll: %v", err)
 			}
 
