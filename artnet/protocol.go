@@ -1,11 +1,28 @@
 package artnet
 
+import (
+  "fmt"
+)
+
 const Port = 6454
 const MTU = 1500
 
 var ARTNET = [8]byte{'A', 'R', 'T', '-', 'N', 'E', 'T', 0}
 
 const ProtVer = 14
+
+type Address struct {
+  Net     uint8 // 0-128
+  SubUni  uint8
+}
+
+func (a Address) String() string {
+  return fmt.Sprintf("%d:%d.%d",
+    a.Net,
+    (a.SubUni >> 4),
+    a.SubUni & 0x0F,
+  )
+}
 
 type ArtHeader struct {
   ID      [8]byte

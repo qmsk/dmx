@@ -4,6 +4,7 @@ import (
   log "github.com/Sirupsen/logrus"
   "github.com/qmsk/dmx/artnet"
   flags "github.com/jessevdk/go-flags"
+  "fmt"
 )
 
 var options struct {
@@ -35,7 +36,18 @@ func main() {
     log.Infof("artnet.Discovery:")
 
     for _, node := range discovery.Nodes {
-      log.Infof("\t%v", node)
+      fmt.Printf("%v:\n", node)
+
+      config := node.Config()
+
+      fmt.Printf("\tName: %v\n", config.Name)
+
+      for i, inputPort := range config.InputPorts {
+        fmt.Printf("\tInput %d: %v\n", i, inputPort.Address)
+      }
+      for i, outputPort := range config.OutputPorts {
+        fmt.Printf("\tOutput %d: %v\n", i, outputPort.Address)
+      }
     }
   }
 }

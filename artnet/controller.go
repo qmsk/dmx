@@ -48,7 +48,7 @@ func (config Config) Controller() (*Controller, error) {
 type pollEvent struct {
   recvTime    time.Time
   srcAddr     *net.UDPAddr
-  pollReply   ArtPollReply
+  packet      ArtPollReply
 }
 
 func (event pollEvent) String() string {
@@ -104,7 +104,7 @@ func (controller *Controller) recvPacket(packet ArtPacket, srcAddr *net.UDPAddr)
       controller.pollChan <- pollEvent{
         recvTime: time.Now(),
         srcAddr: srcAddr,
-        pollReply: *packetType,
+        packet: *packetType,
       }
     }
 

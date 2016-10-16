@@ -1,5 +1,10 @@
 package artnet
 
+import (
+  "fmt"
+  log "github.com/Sirupsen/logrus"
+)
+
 type ArtPoll struct {
   ArtHeader
   ProtVer uint16
@@ -40,4 +45,52 @@ type ArtPollReply struct {
   BindIp      [4]byte
   BindIndex   uint8
   Status2     uint8
+}
+
+func decodeMac(mac [6]byte) string {
+  return fmt.Sprintf("%02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5])
+}
+
+func (p ArtPollReply) NodeConfig() NodeConfig {
+  var address = Address{
+    Net:    p.NetSwitch,
+    SubUni: p.SubSwitch,
+  }
+
+  var nodeConfig = NodeConfig{
+    OEM:          p.Oem,
+    Version:      p.VersInfo,
+    Name:         decodeString(p.ShortName[:]),
+    Description:  decodeString(p.LongName[:]),
+    Report:       decodeString(p.NodeReport[:]),
+    Ethernet:     decodeMac(p.Mac),
+    BaseAddress:  address,
+  }
+
+  for i := 0; i < int(p.NumPorts) && i < 4; i++ {
+    log.Debugf("decode poll reply: port=%d type=%04x", i, p.PortTypes[i])
+
+    if p.PortTypes[i] & 0x80 != 0 {
+      nodeConfig.OutputPorts = append(nodeConfig.OutputPorts, OutputPort{
+        Address: Address{
+          Net:    address.Net,
+          SubUni: address.SubUni | p.SwOut[i],
+        },
+        Type: p.PortTypes[i] & 0x1F,
+        Status: p.GoodOutput[i],
+      })
+    }
+    if p.PortTypes[i] & 0x40 != 0 {
+      nodeConfig.InputPorts = append(nodeConfig.InputPorts, InputPort{
+        Address: Address{
+          Net:    address.Net,
+          SubUni: address.SubUni | p.SwIn[i],
+        },
+        Type: p.PortTypes[i] & 0x1F,
+        Status: p.GoodInput[i],
+      })
+    }
+  }
+
+  return nodeConfig
 }

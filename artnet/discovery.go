@@ -39,12 +39,15 @@ func (controller *Controller) discovery(pollChan chan pollEvent) {
       // TODO: timeout nodes
 
     case pollEvent := <-pollChan:
+      nodeConfig := pollEvent.packet.NodeConfig()
+
       if node := nodes[pollEvent.String()]; node != nil {
         node.discoveryTime = pollEvent.recvTime
+        node.config = nodeConfig
 
         controller.log.Debugf("discovery refresh: %v", node)
 
-      } else if node, err := controller.makeNode(pollEvent.srcAddr); err != nil {
+      } else if node, err := controller.makeNode(pollEvent.srcAddr, nodeConfig); err != nil {
         controller.log.Warnf("discovery %v: %v", pollEvent, err)
 
       } else {
@@ -60,12 +63,13 @@ func (controller *Controller) discovery(pollChan chan pollEvent) {
   }
 }
 
-func (controller *Controller) makeNode(addr *net.UDPAddr) (*Node, error) {
+func (controller *Controller) makeNode(addr *net.UDPAddr, config NodeConfig) (*Node, error) {
   var node = Node{
     log:  controller.log.WithField("node", addr.String()),
 
     transport:  controller.transport,
     addr:       addr,
+    config:     config,
   }
 
   return &node, nil

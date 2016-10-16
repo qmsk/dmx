@@ -7,6 +7,16 @@ import (
   "net"
 )
 
+// Decode NUL-terminated/padded string
+func decodeString(buf []byte) string {
+  for i := 0; i < len(buf); i++ {
+    if buf[i] == 0 {
+      return string(buf[:i])
+    }
+  }
+  return string(buf)
+}
+
 type Transport struct {
   udpConn *net.UDPConn    // listening on port
 }
