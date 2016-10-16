@@ -21,11 +21,21 @@ func main() {
     options.Setup()
   }
 
+  var discoveryChan = make(chan artnet.Discovery)
+
   if artnetController, err := options.Artnet.Controller(); err != nil {
     log.Fatalf("artnet.Controller: %v", err)
   } else {
     log.Infof("artnet.Controller: %v", artnetController)
 
-    artnetController.Run()
+    artnetController.Start(discoveryChan)
+  }
+
+  for discovery := range discoveryChan {
+    log.Infof("artnet.Discovery:")
+
+    for _, node := range discovery.Nodes {
+      log.Infof("\t%v", node)
+    }
   }
 }

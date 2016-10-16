@@ -1,6 +1,7 @@
 package artnet
 
 import (
+  "sync/atomic"
   "fmt"
   "net"
   log "github.com/Sirupsen/logrus"
@@ -44,30 +45,37 @@ func (config Config) Controller() (*Controller, error) {
   return &controller, nil
 }
 
+type pollEvent struct {
+  recvTime    time.Time
+  srcAddr     *net.UDPAddr
+  pollReply   ArtPollReply
+}
+
+func (event pollEvent) String() string {
+  return event.srcAddr.String()
+}
+
 type Controller struct {
   log *log.Entry
 
   transport *Transport
 
+  pollChan   chan pollEvent
+
   // discovery handler
   discoveryAddr    *net.UDPAddr    // sending to broadcast
-  discoveryChan     chan discoveryEvent
   discoveryInterval time.Duration
-}
-func (controller *Controller) Run() {
 
-  controller.discoveryChan = make(chan discoveryEvent)
-
-  go controller.discovery(controller.discoveryChan)
-
-  controller.recv()
+  discoveryState    atomic.Value
+  discoveryChan     chan Discovery
 }
 
-func (controller *Controller) Start() {
-  controller.discoveryChan = make(chan discoveryEvent)
+func (controller *Controller) Start(discoveryChan chan Discovery) {
+  controller.pollChan = make(chan pollEvent)
+  controller.discoveryChan = discoveryChan
 
   go controller.recv()
-  go controller.discovery(controller.discoveryChan)
+  go controller.discovery(controller.pollChan)
 }
 
 func (controller *Controller) recv() {
@@ -92,8 +100,8 @@ func (controller *Controller) recvPacket(packet ArtPacket, srcAddr *net.UDPAddr)
     return nil
 
   case *ArtPollReply:
-    if controller.discoveryChan != nil {
-      controller.discoveryChan <- discoveryEvent{
+    if controller.pollChan != nil {
+      controller.pollChan <- pollEvent{
         recvTime: time.Now(),
         srcAddr: srcAddr,
         pollReply: *packetType,
