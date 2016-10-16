@@ -1,108 +1,108 @@
 package artnet
 
 import (
-  "net"
-  "time"
+	"net"
+	"time"
 )
 
 type Discovery struct {
-  Nodes       map[string]*Node
+	Nodes map[string]*Node
 }
 
 func (controller *Controller) discovery(pollChan chan pollEvent) {
-  var ticker = time.NewTicker(controller.config.DiscoveryInterval)
-  var nodes = make(map[string]*Node)
+	var ticker = time.NewTicker(controller.config.DiscoveryInterval)
+	var nodes = make(map[string]*Node)
 
-  if err := controller.transport.SendPoll(controller.discoveryAddr); err != nil {
-    controller.log.Fatalf("discovery: sendPoll: %v", err)
-  }
+	if err := controller.transport.SendPoll(controller.discoveryAddr); err != nil {
+		controller.log.Fatalf("discovery: sendPoll: %v", err)
+	}
 
-  for {
-    select {
-    case t := <-ticker.C:
-      // scan timeouts
-      var timeout = false
+	for {
+		select {
+		case t := <-ticker.C:
+			// scan timeouts
+			var timeout = false
 
-      for name, node := range nodes {
-        if dt := t.Sub(node.discoveryTime); dt > node.timeout {
-          controller.log.Warnf("discovery timeout: %v", node)
+			for name, node := range nodes {
+				if dt := t.Sub(node.discoveryTime); dt > node.timeout {
+					controller.log.Warnf("discovery timeout: %v", node)
 
-          delete(nodes, name)
+					delete(nodes, name)
 
-          timeout = true
-        }
-      }
+					timeout = true
+				}
+			}
 
-      if timeout {
-        controller.update(nodes)
-      }
+			if timeout {
+				controller.update(nodes)
+			}
 
-      // poll
-      controller.log.Debug("discovery: tick...")
+			// poll
+			controller.log.Debug("discovery: tick...")
 
-      if err := controller.transport.SendPoll(controller.discoveryAddr); err != nil {
-        controller.log.Fatalf("discovery: sendPoll: %v", err)
-      }
+			if err := controller.transport.SendPoll(controller.discoveryAddr); err != nil {
+				controller.log.Fatalf("discovery: sendPoll: %v", err)
+			}
 
-    case pollEvent := <-pollChan:
-      nodeConfig := pollEvent.packet.NodeConfig()
+		case pollEvent := <-pollChan:
+			nodeConfig := pollEvent.packet.NodeConfig()
 
-      if node := nodes[pollEvent.String()]; node != nil {
-        node.discoveryTime = pollEvent.recvTime
-        node.config = nodeConfig // XXX: atomic
+			if node := nodes[pollEvent.String()]; node != nil {
+				node.discoveryTime = pollEvent.recvTime
+				node.config = nodeConfig // XXX: atomic
 
-        controller.log.Debugf("discovery refresh: %v", node)
+				controller.log.Debugf("discovery refresh: %v", node)
 
-      } else if node, err := controller.makeNode(pollEvent.srcAddr, nodeConfig); err != nil {
-        controller.log.Warnf("discovery %v: %v", pollEvent, err)
+			} else if node, err := controller.makeNode(pollEvent.srcAddr, nodeConfig); err != nil {
+				controller.log.Warnf("discovery %v: %v", pollEvent, err)
 
-      } else {
-        node.discoveryTime = pollEvent.recvTime
+			} else {
+				node.discoveryTime = pollEvent.recvTime
 
-        controller.log.Debugf("discovery new: %v", node)
+				controller.log.Debugf("discovery new: %v", node)
 
-        nodes[pollEvent.String()] = node
+				nodes[pollEvent.String()] = node
 
-        controller.update(nodes)
-      }
-    }
-  }
+				controller.update(nodes)
+			}
+		}
+	}
 }
 
 func (controller *Controller) makeNode(addr *net.UDPAddr, config NodeConfig) (*Node, error) {
-  var node = Node{
-    log:  controller.log.WithField("node", addr.String()),
+	var node = Node{
+		log: controller.log.WithField("node", addr.String()),
 
-    timeout:    controller.config.DiscoveryTimeout,
+		timeout: controller.config.DiscoveryTimeout,
 
-    transport:  controller.transport,
-    addr:       addr,
-    config:     config,
-  }
+		transport: controller.transport,
+		addr:      addr,
+		config:    config,
+	}
 
-  return &node, nil
+	return &node, nil
 }
 
 func (controller *Controller) update(nodes map[string]*Node) {
-  var discovery = Discovery{
-    Nodes:  make(map[string]*Node),
-  }
+	var discovery = Discovery{
+		Nodes: make(map[string]*Node),
+	}
 
-  for name, node := range nodes {
-    discovery.Nodes[name] = node
-  }
+	for name, node := range nodes {
+		discovery.Nodes[name] = node
+	}
 
-  controller.discoveryState.Store(discovery)
+	controller.discoveryState.Store(discovery)
 
-  if controller.discoveryChan != nil {
-    controller.discoveryChan <- discovery
-  }
+	if controller.discoveryChan != nil {
+		controller.discoveryChan <- discovery
+	}
 }
 
 func (controller *Controller) Get() Discovery {
-  if value := controller.discoveryState.Load(); value == nil {
-    return Discovery{}
-  } else {
-    return value.(Discovery)
-  }
+	if value := controller.discoveryState.Load(); value == nil {
+		return Discovery{}
+	} else {
+		return value.(Discovery)
+	}
 }

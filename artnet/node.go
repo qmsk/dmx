@@ -1,68 +1,68 @@
 package artnet
 
 import (
-  "net"
-  "time"
-  log "github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
+	"net"
+	"time"
 )
 
 type InputPort struct {
-  Address     Address
+	Address Address
 
-  Type        uint8
-  Status      uint8
+	Type   uint8
+	Status uint8
 }
 
 type OutputPort struct {
-  Address     Address
+	Address Address
 
-  Type        uint8
-  Status      uint8
+	Type   uint8
+	Status uint8
 }
 
 type NodeConfig struct {
-  OEM         uint16
-  Version     uint16
-  Name        string
-  Description string
-  Report      string
-  Ethernet    string
+	OEM         uint16
+	Version     uint16
+	Name        string
+	Description string
+	Report      string
+	Ethernet    string
 
-  BaseAddress Address
-  InputPorts  []InputPort
-  OutputPorts []OutputPort
+	BaseAddress Address
+	InputPorts  []InputPort
+	OutputPorts []OutputPort
 }
 
 type Node struct {
-  log *log.Entry
+	log *log.Entry
 
-  timeout time.Duration
+	timeout time.Duration
 
-  transport *Transport
-  addr *net.UDPAddr    // unicast
+	transport *Transport
+	addr      *net.UDPAddr // unicast
 
-  config NodeConfig
-  sequence uint8
-  discoveryTime time.Time
+	config        NodeConfig
+	sequence      uint8
+	discoveryTime time.Time
 }
 
 func (node *Node) String() string {
-  return node.addr.String()
+	return node.addr.String()
 }
 
 func (node *Node) Config() NodeConfig {
-  // XXX: atomic
-  return node.config
+	// XXX: atomic
+	return node.config
 }
 
 func (node *Node) SendDMX(address Address, data Universe) error {
-  node.sequence++
+	node.sequence++
 
-  if node.sequence == 0 {
-    node.sequence = 1
-  }
+	if node.sequence == 0 {
+		node.sequence = 1
+	}
 
-  node.log.Debugf("SendDMX %v @ %v", address, node.sequence)
+	node.log.Debugf("SendDMX %v @ %v", address, node.sequence)
 
-  return node.transport.SendDMX(node.addr, node.sequence, address, data)
+	return node.transport.SendDMX(node.addr, node.sequence, address, data)
 }
