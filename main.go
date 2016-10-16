@@ -5,6 +5,7 @@ import (
   "github.com/qmsk/dmx/artnet"
   flags "github.com/jessevdk/go-flags"
   "fmt"
+  "time"
 )
 
 var options struct {
@@ -22,48 +23,59 @@ func main() {
     options.Setup()
   }
 
+  var artnetController *artnet.Controller
   var discoveryChan = make(chan artnet.Discovery)
 
-  if artnetController, err := options.Artnet.Controller(); err != nil {
+  if c, err := options.Artnet.Controller(); err != nil {
     log.Fatalf("artnet.Controller: %v", err)
   } else {
-    log.Infof("artnet.Controller: %v", artnetController)
+    log.Infof("artnet.Controller: %v", c)
 
-    artnetController.Start(discoveryChan)
+    c.Start(discoveryChan)
+
+    artnetController = c
   }
 
-  dmx := artnet.Universe{
+
+  var artnetAddress = artnet.Address{ }
+  var dmxUniverse = artnet.Universe{
     0x00,
     0x00,
     0x00,
-    0xff,
+    0x00,
     0x00,
   }
 
-  for discovery := range discoveryChan {
-    log.Infof("artnet.Discovery:")
+  go func() {
+    for discovery := range discoveryChan {
+      log.Infof("artnet.Discovery:")
 
-    for _, node := range discovery.Nodes {
-      fmt.Printf("%v:\n", node)
+      for _, node := range discovery.Nodes {
+        fmt.Printf("%v:\n", node)
 
-      config := node.Config()
+        config := node.Config()
 
-      fmt.Printf("\tName: %v\n", config.Name)
+        fmt.Printf("\tName: %v\n", config.Name)
 
-      for i, inputPort := range config.InputPorts {
-        fmt.Printf("\tInput %d: %v\n", i, inputPort.Address)
-      }
-      for i, outputPort := range config.OutputPorts {
-        fmt.Printf("\tOutput %d: %v\n", i, outputPort.Address)
-
-        if err := node.SendDMX(outputPort.Address, dmx); err != nil {
-          log.Errorf("Node %v: SendDMX: %v", node, err)
-        } else {
-          log.Infof("Node %v: SendDMX", node)
+        for i, inputPort := range config.InputPorts {
+          fmt.Printf("\tInput %d: %v\n", i, inputPort.Address)
         }
+        for i, outputPort := range config.OutputPorts {
+          fmt.Printf("\tOutput %d: %v\n", i, outputPort.Address)
 
-        dmx[3]++
+          if err := node.SendDMX(outputPort.Address, dmxUniverse); err != nil {
+            log.Errorf("Node %v: SendDMX: %v", node, err)
+          } else {
+            log.Infof("Node %v: SendDMX", node)
+          }
+        }
       }
     }
+  }()
+
+  for range time.NewTicker(100 * time.Millisecond).C {
+    dmxUniverse[3] += 10
+
+    artnetController.SendDMX(artnetAddress, dmxUniverse)
   }
 }
