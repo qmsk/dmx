@@ -20,7 +20,7 @@ func (config Config) Controller() (*Controller, error) {
   var controller = Controller{
     log:  log.WithFields(log.Fields{"prefix": "artnet:Controller"}),
 
-    discoveryInterval: config.DiscoveryInterval,
+    config: config,
   }
 
   listenAddr  := net.JoinHostPort(config.Listen, fmt.Sprintf("%d", Port))
@@ -58,14 +58,13 @@ func (event pollEvent) String() string {
 type Controller struct {
   log *log.Entry
 
-  transport *Transport
+  config    Config
 
+  transport *Transport
   pollChan   chan pollEvent
 
   // discovery handler
   discoveryAddr    *net.UDPAddr    // sending to broadcast
-  discoveryInterval time.Duration
-
   discoveryState    atomic.Value
   discoveryChan     chan Discovery
 }

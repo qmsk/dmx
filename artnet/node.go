@@ -51,6 +51,7 @@ func (node *Node) String() string {
 }
 
 func (node *Node) Config() NodeConfig {
+  // XXX: atomic
   return node.config
 }
 

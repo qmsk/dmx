@@ -10,7 +10,7 @@ type Discovery struct {
 }
 
 func (controller *Controller) discovery(pollChan chan pollEvent) {
-  var ticker = time.NewTicker(controller.discoveryInterval)
+  var ticker = time.NewTicker(controller.config.DiscoveryInterval)
   var nodes = make(map[string]*Node)
 
   if err := controller.transport.SendPoll(controller.discoveryAddr); err != nil {
@@ -19,21 +19,37 @@ func (controller *Controller) discovery(pollChan chan pollEvent) {
 
   for {
     select {
-    case <-ticker.C:
+    case t := <-ticker.C:
+      // scan timeouts
+      var timeout = false
+
+      for name, node := range nodes {
+        if dt := t.Sub(node.discoveryTime); dt > node.timeout {
+          controller.log.Warnf("discovery timeout: %v", node)
+
+          delete(nodes, name)
+
+          timeout = true
+        }
+      }
+
+      if timeout {
+        controller.update(nodes)
+      }
+
+      // poll
       controller.log.Debug("discovery: tick...")
 
       if err := controller.transport.SendPoll(controller.discoveryAddr); err != nil {
         controller.log.Fatalf("discovery: sendPoll: %v", err)
       }
 
-      // TODO: timeout nodes
-
     case pollEvent := <-pollChan:
       nodeConfig := pollEvent.packet.NodeConfig()
 
       if node := nodes[pollEvent.String()]; node != nil {
         node.discoveryTime = pollEvent.recvTime
-        node.config = nodeConfig
+        node.config = nodeConfig // XXX: atomic
 
         controller.log.Debugf("discovery refresh: %v", node)
 
@@ -47,9 +63,8 @@ func (controller *Controller) discovery(pollChan chan pollEvent) {
 
         nodes[pollEvent.String()] = node
 
+        controller.update(nodes)
       }
-      
-      controller.update(nodes)
     }
   }
 }
@@ -57,6 +72,8 @@ func (controller *Controller) discovery(pollChan chan pollEvent) {
 func (controller *Controller) makeNode(addr *net.UDPAddr, config NodeConfig) (*Node, error) {
   var node = Node{
     log:  controller.log.WithField("node", addr.String()),
+
+    timeout:    controller.config.DiscoveryTimeout,
 
     transport:  controller.transport,
     addr:       addr,
