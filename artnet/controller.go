@@ -118,3 +118,45 @@ func (controller *Controller) recvPacket(packet ArtPacket, srcAddr *net.UDPAddr)
 
   return nil
 }
+
+// Send DMX universe using either unicast or broadcast.
+//
+// Implements ArtNet Subscription using the discovery nodes.
+//
+// If we have discovered a Node configured for the given address, the DMX packet is unicast to each such node.
+// Otherwise, the packet is broadcast to the discovery address.
+func (controller *Controller) SendDMX(address Address, data Universe) error {
+  discovery := controller.Get()
+
+  var matchNodes = false
+
+  for _, node := range discovery.Nodes {
+    var matchNode = false
+
+    for _, outputPort := range node.config.OutputPorts {
+      if outputPort.Address == address {
+        matchNode = true
+      }
+    }
+
+    if matchNode {
+      matchNodes = true
+
+      // send unicast to node; may have multiple outputs for the same universe
+      if err := node.SendDMX(address, data); err != nil {
+        return fmt.Errorf("artnet:Node %v: SendDMX %v: %v", node, address, err)
+      }
+    }
+  }
+
+  if !matchNodes {
+    // send broadcast, did not find specific node
+    if err := controller.transport.SendDMX(controller.discoveryAddr, 0, address, data); err != nil {
+      return fmt.Errorf("artnet:SendDMX broadcast %v: %v", address, err)
+    } else {
+      controller.log.Debugf("broadcast SendDMX %v ", address)
+    }
+  }
+
+  return nil
+}
