@@ -32,6 +32,14 @@ func main() {
     artnetController.Start(discoveryChan)
   }
 
+  dmx := artnet.Universe{
+    0x00,
+    0x00,
+    0x00,
+    0xff,
+    0x00,
+  }
+
   for discovery := range discoveryChan {
     log.Infof("artnet.Discovery:")
 
@@ -47,6 +55,14 @@ func main() {
       }
       for i, outputPort := range config.OutputPorts {
         fmt.Printf("\tOutput %d: %v\n", i, outputPort.Address)
+
+        if err := node.SendDMX(outputPort.Address, dmx); err != nil {
+          log.Errorf("Node %v: SendDMX: %v", node, err)
+        } else {
+          log.Infof("Node %v: SendDMX", node)
+        }
+
+        dmx[3]++
       }
     }
   }

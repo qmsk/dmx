@@ -61,16 +61,5 @@ func (node *Node) SendDMX(address Address, data Universe) error {
     node.sequence = 1
   }
 
-  return node.transport.send(node.addr, ArtDmx{
-    ArtHeader: ArtHeader{
-      ID: ARTNET,
-      OpCode: OpDmx,
-    },
-    ProtVer: ProtVer,
-    Sequence: node.sequence,
-    SubUni:   address.SubUni,
-    Net:      address.Net,
-    Length:   uint16(len(data)),
-    Data:     data,
-  })
+  return node.transport.SendDMX(node.addr, node.sequence, address, data)
 }

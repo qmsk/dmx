@@ -78,10 +78,14 @@ func (t *Transport) decode(header ArtHeader, buf []byte) (ArtPacket, error) {
   return packet, nil
 }
 
-func (t *Transport) send(addr *net.UDPAddr, packet ArtPacket) error {
+func (t *Transport) send(addr *net.UDPAddr, packet ArtPacket, data []byte) error {
   var buf bytes.Buffer
 
   if err := binary.Write(&buf, binary.LittleEndian, packet); err != nil {
+    return err
+  }
+
+  if _, err := buf.Write(data); err != nil {
     return err
   }
 

@@ -3,6 +3,7 @@ package artnet
 import (
   "fmt"
   log "github.com/Sirupsen/logrus"
+  "net"
 )
 
 type ArtPoll struct {
@@ -11,6 +12,16 @@ type ArtPoll struct {
 
   TalkToMe    uint8
   Priority    uint8
+}
+
+func (transport *Transport) SendPoll(addr *net.UDPAddr) error {
+  return transport.send(addr, ArtPoll{
+    ArtHeader: ArtHeader{
+      ID: ARTNET,
+      OpCode: OpPoll,
+    },
+    ProtVer: ProtVer,
+  }, nil)
 }
 
 type ArtPollReply struct {
