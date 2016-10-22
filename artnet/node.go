@@ -58,13 +58,16 @@ func (node *Node) Config() NodeConfig {
 }
 
 func (node *Node) SendDMX(address Address, universe dmx.Universe) error {
+	// start sequence at 0
+	var sequence = node.sequence
+
 	node.sequence++
 
 	if node.sequence == 0 {
 		node.sequence = 1
 	}
 
-	node.log.Debugf("SendDMX %v @ %v", address, node.sequence)
+	node.log.Debugf("SendDMX %v @ %v", address, sequence)
 
-	return node.transport.SendDMX(node.addr, node.sequence, address, universe)
+	return node.transport.SendDMX(node.addr, sequence, address, universe)
 }
