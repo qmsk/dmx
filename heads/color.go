@@ -4,6 +4,7 @@ type ColorRGB struct {
 	R, G, B Value
 }
 
+// Linear RGB intensity scaling
 func (color ColorRGB) scaleIntensity(intensity Intensity) ColorRGB {
 	return ColorRGB{
 		R: color.R * Value(intensity),
@@ -35,6 +36,7 @@ func (hc HeadColor) SetRGB(colorRGB ColorRGB) {
 	}
 }
 
+// Set color with intensity, using either head intensity channel or linear RGB scaling
 func (hc HeadColor) SetRGBIntensity(colorRGB ColorRGB, intensity Intensity) {
 	if hc.intensity != nil {
 		hc.SetRGB(colorRGB)

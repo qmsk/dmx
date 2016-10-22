@@ -85,9 +85,10 @@ func main() {
 
 	// animate heads
 	var intensity heads.Intensity = 1.0
+	var hue float64 = 0.0
 
 	for range time.NewTicker(100 * time.Millisecond).C {
-		var color = colorful.FastHappyColor()
+		var color = colorful.Hsv(hue, 1.0, 1.0) // FastHappyColor()
 
 		var headsColor = heads.ColorRGB{
 			R: heads.Value(color.R),
@@ -115,10 +116,17 @@ func main() {
 
 		headsHeads.Refresh()
 
-		intensity *= 0.9
+		// animate
+		intensity *= 0.95
 
 		if intensity < 0.001 {
 			intensity = 1.0
+		}
+
+		hue += 10.0
+
+		if hue >= 360.0 {
+			hue = 0.0
 		}
 	}
 }
