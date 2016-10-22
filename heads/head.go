@@ -4,24 +4,6 @@ import (
 	"github.com/SpComb/qmsk-dmx"
 )
 
-type ChannelClass string
-
-const (
-	ChannelClassIntensity ChannelClass = "intensity"
-	ChannelClassColor                  = "color"
-)
-
-type ChannelConfig struct {
-	Class ChannelClass
-	Name  string
-}
-
-type HeadConfig struct {
-	Vendor   string
-	Model    string
-	Channels []ChannelConfig
-}
-
 type Channel struct {
 	config ChannelConfig
 	output *Output
@@ -43,16 +25,16 @@ func (channel *Channel) Set(value dmx.Channel) {
 
 // A single DMX receiver using multiple consecutive DMX channels from a base address within a single universe
 type Head struct {
-	config  HeadConfig
-	address dmx.Address
+	headType *HeadType
+	address  dmx.Address
 
 	channels map[ChannelConfig]*Channel
 }
 
-func (head *Head) init(output *Output, config HeadConfig) {
+func (head *Head) init(output *Output, headType *HeadType) {
 	head.channels = make(map[ChannelConfig]*Channel)
 
-	for channelOffset, channelConfig := range config.Channels {
+	for channelOffset, channelConfig := range headType.Channels {
 		var channel = &Channel{
 			config:  channelConfig,
 			output:  output,
@@ -65,6 +47,6 @@ func (head *Head) init(output *Output, config HeadConfig) {
 	}
 }
 
-func (head *Head) Intensity() *Channel {
+func (head *Head) IntensityChannel() *Channel {
 	return head.channels[ChannelConfig{Class: ChannelClassIntensity}]
 }
