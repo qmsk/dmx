@@ -52,6 +52,10 @@ type Universe struct {
 	Address Address
 }
 
+func (universe Universe) String() string {
+	return fmt.Sprintf("artnet=%v", universe.Address)
+}
+
 func (universe Universe) WriteDMX(dmx dmx.Universe) error {
 	return universe.controller.SendDMX(universe.Address, dmx)
 }
