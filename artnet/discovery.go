@@ -111,7 +111,7 @@ func (controller *Controller) update(nodes map[string]*Node) {
 	}
 }
 
-func (controller *Controller) Get() Discovery {
+func (controller *Controller) Discovery() Discovery {
 	if value := controller.discoveryState.Load(); value == nil {
 		return Discovery{}
 	} else {

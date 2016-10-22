@@ -2,14 +2,16 @@ package artnet
 
 import (
 	"fmt"
-	log "github.com/Sirupsen/logrus"
 	"net"
 	"sync/atomic"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
+	dmx "github.com/SpComb/qmsk-dmx"
 )
 
 type Config struct {
-	Listen    string `long:"artnet-listen" value-name:"ADDR" default:"0.0.0.0"`
+	Listen    string   `long:"artnet-listen" value-name:"ADDR" default:"0.0.0.0"`
 	Discovery []string `long:"artnet-discovery" value-name:"ADDR" default:"255.255.255.255"`
 
 	DiscoveryInterval time.Duration `long:"artnet-discovery-interval" value-name:"DURATION" default:"3s"`
@@ -128,8 +130,8 @@ func (controller *Controller) recvPacket(packet ArtPacket, srcAddr *net.UDPAddr)
 //
 // If we have discovered a Node configured for the given address, the DMX packet is unicast to each such node.
 // Otherwise, the packet is broadcast to the discovery address.
-func (controller *Controller) SendDMX(address Address, data Universe) error {
-	discovery := controller.Get()
+func (controller *Controller) SendDMX(address Address, universe dmx.Universe) error {
+	discovery := controller.Discovery()
 
 	var matchNodes = false
 
@@ -146,7 +148,7 @@ func (controller *Controller) SendDMX(address Address, data Universe) error {
 			matchNodes = true
 
 			// send unicast to node; may have multiple outputs for the same universe
-			if err := node.SendDMX(address, data); err != nil {
+			if err := node.SendDMX(address, universe); err != nil {
 				return fmt.Errorf("Node %v: SendDMX %v: %v", node, address, err)
 			}
 		}
@@ -155,7 +157,7 @@ func (controller *Controller) SendDMX(address Address, data Universe) error {
 	if !matchNodes {
 		// send broadcast, did not find specific node
 		for _, addr := range controller.discoveryAddrs {
-			if err := controller.transport.SendDMX(addr, 0, address, data); err != nil {
+			if err := controller.transport.SendDMX(addr, 0, address, universe); err != nil {
 				return fmt.Errorf("SendDMX broadcast %v: %v", address, err)
 			} else {
 				controller.log.Debugf("SendDMX %v: broadcast %v ", address, addr)

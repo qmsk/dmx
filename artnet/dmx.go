@@ -2,9 +2,11 @@ package artnet
 
 import (
 	"net"
+
+	dmx "github.com/SpComb/qmsk-dmx"
 )
 
-type Universe []uint8
+type DMXUniverse []uint8
 
 type ArtDmx struct {
 	ArtHeader
@@ -17,7 +19,7 @@ type ArtDmx struct {
 	Length   uint16
 }
 
-func (transport *Transport) SendDMX(addr *net.UDPAddr, sequence uint8, address Address, data Universe) error {
+func (transport *Transport) SendDMX(addr *net.UDPAddr, sequence uint8, address Address, universe dmx.Universe) error {
 	packet := ArtDmx{
 		ArtHeader: ArtHeader{
 			ID:     ARTNET,
@@ -27,8 +29,8 @@ func (transport *Transport) SendDMX(addr *net.UDPAddr, sequence uint8, address A
 		Sequence: sequence,
 		SubUni:   address.SubUni,
 		Net:      address.Net,
-		Length:   uint16(len(data)),
+		Length:   uint16(len(universe)),
 	}
 
-	return transport.send(addr, packet, data)
+	return transport.send(addr, packet, universe.Bytes())
 }

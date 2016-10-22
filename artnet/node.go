@@ -1,9 +1,11 @@
 package artnet
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"net"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
+	dmx "github.com/SpComb/qmsk-dmx"
 )
 
 type InputPort struct {
@@ -55,7 +57,7 @@ func (node *Node) Config() NodeConfig {
 	return node.config
 }
 
-func (node *Node) SendDMX(address Address, data Universe) error {
+func (node *Node) SendDMX(address Address, universe dmx.Universe) error {
 	node.sequence++
 
 	if node.sequence == 0 {
@@ -64,5 +66,5 @@ func (node *Node) SendDMX(address Address, data Universe) error {
 
 	node.log.Debugf("SendDMX %v @ %v", address, node.sequence)
 
-	return node.transport.SendDMX(node.addr, node.sequence, address, data)
+	return node.transport.SendDMX(node.addr, node.sequence, address, universe)
 }
