@@ -18,13 +18,22 @@ func (output *Output) init(dmxWriter dmx.Writer) {
 	output.dmxWriter = dmxWriter
 }
 
-func (output *Output) Get(address dmx.Address) dmx.Channel {
+func (output *Output) GetDMX(address dmx.Address) dmx.Channel {
 	return output.dmx.Get(address)
 }
 
-func (output *Output) Set(address dmx.Address, value dmx.Channel) {
+func (output *Output) GetValue(address dmx.Address) Value {
+	return Value(output.GetDMX(address)) / 255.0
+}
+
+func (output *Output) SetDMX(address dmx.Address, value dmx.Channel) {
 	output.dirty = true
 	output.dmx.Set(address, value)
+}
+
+// Set value 0.0 .. 1.0
+func (output *Output) SetValue(address dmx.Address, value Value) {
+	output.SetDMX(address, dmx.Channel(value*255.0))
 }
 
 func (output *Output) refresh() error {

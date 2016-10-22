@@ -38,17 +38,18 @@ func load(obj interface{}, path string) (string, error) {
 	}
 }
 
-type ChannelClass string
+type ColorChannel string
 
 const (
-	ChannelClassControl   ChannelClass = "control"
-	ChannelClassIntensity              = "intensity"
-	ChannelClassColor                  = "color"
+	ColorChannelRed   = "red"
+	ColorChannelGreen = "green"
+	ColorChannelBlue  = "blue"
 )
 
-type ChannelConfig struct {
-	Class ChannelClass
-	Name  string
+type ChannelType struct {
+	Control   string
+	Intensity bool
+	Color     ColorChannel
 }
 
 type HeadType struct {
@@ -56,7 +57,7 @@ type HeadType struct {
 	Model    string
 	Mode     string
 	URL      string
-	Channels []ChannelConfig
+	Channels []ChannelType
 }
 
 type HeadConfig struct {
