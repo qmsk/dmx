@@ -1,0 +1,20 @@
+Vendor  = "Stairville"
+Model   = "LED Par56"
+Mode    = "5ch"
+
+URL     = "https://images.thomann.de/pics/atg/atgdata/document/manual/c_193245_en_online.pdf"
+
+[[Channels]]
+Control  = "mode"
+
+[[Channels]]
+Color    = "red"
+
+[[Channels]]
+Color    = "green"
+
+[[Channels]]
+Color    = "blue"
+
+[[Channels]]
+Control  = "speed"
