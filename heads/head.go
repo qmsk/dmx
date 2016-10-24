@@ -87,13 +87,19 @@ func (head *Head) Color() HeadColor {
 }
 
 // web API
+type APIHeadParameters struct {
+	head *Head
+
+	Intensity *APIHeadIntensity `json:"intensity,omitempty"`
+	Color     *APIHeadColor     `json:"color,omitempty"`
+}
+
 type APIHead struct {
 	ID     string
 	Config HeadConfig
 	Type   *HeadType
 
-	Intensity *APIHeadIntensity `json:"intensity,omitempty"`
-	Color     *APIHeadColor     `json:"color,omitempty"`
+	APIHeadParameters
 }
 
 func (head *Head) makeAPI() APIHead {
@@ -104,13 +110,43 @@ func (head *Head) makeAPI() APIHead {
 		Config: head.config,
 		Type:   head.headType,
 
-		Intensity: head.Intensity().makeAPI(),
-		Color:     head.Color().makeAPI(),
+		APIHeadParameters: APIHeadParameters{
+			Intensity: head.Intensity().makeAPI(),
+			Color:     head.Color().makeAPI(),
+		},
 	}
 }
 
 func (head *Head) GetREST() (web.Resource, error) {
 	return head.makeAPI(), nil
+}
+func (head *Head) PostREST() (web.Resource, error) {
+	return &APIHeadParameters{head: head}, nil
+}
+
+func (params APIHeadParameters) Apply() error {
+	log.Debugln("heads:Head.Apply", params.head,
+		"intensity", params.Intensity,
+		"color", params.Color,
+	)
+
+	if params.Intensity != nil {
+		params.Intensity.headIntensity = params.head.Intensity()
+
+		if err := params.Intensity.Apply(); err != nil {
+			return err
+		}
+	}
+
+	if params.Color != nil {
+		params.Color.headColor = params.head.Color()
+
+		if err := params.Color.Apply(); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (head *Head) Index(name string) (web.Resource, error) {

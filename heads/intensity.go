@@ -54,6 +54,10 @@ func (headIntensity HeadIntensity) PostREST() (web.Resource, error) {
 }
 
 func (apiHeadIntensity *APIHeadIntensity) Apply() error {
+	if !apiHeadIntensity.headIntensity.Exists() {
+		return web.RequestErrorf("Head does not support intensity")
+	}
+
 	log.Debugln("heads:APIHeadIntensity.Apply", apiHeadIntensity.Intensity)
 
 	apiHeadIntensity.Intensity = apiHeadIntensity.headIntensity.Set(apiHeadIntensity.Intensity)

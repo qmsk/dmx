@@ -93,6 +93,10 @@ func (headColor HeadColor) PostREST() (web.Resource, error) {
 }
 
 func (apiHeadColor *APIHeadColor) Apply() error {
+	if !apiHeadColor.headColor.Exists() {
+		return web.RequestErrorf("Head does not support color")
+	}
+
 	log.Debugln("heads:APIHeadColor.Apply", apiHeadColor.ColorRGB)
 
 	apiHeadColor.ColorRGB = apiHeadColor.headColor.SetRGB(apiHeadColor.ColorRGB)
