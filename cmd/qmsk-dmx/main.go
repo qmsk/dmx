@@ -9,6 +9,7 @@ import (
 	"github.com/SpComb/qmsk-dmx/heads"
 	flags "github.com/jessevdk/go-flags"
 	colorful "github.com/lucasb-eyer/go-colorful"
+	"github.com/qmsk/e2/web"
 )
 
 var options struct {
@@ -16,6 +17,7 @@ var options struct {
 
 	Artnet artnet.Config `group:"ArtNet"`
 	Heads  heads.Options `group:"Heads"`
+	Web    web.Options   `group:"Web"`
 
 	Args struct {
 		HeadsConfig string
@@ -82,6 +84,11 @@ func main() {
 			}
 		}
 	}()
+
+	// web
+	go options.Web.Server(
+		web.RoutePrefix("/api/", headsHeads.WebAPI()),
+	)
 
 	// animate heads
 	var intensity heads.Intensity = 1.0

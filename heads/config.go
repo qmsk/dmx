@@ -47,9 +47,9 @@ const (
 )
 
 type ChannelType struct {
-	Control   string
-	Intensity bool
-	Color     ColorChannel
+	Control   string       `json:",omitempty"`
+	Intensity bool         `json:",omitempty"`
+	Color     ColorChannel `json:",omitempty"`
 }
 
 type HeadType struct {

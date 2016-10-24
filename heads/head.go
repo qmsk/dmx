@@ -83,3 +83,22 @@ func (head *Head) Color() HeadColor {
 		intensity: head.getChannel(ChannelType{Intensity: true}),
 	}
 }
+
+// web API
+type APIHead struct {
+	ID     string
+	Config HeadConfig
+	Type   *HeadType
+}
+
+func (head *Head) makeAPI() APIHead {
+	return APIHead{
+		ID:     head.id,
+		Config: head.config,
+		Type:   head.headType,
+	}
+}
+
+func (head *Head) Get() (interface{}, error) {
+	return head.makeAPI(), nil
+}
