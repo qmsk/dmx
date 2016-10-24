@@ -1,6 +1,9 @@
 package heads
 
-import "github.com/SpComb/qmsk-web"
+import (
+	log "github.com/Sirupsen/logrus"
+	"github.com/SpComb/qmsk-web"
+)
 
 type ColorRGB struct {
 	Red   Value
@@ -66,6 +69,8 @@ func (hc HeadColor) SetRGBIntensity(colorRGB ColorRGB, intensity Intensity) {
 
 // Web API
 type APIHeadColor struct {
+	headColor HeadColor
+
 	ColorRGB
 }
 
@@ -74,9 +79,23 @@ func (headColor HeadColor) makeAPI() *APIHeadColor {
 		return nil
 	}
 
-	return &APIHeadColor{}
+	return &APIHeadColor{
+		headColor: headColor,
+		ColorRGB:  headColor.GetRGB(),
+	}
 }
 
 func (headColor HeadColor) GetREST() (web.Resource, error) {
 	return headColor.makeAPI(), nil
+}
+func (headColor HeadColor) PostREST() (web.Resource, error) {
+	return headColor.makeAPI(), nil
+}
+
+func (apiHeadColor *APIHeadColor) Apply() error {
+	log.Debugln("heads:APIHeadColor.Apply", apiHeadColor.ColorRGB)
+
+	apiHeadColor.ColorRGB = apiHeadColor.headColor.SetRGB(apiHeadColor.ColorRGB)
+
+	return nil
 }
