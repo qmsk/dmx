@@ -47,7 +47,7 @@ func (output *Output) SetValue(address dmx.Address, value Value) Value {
 
 	output.SetDMX(address, dmxChannel)
 
-	return Value(dmxChannel / 255.0)
+	return Value(dmxChannel) / 255.0
 }
 
 func (output *Output) refresh() error {
