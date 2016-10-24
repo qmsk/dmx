@@ -1,18 +1,21 @@
 package heads
 
 import (
+	log "github.com/Sirupsen/logrus"
 	"github.com/qmsk/e2/web"
 )
-
-type API struct {
-	Heads map[string]APIHead `json:"heads"`
-}
 
 func (heads *Heads) WebAPI() web.API {
 	return web.MakeAPI(heads)
 }
 
+type API struct {
+	Heads map[string]APIHead `json:"heads"`
+}
+
 func (heads *Heads) Index(name string) (web.Resource, error) {
+	log.Debug("heads:Heads.Index", name)
+
 	switch name {
 	case "":
 		return heads, nil
@@ -23,42 +26,9 @@ func (heads *Heads) Index(name string) (web.Resource, error) {
 	}
 }
 
-func (heads *Heads) Get() (interface{}, error) {
+func (heads *Heads) GetREST() (interface{}, error) {
+	log.Debug("heads:Heads.GetREST")
 	return API{
-		Heads: heads.heads.apiDict(),
+		Heads: heads.heads.makeAPI(),
 	}, nil
-}
-
-type headList headMap
-
-func (heads headList) Get() (interface{}, error) {
-	var apiHeads []APIHead
-
-	for _, head := range heads {
-		apiHeads = append(apiHeads, head.makeAPI())
-	}
-
-	return apiHeads, nil
-}
-
-func (heads headMap) apiDict() map[string]APIHead {
-	var apiHeads = make(map[string]APIHead)
-
-	for headID, head := range heads {
-		apiHeads[headID] = head.makeAPI()
-	}
-	return apiHeads
-}
-
-func (headMap headMap) Index(name string) (web.Resource, error) {
-	switch name {
-	case "":
-		return headList(headMap), nil
-	default:
-		return headMap[name], nil
-	}
-}
-
-func (headMap headMap) Get() (interface{}, error) {
-	return headMap.apiDict(), nil
 }

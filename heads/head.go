@@ -3,7 +3,9 @@ package heads
 import (
 	"fmt"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/SpComb/qmsk-dmx"
+	"github.com/qmsk/e2/web"
 )
 
 type Channel struct {
@@ -46,7 +48,7 @@ func (head *Head) Name() string {
 }
 
 func (head *Head) String() string {
-	return fmt.Sprintf("%v @ %v[%d]", head.id, head.output, head.config.Address)
+	return fmt.Sprintf("%v@%v[%d]", head.id, head.output, head.config.Address)
 }
 
 func (head *Head) init() {
@@ -89,16 +91,35 @@ type APIHead struct {
 	ID     string
 	Config HeadConfig
 	Type   *HeadType
+
+	Intensity *APIHeadIntensity `json:"intensity,omitempty"`
+	Color     *APIHeadColor     `json:"color,omitempty"`
 }
 
 func (head *Head) makeAPI() APIHead {
+	log.Debug("heads:Head.makeAPI ", head)
+
 	return APIHead{
 		ID:     head.id,
 		Config: head.config,
 		Type:   head.headType,
+
+		Intensity: head.Intensity().makeAPI(),
+		Color:     head.Color().makeAPI(),
 	}
 }
 
-func (head *Head) Get() (interface{}, error) {
+func (head *Head) GetREST() (interface{}, error) {
 	return head.makeAPI(), nil
+}
+
+func (head *Head) Index(name string) (web.Resource, error) {
+	switch name {
+	case "intensity":
+		return head.Intensity(), nil
+	case "color":
+		return head.Color(), nil
+	default:
+		return nil, nil
+	}
 }

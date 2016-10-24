@@ -5,6 +5,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/SpComb/qmsk-dmx"
+	"github.com/qmsk/e2/web"
 )
 
 type Options struct {
@@ -90,4 +91,49 @@ func (heads *Heads) Refresh() error {
 	}
 
 	return refreshErr
+}
+
+// Web API
+type APIHeads map[string]APIHead
+
+func (heads headMap) makeAPI() APIHeads {
+	log.Debug("heads:headMap.makeAPI")
+
+	var apiHeads = make(APIHeads)
+
+	for headID, head := range heads {
+		apiHeads[headID] = head.makeAPI()
+	}
+	return apiHeads
+}
+
+type headList headMap
+
+func (heads headList) GetREST() (interface{}, error) {
+	log.Debug("heads:headList.GetREST")
+
+	var apiHeads []APIHead
+
+	for _, head := range heads {
+		apiHeads = append(apiHeads, head.makeAPI())
+	}
+
+	return apiHeads, nil
+}
+
+func (headMap headMap) Index(name string) (web.Resource, error) {
+	log.Debug("heads:headMap.Index", name)
+
+	switch name {
+	case "":
+		return headList(headMap), nil
+	default:
+		return headMap[name], nil
+	}
+}
+
+func (headMap headMap) GetREST() (interface{}, error) {
+	log.Debug("heads:headMap.GetREST")
+
+	return headMap.makeAPI(), nil
 }

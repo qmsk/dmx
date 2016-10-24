@@ -45,3 +45,22 @@ func (hc HeadColor) SetRGBIntensity(colorRGB ColorRGB, intensity Intensity) {
 		hc.SetRGB(colorRGB.scaleIntensity(intensity))
 	}
 }
+
+// Web API
+type APIHeadColor struct {
+	Red   Value
+	Green Value
+	Blue  Value
+}
+
+func (headColor HeadColor) makeAPI() *APIHeadColor {
+	if !headColor.Exists() {
+		return nil
+	}
+
+	return &APIHeadColor{}
+}
+
+func (headColor HeadColor) GetREST() (interface{}, error) {
+	return headColor.makeAPI(), nil
+}
