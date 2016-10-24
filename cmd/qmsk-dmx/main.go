@@ -66,9 +66,9 @@ func demo(hh *heads.Heads) {
 		var color = colorful.Hsv(hue, 1.0, 1.0) // FastHappyColor()
 
 		var headsColor = heads.ColorRGB{
-			R: heads.Value(color.R),
-			G: heads.Value(color.G),
-			B: heads.Value(color.B),
+			Red:   heads.Value(color.R),
+			Green: heads.Value(color.G),
+			Blue:  heads.Value(color.B),
 		}
 
 		hh.Each(func(head *heads.Head) {

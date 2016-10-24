@@ -3,15 +3,17 @@ package heads
 import "github.com/SpComb/qmsk-web"
 
 type ColorRGB struct {
-	R, G, B Value
+	Red   Value
+	Green Value
+	Blue  Value
 }
 
 // Linear RGB intensity scaling
 func (color ColorRGB) scaleIntensity(intensity Intensity) ColorRGB {
 	return ColorRGB{
-		R: color.R * Value(intensity),
-		G: color.G * Value(intensity),
-		B: color.B * Value(intensity),
+		Red:   color.Red * Value(intensity),
+		Green: color.Green * Value(intensity),
+		Blue:  color.Blue * Value(intensity),
 	}
 }
 
@@ -26,16 +28,30 @@ func (it HeadColor) Exists() bool {
 	return it.red != nil || it.green != nil || it.blue != nil
 }
 
-func (hc HeadColor) SetRGB(colorRGB ColorRGB) {
+func (hc HeadColor) GetRGB() (colorRGB ColorRGB) {
 	if hc.red != nil {
-		hc.red.SetValue(colorRGB.R)
+		colorRGB.Red = hc.red.GetValue()
 	}
 	if hc.green != nil {
-		hc.green.SetValue(colorRGB.G)
+		colorRGB.Green = hc.green.GetValue()
 	}
 	if hc.blue != nil {
-		hc.blue.SetValue(colorRGB.B)
+		colorRGB.Blue = hc.blue.GetValue()
 	}
+	return
+}
+
+func (hc HeadColor) SetRGB(colorRGB ColorRGB) ColorRGB {
+	if hc.red != nil {
+		colorRGB.Red = hc.red.SetValue(colorRGB.Red)
+	}
+	if hc.green != nil {
+		colorRGB.Green = hc.green.SetValue(colorRGB.Green)
+	}
+	if hc.blue != nil {
+		colorRGB.Blue = hc.blue.SetValue(colorRGB.Blue)
+	}
+	return colorRGB
 }
 
 // Set color with intensity, using either head intensity channel or linear RGB scaling
@@ -50,9 +66,7 @@ func (hc HeadColor) SetRGBIntensity(colorRGB ColorRGB, intensity Intensity) {
 
 // Web API
 type APIHeadColor struct {
-	Red   Value
-	Green Value
-	Blue  Value
+	ColorRGB
 }
 
 func (headColor HeadColor) makeAPI() *APIHeadColor {
