@@ -7,9 +7,9 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/SpComb/qmsk-dmx/artnet"
 	"github.com/SpComb/qmsk-dmx/heads"
+	"github.com/SpComb/qmsk-web"
 	flags "github.com/jessevdk/go-flags"
 	colorful "github.com/lucasb-eyer/go-colorful"
-	"github.com/qmsk/e2/web"
 )
 
 var options struct {

@@ -1,5 +1,7 @@
 package heads
 
+import "github.com/SpComb/qmsk-web"
+
 type ColorRGB struct {
 	R, G, B Value
 }
@@ -61,6 +63,6 @@ func (headColor HeadColor) makeAPI() *APIHeadColor {
 	return &APIHeadColor{}
 }
 
-func (headColor HeadColor) GetREST() (interface{}, error) {
+func (headColor HeadColor) GetREST() (web.Resource, error) {
 	return headColor.makeAPI(), nil
 }

@@ -2,7 +2,7 @@ package heads
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"github.com/qmsk/e2/web"
+	"github.com/SpComb/qmsk-web"
 )
 
 func (heads *Heads) WebAPI() web.API {
@@ -26,7 +26,7 @@ func (heads *Heads) Index(name string) (web.Resource, error) {
 	}
 }
 
-func (heads *Heads) GetREST() (interface{}, error) {
+func (heads *Heads) GetREST() (web.Resource, error) {
 	log.Debug("heads:Heads.GetREST")
 	return API{
 		Heads: heads.heads.makeAPI(),

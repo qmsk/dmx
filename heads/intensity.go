@@ -1,5 +1,7 @@
 package heads
 
+import "github.com/SpComb/qmsk-web"
+
 type Intensity Value // 0.0 .. 1.0
 
 type HeadIntensity struct {
@@ -37,6 +39,6 @@ func (headIntensity HeadIntensity) makeAPI() *APIHeadIntensity {
 	}
 }
 
-func (headIntensity HeadIntensity) GetREST() (interface{}, error) {
+func (headIntensity HeadIntensity) GetREST() (web.Resource, error) {
 	return headIntensity.makeAPI(), nil
 }

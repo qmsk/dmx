@@ -5,7 +5,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/SpComb/qmsk-dmx"
-	"github.com/qmsk/e2/web"
+	"github.com/SpComb/qmsk-web"
 )
 
 type Options struct {
@@ -109,7 +109,7 @@ func (heads headMap) makeAPI() APIHeads {
 
 type headList headMap
 
-func (heads headList) GetREST() (interface{}, error) {
+func (heads headList) GetREST() (web.Resource, error) {
 	log.Debug("heads:headList.GetREST")
 
 	var apiHeads []APIHead
@@ -132,7 +132,7 @@ func (headMap headMap) Index(name string) (web.Resource, error) {
 	}
 }
 
-func (headMap headMap) GetREST() (interface{}, error) {
+func (headMap headMap) GetREST() (web.Resource, error) {
 	log.Debug("heads:headMap.GetREST")
 
 	return headMap.makeAPI(), nil

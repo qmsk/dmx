@@ -5,7 +5,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/SpComb/qmsk-dmx"
-	"github.com/qmsk/e2/web"
+	"github.com/SpComb/qmsk-web"
 )
 
 type Channel struct {
@@ -109,7 +109,7 @@ func (head *Head) makeAPI() APIHead {
 	}
 }
 
-func (head *Head) GetREST() (interface{}, error) {
+func (head *Head) GetREST() (web.Resource, error) {
 	return head.makeAPI(), nil
 }
 
