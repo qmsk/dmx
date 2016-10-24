@@ -1,0 +1,6 @@
+Vendor = "Generic"
+Model  = "Dimmer"
+Mode   = "1ch"
+
+[[Channels]]
+Intensity = true
