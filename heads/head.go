@@ -29,8 +29,8 @@ func (channel *Channel) GetValue() Value {
 func (channel *Channel) SetDMX(value dmx.Channel) {
 	channel.output.SetDMX(channel.address, value)
 }
-func (channel *Channel) SetValue(value Value) {
-	channel.output.SetValue(channel.address, value)
+func (channel *Channel) SetValue(value Value) Value {
+	return channel.output.SetValue(channel.address, value)
 }
 
 // A single DMX receiver using multiple consecutive DMX channels from a base address within a single universe
@@ -97,7 +97,7 @@ type APIHead struct {
 }
 
 func (head *Head) makeAPI() APIHead {
-	log.Debug("heads:Head.makeAPI ", head)
+	log.Debugln("heads:Head.makeAPI", head)
 
 	return APIHead{
 		ID:     head.id,

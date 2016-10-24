@@ -1,6 +1,9 @@
 package heads
 
-import "github.com/SpComb/qmsk-web"
+import (
+	log "github.com/Sirupsen/logrus"
+	"github.com/SpComb/qmsk-web"
+)
 
 type Intensity Value // 0.0 .. 1.0
 
@@ -20,12 +23,14 @@ func (it HeadIntensity) Get() Intensity {
 	}
 }
 
-func (it HeadIntensity) Set(intensity Intensity) {
-	it.channel.SetValue(Value(intensity))
+func (it HeadIntensity) Set(intensity Intensity) Intensity {
+	return Intensity(it.channel.SetValue(Value(intensity)))
 }
 
 // Web API
 type APIHeadIntensity struct {
+	headIntensity HeadIntensity
+
 	Intensity
 }
 
@@ -35,10 +40,23 @@ func (headIntensity HeadIntensity) makeAPI() *APIHeadIntensity {
 	}
 
 	return &APIHeadIntensity{
-		Intensity: headIntensity.Get(),
+		headIntensity: headIntensity,
+		Intensity:     headIntensity.Get(),
 	}
 }
 
 func (headIntensity HeadIntensity) GetREST() (web.Resource, error) {
 	return headIntensity.makeAPI(), nil
+}
+
+func (headIntensity HeadIntensity) PostREST() (web.Resource, error) {
+	return headIntensity.makeAPI(), nil
+}
+
+func (apiHeadIntensity *APIHeadIntensity) Apply() error {
+	log.Debugln("heads:APIHeadIntensity.Apply", apiHeadIntensity.Intensity)
+
+	apiHeadIntensity.Intensity = apiHeadIntensity.headIntensity.Set(apiHeadIntensity.Intensity)
+
+	return nil
 }

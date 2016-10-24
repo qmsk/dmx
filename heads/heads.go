@@ -122,7 +122,7 @@ func (heads headList) GetREST() (web.Resource, error) {
 }
 
 func (headMap headMap) Index(name string) (web.Resource, error) {
-	log.Debug("heads:headMap.Index", name)
+	log.Debugln("heads:headMap.Index", name)
 
 	switch name {
 	case "":

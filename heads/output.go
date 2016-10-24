@@ -40,8 +40,14 @@ func (output *Output) SetDMX(address dmx.Address, value dmx.Channel) {
 }
 
 // Set value 0.0 .. 1.0
-func (output *Output) SetValue(address dmx.Address, value Value) {
-	output.SetDMX(address, dmx.Channel(value*255.0))
+//
+// Returns value at DMX percision
+func (output *Output) SetValue(address dmx.Address, value Value) Value {
+	var dmxChannel = dmx.Channel(value * 255.0)
+
+	output.SetDMX(address, dmxChannel)
+
+	return Value(dmxChannel / 255.0)
 }
 
 func (output *Output) refresh() error {

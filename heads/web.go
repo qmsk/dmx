@@ -14,7 +14,7 @@ type API struct {
 }
 
 func (heads *Heads) Index(name string) (web.Resource, error) {
-	log.Debug("heads:Heads.Index", name)
+	log.Debugln("heads:Heads.Index", name)
 
 	switch name {
 	case "":
@@ -31,4 +31,10 @@ func (heads *Heads) GetREST() (web.Resource, error) {
 	return API{
 		Heads: heads.heads.makeAPI(),
 	}, nil
+}
+
+func (heads *Heads) Apply() error {
+	log.Debug("heads:Heads.Apply")
+
+	return heads.Refresh()
 }
