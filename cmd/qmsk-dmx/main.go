@@ -19,78 +19,46 @@ var options struct {
 	Heads  heads.Options `group:"Heads"`
 	Web    web.Options   `group:"Web"`
 
+	Demo bool `long:"demo" description:"Demo Effect"`
+
 	Args struct {
 		HeadsConfig string
 	} `positional-args:"yes" required:"yes"`
 }
 
-func main() {
-	if args, err := flags.Parse(&options); err != nil {
-		log.Fatalf("flags.Parse")
-	} else if len(args) > 0 {
-		log.Fatalf("Usage")
-	} else {
-		options.Setup()
-	}
-
-	var artnetController *artnet.Controller
+// patch heads output universes on artnet discovery
+func discovery(artnetController *artnet.Controller, hh *heads.Heads) {
 	var discoveryChan = make(chan artnet.Discovery)
 
-	if c, err := options.Artnet.Controller(); err != nil {
-		log.Fatalf("artnet.Controller: %v", err)
-	} else {
-		log.Infof("artnet.Controller: %v", c)
+	artnetController.Start(discoveryChan)
 
-		c.Start(discoveryChan)
+	for discovery := range discoveryChan {
+		log.Infof("artnet.Discovery:")
 
-		artnetController = c
-	}
+		for _, node := range discovery.Nodes {
+			fmt.Printf("%v:\n", node)
 
-	// heads
-	var headsHeads *heads.Heads
+			config := node.Config()
 
-	if headsConfig, err := options.Heads.Config(options.Args.HeadsConfig); err != nil {
-		log.Fatalf("heads.Config %v: %v", options.Args.HeadsConfig, err)
-	} else if heads, err := options.Heads.Heads(headsConfig); err != nil {
-		log.Fatalf("heads.Heads: %v", err)
-	} else {
-		headsHeads = heads
-	}
+			fmt.Printf("\tName: %v\n", config.Name)
 
-	// patch heads output universes on artnet discovery
-	go func() {
-		for discovery := range discoveryChan {
-			log.Infof("artnet.Discovery:")
-
-			for _, node := range discovery.Nodes {
-				fmt.Printf("%v:\n", node)
-
-				config := node.Config()
-
-				fmt.Printf("\tName: %v\n", config.Name)
-
-				for i, inputPort := range config.InputPorts {
-					fmt.Printf("\tInput %d: %v\n", i, inputPort.Address)
-				}
-				for i, outputPort := range config.OutputPorts {
-					fmt.Printf("\tOutput %d: %v\n", i, outputPort.Address)
-				}
+			for i, inputPort := range config.InputPorts {
+				fmt.Printf("\tInput %d: %v\n", i, inputPort.Address)
 			}
-
-			// patch outputs
-			for address, universe := range artnetController.Universes() {
-				// XXX: not safe
-				headsHeads.Output(heads.Universe(address.Integer()), universe)
+			for i, outputPort := range config.OutputPorts {
+				fmt.Printf("\tOutput %d: %v\n", i, outputPort.Address)
 			}
 		}
-	}()
 
-	// web
-	go options.Web.Server(
-		web.RoutePrefix("/api/", headsHeads.WebAPI()),
-	)
+		// patch outputs
+		for address, universe := range artnetController.Universes() {
+			// XXX: not safe
+			hh.Output(heads.Universe(address.Integer()), universe)
+		}
+	}
+}
 
-	// animate heads
+func demo(hh *heads.Heads) {
 	var intensity heads.Intensity = 1.0
 	var hue float64 = 0.0
 
@@ -103,7 +71,7 @@ func main() {
 			B: heads.Value(color.B),
 		}
 
-		headsHeads.Each(func(head *heads.Head) {
+		hh.Each(func(head *heads.Head) {
 			headIntensity := head.Intensity()
 			headColor := head.Color()
 
@@ -121,7 +89,7 @@ func main() {
 			}
 		})
 
-		headsHeads.Refresh()
+		hh.Refresh()
 
 		// animate
 		intensity *= 0.95
@@ -136,4 +104,48 @@ func main() {
 			hue = 0.0
 		}
 	}
+}
+
+func main() {
+	if args, err := flags.Parse(&options); err != nil {
+		log.Fatalf("flags.Parse")
+	} else if len(args) > 0 {
+		log.Fatalf("Usage")
+	} else {
+		options.Setup()
+	}
+
+	var artnetController *artnet.Controller
+
+	if c, err := options.Artnet.Controller(); err != nil {
+		log.Fatalf("artnet.Controller: %v", err)
+	} else {
+		log.Infof("artnet.Controller: %v", c)
+
+		artnetController = c
+	}
+
+	// heads
+	var headsHeads *heads.Heads
+
+	if headsConfig, err := options.Heads.Config(options.Args.HeadsConfig); err != nil {
+		log.Fatalf("heads.Config %v: %v", options.Args.HeadsConfig, err)
+	} else if heads, err := options.Heads.Heads(headsConfig); err != nil {
+		log.Fatalf("heads.Heads: %v", err)
+	} else {
+		headsHeads = heads
+	}
+
+	// artnet discovery to patch head outputs
+	go discovery(artnetController, headsHeads)
+
+	// animate heads
+	if options.Demo {
+		go demo(headsHeads)
+	}
+
+	// web
+	options.Web.Server(
+		web.RoutePrefix("/api/", headsHeads.WebAPI()),
+	)
 }
