@@ -15,25 +15,27 @@ func (options Options) Heads(config *Config) (*Heads, error) {
 	var heads = Heads{
 		log:     log.WithField("package", "heads"),
 		outputs: make(map[Universe]*Output),
+		heads:   make(headMap),
 	}
 
-	for _, headConfig := range config.Heads {
-		if headType, exists := config.headTypes[headConfig.Type]; !exists {
+	for headID, headConfig := range config.Heads {
+		if headType, exists := config.HeadTypes[headConfig.Type]; !exists {
 			return nil, fmt.Errorf("Invalid Head.Type=%v", headConfig.Type)
 		} else {
-			headConfig.headType = headType
+			heads.addHead(headID, headConfig, headType)
 		}
 
-		heads.addHead(headConfig)
 	}
 
 	return &heads, nil
 }
 
+type headMap map[string]*Head
+
 type Heads struct {
 	log     *log.Entry
 	outputs map[Universe]*Output
-	heads   []*Head
+	heads   headMap
 }
 
 func (heads *Heads) output(universe Universe) *Output {
@@ -56,16 +58,18 @@ func (heads *Heads) Output(universe Universe, dmxWriter dmx.Writer) {
 }
 
 // Patch head
-func (heads *Heads) addHead(config HeadConfig) *Head {
+func (heads *Heads) addHead(id string, config HeadConfig, headType *HeadType) *Head {
 	var output = heads.output(config.Universe)
 	var head = Head{
-		headType: config.headType,
-		address:  config.Address,
+		id:       id,
+		config:   config,
+		headType: headType,
+		output:   output,
 	}
 
-	head.init(output, config.headType)
+	head.init()
 
-	heads.heads = append(heads.heads, &head)
+	heads.heads[id] = &head
 
 	return &head
 }

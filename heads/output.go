@@ -1,17 +1,25 @@
 package heads
 
 import (
+	"fmt"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/SpComb/qmsk-dmx"
 )
 
 type Output struct {
 	log *log.Entry
-	dmx dmx.Universe
+
+	universe Universe
+	dmx      dmx.Universe
 
 	dmxWriter dmx.Writer // or nil
 
 	dirty bool
+}
+
+func (output *Output) String() string {
+	return fmt.Sprintf("%d", output.universe)
 }
 
 func (output *Output) init(dmxWriter dmx.Writer) {

@@ -60,18 +60,21 @@ type HeadType struct {
 	Channels []ChannelType
 }
 
+func (headType HeadType) String() string {
+	return fmt.Sprintf("%v/%v=%v", headType.Vendor, headType.Model, headType.Mode)
+}
+
 type HeadConfig struct {
 	Type     string
 	Universe Universe
 	Address  dmx.Address
-
-	headType *HeadType
+	Name     string
 }
 
 type Config struct {
-	headTypes map[string]*HeadType
+	HeadTypes map[string]*HeadType
 
-	Heads []HeadConfig
+	Heads map[string]HeadConfig
 }
 
 func (config *Config) loadTypes(rootPath string) error {
@@ -102,7 +105,7 @@ func (config *Config) loadTypes(rootPath string) error {
 
 		log.Infof("heads:Config.loadTypes %v: HeadType %v", path, name)
 
-		config.headTypes[name] = &headType
+		config.HeadTypes[name] = &headType
 
 		return nil
 	})
@@ -110,7 +113,7 @@ func (config *Config) loadTypes(rootPath string) error {
 
 func (options Options) Config(path string) (*Config, error) {
 	var config = Config{
-		headTypes: make(map[string]*HeadType),
+		HeadTypes: make(map[string]*HeadType),
 	}
 
 	if err := config.loadTypes(options.LibraryPath); err != nil {

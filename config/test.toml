@@ -1,4 +1,5 @@
-[[Heads]]
+[heads.test-led]
 Type        = "stairville/ledpar56-5ch"
 Universe    = 0
 Address     = 1
+Name        = "Test LED"

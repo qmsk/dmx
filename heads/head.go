@@ -1,6 +1,8 @@
 package heads
 
 import (
+	"fmt"
+
 	"github.com/SpComb/qmsk-dmx"
 )
 
@@ -31,20 +33,30 @@ func (channel *Channel) SetValue(value Value) {
 
 // A single DMX receiver using multiple consecutive DMX channels from a base address within a single universe
 type Head struct {
+	id       string
+	config   HeadConfig
 	headType *HeadType
-	address  dmx.Address
+	output   *Output
 
 	channels map[ChannelType]*Channel
 }
 
-func (head *Head) init(output *Output, headType *HeadType) {
+func (head *Head) Name() string {
+	return head.config.Name
+}
+
+func (head *Head) String() string {
+	return fmt.Sprintf("%v @ %v[%d]", head.id, head.output, head.config.Address)
+}
+
+func (head *Head) init() {
 	head.channels = make(map[ChannelType]*Channel)
 
-	for channelOffset, channelType := range headType.Channels {
+	for channelOffset, channelType := range head.headType.Channels {
 		var channel = &Channel{
 			channelType: channelType,
-			output:      output,
-			address:     head.address + dmx.Address(channelOffset),
+			output:      head.output,
+			address:     head.config.Address + dmx.Address(channelOffset),
 		}
 
 		channel.init()
