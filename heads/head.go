@@ -40,7 +40,13 @@ type Head struct {
 	headType *HeadType
 	output   *Output
 
-	channels map[ChannelType]*Channel
+	channels   map[ChannelType]*Channel
+	parameters HeadParameters
+}
+
+type HeadParameters struct {
+	Intensity *HeadIntensity `json:"intensity,omitempty"`
+	Color     *HeadColor     `json:"color,omitempty"`
 }
 
 func (head *Head) Name() string {
@@ -65,19 +71,27 @@ func (head *Head) init() {
 
 		head.channels[channelType] = channel
 	}
+
+	// set parameters
+	if headIntensity := head.getIntensity(); headIntensity.exists() {
+		head.parameters.Intensity = &headIntensity
+	}
+	if headColor := head.getColor(); headColor.exists() {
+		head.parameters.Color = &headColor
+	}
 }
 
 func (head *Head) getChannel(channelType ChannelType) *Channel {
 	return head.channels[channelType]
 }
 
-func (head *Head) Intensity() HeadIntensity {
+func (head *Head) getIntensity() HeadIntensity {
 	return HeadIntensity{
 		channel: head.getChannel(ChannelType{Intensity: true}),
 	}
 }
 
-func (head *Head) Color() HeadColor {
+func (head *Head) getColor() HeadColor {
 	return HeadColor{
 		red:       head.getChannel(ChannelType{Color: ColorChannelRed}),
 		green:     head.getChannel(ChannelType{Color: ColorChannelGreen}),
@@ -86,12 +100,27 @@ func (head *Head) Color() HeadColor {
 	}
 }
 
+func (head *Head) Parameters() HeadParameters {
+	return head.parameters
+}
+
 // web API
 type APIHeadParameters struct {
 	head *Head
 
 	Intensity *APIHeadIntensity `json:"intensity,omitempty"`
 	Color     *APIHeadColor     `json:"color,omitempty"`
+}
+
+func (headParameters HeadParameters) makeAPI() APIHeadParameters {
+	return APIHeadParameters{
+		Intensity: headParameters.Intensity.makeAPI(),
+		Color:     headParameters.Color.makeAPI(),
+	}
+}
+
+func (headParameters HeadParameters) GetREST() (web.Resource, error) {
+	return headParameters.makeAPI(), nil
 }
 
 type APIHead struct {
@@ -110,17 +139,16 @@ func (head *Head) makeAPI() APIHead {
 		Config: head.config,
 		Type:   head.headType,
 
-		APIHeadParameters: APIHeadParameters{
-			Intensity: head.Intensity().makeAPI(),
-			Color:     head.Color().makeAPI(),
-		},
+		APIHeadParameters: head.parameters.makeAPI(),
 	}
 }
 
 func (head *Head) GetREST() (web.Resource, error) {
 	return head.makeAPI(), nil
 }
+
 func (head *Head) PostREST() (web.Resource, error) {
+	// parameters only, not configuration
 	return &APIHeadParameters{head: head}, nil
 }
 
@@ -131,7 +159,7 @@ func (params APIHeadParameters) Apply() error {
 	)
 
 	if params.Intensity != nil {
-		params.Intensity.headIntensity = params.head.Intensity()
+		params.Intensity.headIntensity = params.head.parameters.Intensity
 
 		if err := params.Intensity.Apply(); err != nil {
 			return err
@@ -139,7 +167,7 @@ func (params APIHeadParameters) Apply() error {
 	}
 
 	if params.Color != nil {
-		params.Color.headColor = params.head.Color()
+		params.Color.headColor = params.head.parameters.Color
 
 		if err := params.Color.Apply(); err != nil {
 			return err
@@ -151,10 +179,12 @@ func (params APIHeadParameters) Apply() error {
 
 func (head *Head) Index(name string) (web.Resource, error) {
 	switch name {
+	case "":
+		return head.parameters, nil
 	case "intensity":
-		return head.Intensity(), nil
+		return head.parameters.Intensity, nil
 	case "color":
-		return head.Color(), nil
+		return head.parameters.Color, nil
 	default:
 		return nil, nil
 	}

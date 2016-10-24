@@ -27,7 +27,7 @@ type HeadColor struct {
 	intensity *Channel
 }
 
-func (it HeadColor) Exists() bool {
+func (it HeadColor) exists() bool {
 	return it.red != nil || it.green != nil || it.blue != nil
 }
 
@@ -69,13 +69,13 @@ func (hc HeadColor) SetRGBIntensity(colorRGB ColorRGB, intensity Intensity) {
 
 // Web API
 type APIHeadColor struct {
-	headColor HeadColor
+	headColor *HeadColor
 
 	ColorRGB
 }
 
-func (headColor HeadColor) makeAPI() *APIHeadColor {
-	if !headColor.Exists() {
+func (headColor *HeadColor) makeAPI() *APIHeadColor {
+	if headColor == nil {
 		return nil
 	}
 
@@ -93,7 +93,7 @@ func (headColor HeadColor) PostREST() (web.Resource, error) {
 }
 
 func (apiHeadColor *APIHeadColor) Apply() error {
-	if !apiHeadColor.headColor.Exists() {
+	if apiHeadColor.headColor == nil {
 		return web.RequestErrorf("Head does not support color")
 	}
 

@@ -11,7 +11,7 @@ type HeadIntensity struct {
 	channel *Channel
 }
 
-func (it HeadIntensity) Exists() bool {
+func (it HeadIntensity) exists() bool {
 	return it.channel != nil
 }
 
@@ -29,13 +29,13 @@ func (it HeadIntensity) Set(intensity Intensity) Intensity {
 
 // Web API
 type APIHeadIntensity struct {
-	headIntensity HeadIntensity
+	headIntensity *HeadIntensity
 
 	Intensity
 }
 
-func (headIntensity HeadIntensity) makeAPI() *APIHeadIntensity {
-	if !headIntensity.Exists() {
+func (headIntensity *HeadIntensity) makeAPI() *APIHeadIntensity {
+	if headIntensity == nil {
 		return nil
 	}
 
@@ -54,7 +54,7 @@ func (headIntensity HeadIntensity) PostREST() (web.Resource, error) {
 }
 
 func (apiHeadIntensity *APIHeadIntensity) Apply() error {
-	if !apiHeadIntensity.headIntensity.Exists() {
+	if apiHeadIntensity.headIntensity == nil {
 		return web.RequestErrorf("Head does not support intensity")
 	}
 

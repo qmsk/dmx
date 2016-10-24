@@ -72,20 +72,19 @@ func demo(hh *heads.Heads) {
 		}
 
 		hh.Each(func(head *heads.Head) {
-			headIntensity := head.Intensity()
-			headColor := head.Color()
+			headParameters := head.Parameters()
 
-			log.Debugf("head %v: intensity=%v color=%v", head, headIntensity.Get(), headColor.Exists())
+			log.Debugf("head %v: intensity=%v color=%v", head, headParameters.Intensity, headParameters.Color)
 
-			if headColor.Exists() {
+			if headParameters.Color != nil {
 				log.Debugf("head %v: Color %v @ %v", head, color, intensity)
 
-				headColor.SetRGBIntensity(headsColor, intensity)
+				headParameters.Color.SetRGBIntensity(headsColor, intensity)
 
-			} else if headIntensity.Exists() {
+			} else if headParameters.Intensity != nil {
 				log.Debugf("head %v: Intensity %v", head, intensity)
 
-				headIntensity.Set(intensity)
+				headParameters.Intensity.Set(intensity)
 			}
 		})
 
