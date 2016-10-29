@@ -146,5 +146,6 @@ func main() {
 	// web
 	options.Web.Server(
 		web.RoutePrefix("/api/", headsHeads.WebAPI()),
+		options.Web.RouteStatic("/"),
 	)
 }
