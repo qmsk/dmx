@@ -52,6 +52,20 @@ type ChannelType struct {
 	Color     ColorChannel `json:",omitempty"`
 }
 
+func (channelType ChannelType) String() string {
+	if channelType.Control != "" {
+		return "control:" + channelType.Control
+	}
+	if channelType.Intensity {
+		return "intensity"
+	}
+	if channelType.Color != "" {
+		return "color:" + string(channelType.Color)
+	}
+
+	return ""
+}
+
 type HeadType struct {
 	Vendor   string
 	Model    string

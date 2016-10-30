@@ -1,10 +1,14 @@
 package heads
 
-import "github.com/SpComb/qmsk-dmx"
+import (
+	"github.com/SpComb/qmsk-dmx"
+	"github.com/SpComb/qmsk-web"
+)
 
 type Channel struct {
 	channelType ChannelType
 	output      *Output
+	index       uint
 
 	address dmx.Address
 }
@@ -31,7 +35,9 @@ func (channel *Channel) SetValue(value Value) Value {
 type APIChannel struct {
 	channel *Channel
 
+	ID      string
 	Type    ChannelType
+	Index   uint
 	Address dmx.Address
 
 	DMX   dmx.Channel
@@ -41,9 +47,52 @@ type APIChannel struct {
 func (channel *Channel) makeAPI() APIChannel {
 	return APIChannel{
 		channel: channel,
+		ID:      channel.channelType.String(),
+		Index:   channel.index,
 		Type:    channel.channelType,
 		Address: channel.address,
 		DMX:     channel.GetDMX(),
 		Value:   channel.GetValue(),
 	}
+}
+
+func (channel *Channel) GetREST() (web.Resource, error) {
+	return channel.makeAPI(), nil
+}
+
+type APIChannels []APIChannel
+
+func (apiChannels APIChannels) GetREST() (web.Resource, error) {
+	return apiChannels, nil
+}
+
+type APIChannelParams struct {
+	channel *Channel
+
+	DMX   *dmx.Channel `json:",omitempty"`
+	Value *Value       `json:",omitempty"`
+}
+
+func (channel *Channel) PostREST() (web.Resource, error) {
+	return &APIChannelParams{channel: channel}, nil
+}
+
+func (params *APIChannelParams) Apply() error {
+	if params.DMX != nil {
+		params.channel.SetDMX(*params.DMX)
+	}
+	if params.Value != nil {
+		*params.Value = params.channel.SetValue(*params.Value)
+	}
+
+	if params.DMX == nil {
+		var dmxValue = params.channel.GetDMX()
+		params.DMX = &dmxValue
+	}
+	if params.Value == nil {
+		var value = params.channel.GetValue()
+		params.Value = &value
+	}
+
+	return nil
 }

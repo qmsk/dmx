@@ -15,9 +15,11 @@ type Head struct {
 	headType *HeadType
 	output   *Output
 
-	channels   map[ChannelType]*Channel
+	channels   HeadChannels
 	parameters HeadParameters
 }
+
+type HeadChannels map[ChannelType]*Channel
 
 type HeadParameters struct {
 	Intensity *HeadIntensity `json:"intensity,omitempty"`
@@ -33,13 +35,14 @@ func (head *Head) String() string {
 }
 
 func (head *Head) init() {
-	head.channels = make(map[ChannelType]*Channel)
+	head.channels = make(HeadChannels)
 
-	for channelOffset, channelType := range head.headType.Channels {
+	for channelIndex, channelType := range head.headType.Channels {
 		var channel = &Channel{
 			channelType: channelType,
+			index:       uint(channelIndex),
 			output:      head.output,
-			address:     head.config.Address + dmx.Address(channelOffset),
+			address:     head.config.Address + dmx.Address(channelIndex),
 		}
 
 		channel.init()
@@ -103,12 +106,12 @@ type APIHead struct {
 	Config HeadConfig
 	Type   *HeadType
 
-	Channels []APIChannel
+	Channels APIChannels
 	APIHeadParameters
 }
 
-func (head *Head) makeAPIChannels() []APIChannel {
-	var apiChannels []APIChannel
+func (head *Head) makeAPIChannels() APIChannels {
+	var apiChannels APIChannels
 
 	for _, channelType := range head.headType.Channels {
 		apiChannels = append(apiChannels, head.getChannel(channelType).makeAPI())
@@ -168,6 +171,8 @@ func (head *Head) Index(name string) (web.Resource, error) {
 	switch name {
 	case "":
 		return head.parameters, nil
+	case "channels":
+		return head.channels, nil
 	case "intensity":
 		return head.parameters.Intensity, nil
 	case "color":
@@ -175,4 +180,34 @@ func (head *Head) Index(name string) (web.Resource, error) {
 	default:
 		return nil, nil
 	}
+}
+
+func (headChannels HeadChannels) makeAPI() APIChannels {
+	var apiChannels = make(APIChannels, len(headChannels))
+
+	for _, channel := range headChannels {
+		apiChannels[channel.index] = channel.makeAPI()
+	}
+
+	return apiChannels
+}
+
+func (headChannels HeadChannels) GetREST() (web.Resource, error) {
+	log.Debugln("heads:HeadChannels.GetREST")
+
+	return headChannels.makeAPI(), nil
+}
+
+func (headChannels HeadChannels) Index(name string) (web.Resource, error) {
+	for channelType, channel := range headChannels {
+		if channelType.String() == name {
+			log.Debugln("heads:HeadChannels.Index", name, channel)
+
+			return web.GetPostResource(channel), nil
+		}
+	}
+
+	log.Debugln("heads:HeadChannels.Index", name, nil)
+
+	return nil, nil
 }
