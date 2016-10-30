@@ -12,9 +12,13 @@ export class HeadService {
 
   }
 
+  private decode(headData) :Head {
+    return Object.assign(new Head, headData);
+  }
+
   list(): Observable<Head[]> {
     return this.http.get('/api/heads/')
-      .map(response => response.json() as Head[])
+      .map(response => response.json().map(headData => this.decode(headData)))
     ;
   }
 }

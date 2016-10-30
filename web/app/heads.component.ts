@@ -18,8 +18,10 @@ export class HeadsComponent implements OnInit {
   constructor (private headService: HeadService) { }
 
   ngOnInit(): void {
-    this.headService.list().subscribe(
-      heads => this.heads = heads,
-    );
+    this.headService.list()
+      .subscribe(
+        heads => this.heads = heads.sort((a: Head, b: Head) => a.cmpAddress(b)),
+      )
+    ;
   }
 }

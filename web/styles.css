@@ -1,7 +1,4 @@
 body {
-  width: 100%;
-  height: 100%;
-
   background-color: #aaa;
   color: #111;
 }
@@ -10,6 +7,7 @@ a {
   color: #ccc;
 }
 
+/* Structure */
 .app {
   width: 100%;
   height: 100%;
@@ -27,7 +25,7 @@ header {
   color: #ccc;
 }
 
-div.view {
+.view {
   flex: 1;
   padding: 1em;
 
@@ -53,4 +51,26 @@ footer {
 
   background-color: #111;
   color: #44ff44;
+}
+
+/* Elements */
+table {
+  width: 100%;
+
+  border-collapse: collapse;
+}
+
+tr {
+  border: 1px solid #aaa;
+}
+
+th, td {
+  padding: 0.25em;
+}
+th {
+  background-color: #133337;
+  color: #ccc;
+}
+td {
+  background-color: #888;
 }
