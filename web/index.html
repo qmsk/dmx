@@ -1,8 +1,12 @@
 <html>
   <head>
+    <base href="/">
     <title>qmsk::dmx</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="node_modules/normalize.css/normalize.css">
+    <link rel="stylesheet" href="node_modules/spinkit/css/spinkit.css">
     <link rel="stylesheet" href="styles.css">
 
     <script src="node_modules/core-js/client/shim.min.js"></script>
@@ -16,6 +20,12 @@
     </script>
   </head>
   <body>
-    <dmx-app>Loading...</dmx-app>
+    <dmx-app class="app">
+      <header>qmsk::dmx</header>
+      <div class="view centered">
+        <div class="spinner sk-rotating-plane"></div>
+      </div>
+      <footer>Loading...</footer>
+    </dmx-app>
   </body>
 </html>
