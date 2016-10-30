@@ -15,7 +15,7 @@ type Options struct {
 func (options Options) Heads(config *Config) (*Heads, error) {
 	var heads = Heads{
 		log:     log.WithField("package", "heads"),
-		outputs: make(map[Universe]*Output),
+		outputs: make(outputMap),
 		heads:   make(headMap),
 	}
 
@@ -35,7 +35,7 @@ type headMap map[string]*Head
 
 type Heads struct {
 	log     *log.Entry
-	outputs map[Universe]*Output
+	outputs outputMap
 	heads   headMap
 }
 
@@ -54,8 +54,8 @@ func (heads *Heads) output(universe Universe) *Output {
 }
 
 // Patch output
-func (heads *Heads) Output(universe Universe, dmxWriter dmx.Writer) {
-	heads.output(universe).init(dmxWriter)
+func (heads *Heads) Output(config OutputConfig, dmxWriter dmx.Writer) {
+	heads.output(config.Universe).init(config, dmxWriter)
 }
 
 // Patch head

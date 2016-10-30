@@ -50,8 +50,15 @@ func discovery(artnetController *artnet.Controller, hh *heads.Heads) {
 
 				// patch outputs
 				universe := artnetController.Universe(outputPort.Address)
+
+				var outputConfig = heads.OutputConfig{
+					Universe: heads.Universe(outputPort.Address.Integer()),
+
+					ArtNetNode: &config,
+				}
+
 				// XXX: not safe
-				hh.Output(heads.Universe(universe.Address().Integer()), universe)
+				hh.Output(outputConfig, universe)
 			}
 		}
 	}

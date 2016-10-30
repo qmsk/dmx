@@ -5,11 +5,21 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/SpComb/qmsk-dmx"
+	"github.com/SpComb/qmsk-dmx/artnet"
+	"github.com/SpComb/qmsk-web"
 )
+
+type OutputConfig struct {
+	Universe   Universe
+	ArtNetNode *artnet.NodeConfig
+}
+
+type outputMap map[Universe]*Output
 
 type Output struct {
 	log *log.Entry
 
+	config   OutputConfig
 	universe Universe
 	dmx      dmx.Universe
 
@@ -22,7 +32,9 @@ func (output *Output) String() string {
 	return fmt.Sprintf("%d", output.universe)
 }
 
-func (output *Output) init(dmxWriter dmx.Writer) {
+func (output *Output) init(config OutputConfig, dmxWriter dmx.Writer) {
+	output.config = config
+	output.universe = config.Universe
 	output.dmxWriter = dmxWriter
 }
 
@@ -65,4 +77,33 @@ func (output *Output) refresh() error {
 	output.dirty = false
 
 	return nil
+}
+
+func (outputMap outputMap) makeAPI() []APIOutput {
+	var apiOutputs []APIOutput
+
+	for _, output := range outputMap {
+		apiOutputs = append(apiOutputs, output.makeAPI())
+	}
+
+	return apiOutputs
+}
+
+func (outputMap outputMap) GetREST() (web.Resource, error) {
+	return outputMap.makeAPI(), nil
+}
+
+// Web API
+type APIOutput struct {
+	OutputConfig
+}
+
+func (output *Output) makeAPI() APIOutput {
+	return APIOutput{
+		OutputConfig: output.config,
+	}
+}
+
+func (output *Output) GetREST() (web.Resource, error) {
+	return output.makeAPI(), nil
 }
