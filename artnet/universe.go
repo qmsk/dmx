@@ -67,6 +67,15 @@ func (universe *Universe) String() string {
 	return fmt.Sprintf("artnet=%v", universe.address)
 }
 
+// any further WriteDMX() will fail
+func (universe *Universe) close() {
+	var writeChan chan dmx.Universe
+
+	writeChan, universe.writeChan = universe.writeChan, nil
+
+	close(writeChan)
+}
+
 func (universe *Universe) run() {
 	defer universe.ticker.Stop()
 
@@ -109,9 +118,5 @@ func (universe *Universe) WriteDMX(dmx dmx.Universe) error {
 //
 // any further WriteDMX() will fail
 func (universe *Universe) Close() {
-	var writeChan chan dmx.Universe
-
-	writeChan, universe.writeChan = universe.writeChan, nil
-
-	close(writeChan)
+	universe.close()
 }
