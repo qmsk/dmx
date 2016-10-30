@@ -3,7 +3,7 @@ package artnet
 const Port = 6454
 const MTU = 1500
 
-var ARTNET = [8]byte{'A', 'R', 'T', '-', 'N', 'E', 'T', 0}
+var ARTNET = [8]byte{'A', 'r', 't', '-', 'N', 'e', 't', 0}
 
 const ProtVer = 14
 
