@@ -35,14 +35,22 @@ func (universe Universe) String() string {
 	return hex.Dump(universe.Bytes())
 }
 
-func (universe *Universe) Get(address Address) Channel {
+func (universe Universe) Copy() Universe {
+	var out = make(Universe, len(universe))
+
+	copy(out, universe)
+
+	return out
+}
+
+func (universe Universe) Get(address Address) Channel {
 	if address <= 0 || address > UniverseChannels {
 		panic("Invalid DMX address")
-	} else if int(address) > len(*universe) {
+	} else if int(address) > len(universe) {
 		return 0
 	}
 
-	return (*universe)[address-1]
+	return universe[address-1]
 }
 
 func (universe *Universe) Set(address Address, value Channel) {
