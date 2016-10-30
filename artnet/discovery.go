@@ -22,11 +22,14 @@ func (controller *Controller) discoveryPoll() error {
 }
 
 func (controller *Controller) discovery(pollChan chan pollEvent) {
+	defer close(controller.discoveryChan)
+
 	var ticker = time.NewTicker(controller.config.DiscoveryInterval)
 	var nodes = make(map[string]*Node)
 
 	if err := controller.discoveryPoll(); err != nil {
-		controller.log.Fatalf("discovery: sendPoll: %v", err)
+		controller.log.Errorf("discovery: sendPoll: %v", err)
+		return
 	}
 
 	for {
@@ -53,7 +56,8 @@ func (controller *Controller) discovery(pollChan chan pollEvent) {
 			controller.log.Debug("discovery: tick...")
 
 			if err := controller.discoveryPoll(); err != nil {
-				controller.log.Fatalf("discovery: sendPoll: %v", err)
+				controller.log.Errorf("discovery: sendPoll: %v", err)
+				return
 			}
 
 		case pollEvent := <-pollChan:

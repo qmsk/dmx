@@ -56,6 +56,8 @@ func discovery(artnetController *artnet.Controller, hh *heads.Heads) {
 			hh.Output(heads.Universe(address.Integer()), universe)
 		}
 	}
+
+	log.Fatalf("artnet discovery ended")
 }
 
 func demo(hh *heads.Heads) {
