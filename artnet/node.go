@@ -67,7 +67,7 @@ func (node *Node) SendDMX(address Address, universe dmx.Universe) error {
 		node.sequence = 1
 	}
 
-	node.log.Debugf("SendDMX %v @ %v", address, sequence)
+	node.log.Debugf("SendDMX %v @ %v [%d]", address, sequence, len(universe))
 
 	return node.transport.SendDMX(node.addr, sequence, address, universe)
 }

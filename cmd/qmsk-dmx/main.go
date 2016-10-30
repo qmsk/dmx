@@ -47,13 +47,12 @@ func discovery(artnetController *artnet.Controller, hh *heads.Heads) {
 			}
 			for i, outputPort := range config.OutputPorts {
 				fmt.Printf("\tOutput %d: %v\n", i, outputPort.Address)
-			}
-		}
 
-		// patch outputs
-		for address, universe := range artnetController.Universes() {
-			// XXX: not safe
-			hh.Output(heads.Universe(address.Integer()), universe)
+				// patch outputs
+				universe := artnetController.Universe(outputPort.Address)
+				// XXX: not safe
+				hh.Output(heads.Universe(universe.Address().Integer()), universe)
+			}
 		}
 	}
 

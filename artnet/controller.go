@@ -16,6 +16,8 @@ type Config struct {
 
 	DiscoveryInterval time.Duration `long:"artnet-discovery-interval" value-name:"DURATION" default:"3s"`
 	DiscoveryTimeout  time.Duration `long:"artnet-discovery-timeout" value-name:"DURATION" default:"3s"`
+
+	DMXRefresh time.Duration `long:"artnet-dmx-refresh" value-name:"DURATION" default:"1s"`
 }
 
 func (config Config) Controller() (*Controller, error) {
@@ -23,6 +25,8 @@ func (config Config) Controller() (*Controller, error) {
 		log: log.WithFields(log.Fields{"prefix": "artnet:Controller"}),
 
 		config: config,
+
+		universes: make(map[Address]*Universe),
 	}
 
 	listenAddr := net.JoinHostPort(config.Listen, fmt.Sprintf("%d", Port))
@@ -72,6 +76,9 @@ type Controller struct {
 	discoveryAddrs []*net.UDPAddr // sending to unicast/broadcast addresses
 	discoveryState atomic.Value
 	discoveryChan  chan Discovery
+
+	// state
+	universes map[Address]*Universe
 }
 
 func (controller *Controller) Start(discoveryChan chan Discovery) {
@@ -160,7 +167,7 @@ func (controller *Controller) SendDMX(address Address, universe dmx.Universe) er
 			if err := controller.transport.SendDMX(addr, 0, address, universe); err != nil {
 				return fmt.Errorf("SendDMX broadcast %v: %v", address, err)
 			} else {
-				controller.log.Debugf("SendDMX %v: broadcast %v ", address, addr)
+				controller.log.Debugf("SendDMX %v [%v]: broadcast %v ", address, len(universe), addr)
 			}
 		}
 	}

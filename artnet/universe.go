@@ -2,7 +2,10 @@ package artnet
 
 import (
 	"fmt"
+	"io"
+	"time"
 
+	log "github.com/Sirupsen/logrus"
 	dmx "github.com/SpComb/qmsk-dmx"
 )
 
@@ -23,39 +26,92 @@ func (a Address) Integer() int {
 	return int(uint(a.Net<<8) | uint(a.SubUni))
 }
 
-func (controller *Controller) Universes() map[Address]Universe {
-	discovery := controller.Discovery()
-	universes := make(map[Address]Universe)
+// XXX: unsafe
+func (controller *Controller) Universe(address Address) *Universe {
+	var universe = controller.universes[address]
 
-	for _, node := range discovery.Nodes {
-		for _, outputPort := range node.config.OutputPorts {
-			universes[outputPort.Address] = Universe{
-				controller: controller,
-				Address:    outputPort.Address,
-			}
+	if universe == nil {
+		universe = &Universe{
+			log:        controller.log.WithField("universe", address),
+			controller: controller,
+			address:    address,
+
+			ticker:    time.NewTicker(controller.config.DMXRefresh),
+			writeChan: make(chan dmx.Universe),
 		}
+
+		go universe.run()
+
+		controller.universes[address] = universe
 	}
 
-	return universes
-}
-
-func (controller *Controller) Universe(address Address) Universe {
-	return Universe{
-		controller: controller,
-		Address:    address,
-	}
+	return universe
 }
 
 type Universe struct {
+	log        *log.Entry
 	controller *Controller
+	address    Address
 
-	Address Address
+	ticker    *time.Ticker
+	writeChan chan dmx.Universe
+
+	dmx dmx.Universe
 }
 
-func (universe Universe) String() string {
-	return fmt.Sprintf("artnet=%v", universe.Address)
+func (universe *Universe) Address() Address {
+	return universe.address
 }
 
-func (universe Universe) WriteDMX(dmx dmx.Universe) error {
-	return universe.controller.SendDMX(universe.Address, dmx)
+func (universe *Universe) String() string {
+	return fmt.Sprintf("artnet=%v", universe.address)
+}
+
+func (universe *Universe) run() {
+	defer universe.ticker.Stop()
+
+	for {
+		select {
+		case dmx, ok := <-universe.writeChan:
+			if !ok {
+				break
+			}
+
+			universe.dmx = dmx
+
+			universe.log.Debugf("Update: len=%d", len(universe.dmx))
+
+		case <-universe.ticker.C:
+			universe.log.Debugf("Refresh: len=%d", len(universe.dmx))
+		}
+
+		if err := universe.controller.SendDMX(universe.address, universe.dmx); err != nil {
+			universe.log.Warnf("SendDMX: %v", err)
+		}
+	}
+}
+
+// Update DMX output
+// Triggers immediate refresh + further refresh sends
+//
+// Returns io.EOF if closed
+func (universe *Universe) WriteDMX(dmx dmx.Universe) error {
+	if universe.writeChan == nil {
+		return io.EOF
+	}
+
+	universe.writeChan <- dmx.Copy()
+
+	return nil
+}
+
+// Stop the refresh cycle
+//
+// any further WriteDMX() will fail
+func (universe *Universe) Close() {
+	var writeChan chan dmx.Universe
+
+	writeChan, universe.writeChan = universe.writeChan, nil
+
+	close(writeChan)
 }
