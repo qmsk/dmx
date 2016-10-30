@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'my-app',
-  template: "<h1>Hello World</h1>",
+  selector: 'dmx-app',
+  templateUrl: "app/app.component.html",
 })
 export class AppComponent {
-
+  title = "qmsk::dmx";
 }

@@ -1,0 +1,17 @@
+<h2>Heads</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Address</th>
+      <th>Type</th>
+      <th>Head</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let head of heads">
+      <td>{{head.Config.Universe}}.{{head.Config.Address}}</td>
+      <td>{{head.Type.Vendor}} {{head.Type.Model}} ({{head.Type.Mode}})</td>
+      <th>{{head.ID}}</th>
+    </tr>
+  </tbody>
+</table>
