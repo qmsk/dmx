@@ -8,7 +8,7 @@ import (
 
 type ArtPoll struct {
 	ArtHeader
-	ProtVer uint16
+	ProtVer ProtVer
 
 	TalkToMe uint8
 	Priority uint8
@@ -20,7 +20,7 @@ func (transport *Transport) SendPoll(addr *net.UDPAddr) error {
 			ID:     ARTNET,
 			OpCode: OpPoll,
 		},
-		ProtVer: ProtVer,
+		ProtVer: ProtVer14,
 	}, nil)
 }
 
@@ -28,7 +28,7 @@ type ArtPollReply struct {
 	ArtHeader
 
 	IPAddress   [4]byte
-	PortNumber  uint16
+	PortNumber  uint16 // XXX: swapped byte order
 	VersInfo    uint16
 	NetSwitch   uint8
 	SubSwitch   uint8

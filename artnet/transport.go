@@ -71,7 +71,7 @@ func (t *Transport) decode(header ArtHeader, buf []byte) (ArtPacket, error) {
 		return nil, fmt.Errorf("Unknown opcode: %04x", header.OpCode)
 	}
 
-	if err := binary.Read(bytes.NewReader(buf), binary.LittleEndian, packet); err != nil {
+	if err := binary.Read(bytes.NewReader(buf), binary.BigEndian, packet); err != nil {
 		return nil, fmt.Errorf("binary.Read %T: %v", packet, err)
 	}
 
@@ -81,7 +81,7 @@ func (t *Transport) decode(header ArtHeader, buf []byte) (ArtPacket, error) {
 func (t *Transport) send(addr *net.UDPAddr, packet ArtPacket, data []byte) error {
 	var buf bytes.Buffer
 
-	if err := binary.Write(&buf, binary.LittleEndian, packet); err != nil {
+	if err := binary.Write(&buf, binary.BigEndian, packet); err != nil {
 		return err
 	}
 

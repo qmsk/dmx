@@ -5,11 +5,26 @@ const MTU = 1500
 
 var ARTNET = [8]byte{'A', 'r', 't', '-', 'N', 'e', 't', 0}
 
-const ProtVer = 14
+type OpCode struct {
+	Lo uint8
+	Hi uint8
+}
+type ProtVer struct {
+	Hi uint8
+	Lo uint8
+}
+
+func (protVer ProtVer) ToUint() uint {
+	return uint(protVer.Hi<<8) + uint(protVer.Lo)
+}
+
+func (protVer ProtVer) IsCompatible(otherVersion ProtVer) bool {
+	return protVer.ToUint() == otherVersion.ToUint()
+}
 
 type ArtHeader struct {
 	ID     [8]byte
-	OpCode uint16
+	OpCode OpCode
 }
 
 func (h ArtHeader) Header() ArtHeader {
@@ -20,9 +35,9 @@ type ArtPacket interface {
 	Header() ArtHeader
 }
 
-const (
-	opMask      uint16 = 0xffff
-	OpPoll             = 0x2000
-	OpPollReply        = 0x2100
-	OpDmx              = 0x5000
+var ProtVer14 = ProtVer{0, 14}
+var (
+	OpPoll      = OpCode{0x00, 0x20}
+	OpPollReply = OpCode{0x00, 0x21}
+	OpDmx       = OpCode{0x00, 0x50}
 )

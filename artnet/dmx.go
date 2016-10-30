@@ -10,7 +10,7 @@ type DMXUniverse []uint8
 
 type ArtDmx struct {
 	ArtHeader
-	ProtVer uint16
+	ProtVer ProtVer
 
 	Sequence uint8
 	Physical uint8
@@ -25,7 +25,7 @@ func (transport *Transport) SendDMX(addr *net.UDPAddr, sequence uint8, address A
 			ID:     ARTNET,
 			OpCode: OpDmx,
 		},
-		ProtVer:  ProtVer,
+		ProtVer:  ProtVer14,
 		Sequence: sequence,
 		SubUni:   address.SubUni,
 		Net:      address.Net,

@@ -103,8 +103,8 @@ func (controller *Controller) recv() {
 func (controller *Controller) recvPacket(packet ArtPacket, srcAddr *net.UDPAddr) error {
 	switch packetType := packet.(type) {
 	case *ArtPoll:
-		if packetType.ProtVer < ProtVer {
-			return fmt.Errorf("Invalid protocol version: %v < %v", packetType.ProtVer, ProtVer)
+		if !ProtVer14.IsCompatible(packetType.ProtVer) {
+			return fmt.Errorf("Invalid protocol version: %v < %v", packetType.ProtVer, ProtVer14)
 		}
 
 		// ignore
@@ -120,8 +120,8 @@ func (controller *Controller) recvPacket(packet ArtPacket, srcAddr *net.UDPAddr)
 		}
 
 	case *ArtDmx:
-		if packetType.ProtVer < ProtVer {
-			return fmt.Errorf("Invalid protocol version: %v < %v", packetType.ProtVer, ProtVer)
+		if !ProtVer14.IsCompatible(packetType.ProtVer) {
+			return fmt.Errorf("Invalid protocol version: %v < %v", packetType.ProtVer, ProtVer14)
 		}
 
 		// ignore
