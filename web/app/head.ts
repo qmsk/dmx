@@ -14,7 +14,8 @@ export interface HeadConfig {
   Universe: number;
   Address:  number;
 }
-export interface Channel {
+export class Channel {
+  ID:       number;
   Type:     ChannelType;
   Address:  number;
   DMX:      number;

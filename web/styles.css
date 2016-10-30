@@ -74,3 +74,19 @@ th {
 td {
   background-color: #888;
 }
+
+/* Forms */
+div.dmx-channel {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+input.dmx {
+  flex: 1;
+}
+
+output.dmx {
+  width: 3em;
+  text-align: right;
+}
