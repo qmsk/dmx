@@ -8,31 +8,6 @@ import (
 	"github.com/SpComb/qmsk-web"
 )
 
-type Channel struct {
-	channelType ChannelType
-	output      *Output
-
-	address dmx.Address
-}
-
-func (channel *Channel) init() {
-	channel.output.SetDMX(channel.address, 0)
-}
-
-func (channel *Channel) GetDMX() dmx.Channel {
-	return channel.output.GetDMX(channel.address)
-}
-func (channel *Channel) GetValue() Value {
-	return channel.output.GetValue(channel.address)
-}
-
-func (channel *Channel) SetDMX(value dmx.Channel) {
-	channel.output.SetDMX(channel.address, value)
-}
-func (channel *Channel) SetValue(value Value) Value {
-	return channel.output.SetValue(channel.address, value)
-}
-
 // A single DMX receiver using multiple consecutive DMX channels from a base address within a single universe
 type Head struct {
 	id       string
@@ -128,7 +103,18 @@ type APIHead struct {
 	Config HeadConfig
 	Type   *HeadType
 
+	Channels []APIChannel
 	APIHeadParameters
+}
+
+func (head *Head) makeAPIChannels() []APIChannel {
+	var apiChannels []APIChannel
+
+	for _, channelType := range head.headType.Channels {
+		apiChannels = append(apiChannels, head.getChannel(channelType).makeAPI())
+	}
+
+	return apiChannels
 }
 
 func (head *Head) makeAPI() APIHead {
@@ -139,6 +125,7 @@ func (head *Head) makeAPI() APIHead {
 		Config: head.config,
 		Type:   head.headType,
 
+		Channels:          head.makeAPIChannels(),
 		APIHeadParameters: head.parameters.makeAPI(),
 	}
 }
