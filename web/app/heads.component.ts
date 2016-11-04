@@ -1,14 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 
-import { Head, Channel } from './head';
+import { Head } from './head';
 import { HeadService } from './head.service';
-
 
 @Component({
   moduleId: module.id,
   selector: 'dmx-heads',
-  host: { class: 'view' },
   templateUrl: 'heads.component.html',
+  styleUrls: [ 'heads.component.css' ],
   providers: [
     HeadService,
   ],
@@ -21,19 +20,13 @@ export class HeadsComponent implements OnInit {
   ngOnInit(): void {
     this.headService.list()
       .subscribe(
-        heads => this.heads = heads.sort((a: Head, b: Head) => a.cmpAddress(b)),
+        heads => this.heads = heads.sort((a: Head, b: Head) => a.cmpHead(b)),
       )
     ;
   }
 
-  setHeadChannelDMX(head:Head, channel:Channel, value:string) {
-    let params = { DMX: parseInt(value) };
-
-    console.log(`Set head ${head.ID} channel ${channel.ID}...`, params);
-    this.headService.setHeadChannel(head, channel, params)
-      .subscribe(channel => {
-        console.log(`Set head ${head.ID} channel ${channel.ID}: dmx=${channel.DMX}`);
-      })
-    ;
+  select(head :Head) {
+    head.active = !head.active;
+    console.log("Toggle head active", head)
   }
 }

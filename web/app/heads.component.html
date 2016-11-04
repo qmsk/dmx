@@ -1,32 +1,4 @@
-<table>
-  <thead>
-    <tr>
-      <th>Address</th>
-      <th>Type</th>
-      <th>Head</th>
-      <th>Channel</th>
-      <th>DMX</th>
-    </tr>
-  </thead>
-  <tbody *ngFor="let head of heads">
-    <tr>
-      <td></td>
-      <td [attr.rowspan]="1 + head.Channels.length">{{head.Type.Vendor}} {{head.Type.Model}} ({{head.Type.Mode}})</td>
-      <th [attr.rowspan]="1 + head.Channels.length">{{head.ID}}</th>
-      <td></td>
-      <td></td>
-    </tr>
-    <tr *ngFor="let channel of head.Channels">
-      <td>{{head.Config.Universe}}.{{channel.Address}}</td>
-      <th *ngIf="channel.Type.Control">Control {{channel.Type.Control}}</th>
-      <th *ngIf="channel.Type.Intensity">Intensity</th>
-      <th *ngIf="channel.Type.Color">Color {{channel.Type.Color}}</th>
-      <td>
-        <div class="dmx-channel">
-          <input class="dmx" type="range" min="0" max="255" [ngModel]="channel.DMX" (ngModelChange)="setHeadChannelDMX(head, channel, $event)">
-          <output class="dmx">{{channel.DMX}}</output>
-        </div>
-      </td>
-    </tr>
-  </tbody>
-</table>
+<dmx-head
+  *ngFor="let head of heads" [head]="head"
+  (click)="select(head)"
+></dmx-head>

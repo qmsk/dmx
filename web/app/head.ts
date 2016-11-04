@@ -27,6 +27,18 @@ export class Head {
   Config:   HeadConfig;
   Channels: Channel[];
 
+  // state
+  active:   boolean;
+
+  cmpHead(other) : number {
+    if (this.ID < other.ID)
+      return -1;
+    else if (this.ID > other.ID)
+      return +1;
+    else
+      return 0;
+  }
+
   cmpAddress(other) : number {
     if (this.Config.Universe != other.Config.Universe)
       return this.Config.Universe - other.Config.Universe;

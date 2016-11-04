@@ -7,10 +7,12 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { AppComponent } from './app.component'
 import { DashboardComponent } from './dashboard.component'
+import { ChannelsComponent } from './channels.component'
 import { HeadsComponent } from './heads.component'
+import { HeadComponent } from './head.component'
 
 const routes: Routes = [
-  { path: 'heads', component: HeadsComponent },
+  { path: 'channels', component: ChannelsComponent },
   { path: '', component: DashboardComponent },
 ];
 
@@ -24,7 +26,9 @@ const routes: Routes = [
   declarations: [
     AppComponent,
     DashboardComponent,
+    ChannelsComponent,
     HeadsComponent,
+    HeadComponent,
   ],
   bootstrap: [ AppComponent ],
 })
