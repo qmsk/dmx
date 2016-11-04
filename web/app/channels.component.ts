@@ -9,6 +9,7 @@ import { HeadService } from './head.service';
   selector: 'dmx-channels',
   host: { class: 'view' },
   templateUrl: 'channels.component.html',
+  styleUrls: [ 'channels.component.css' ],
   providers: [
     HeadService,
   ],

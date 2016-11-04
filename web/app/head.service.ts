@@ -34,7 +34,9 @@ export class HeadService {
   }
 
   private decodeHead(headData:Object): Head {
-    return Object.assign(new Head, headData);
+    return Object.assign(new Head, headData, {
+      Channels: headData['Channels'].map(channelData => this.decodeChannel(channelData)),
+    });
   }
   private decodeChannel(channelData:Object): Channel {
     return Object.assign(new Channel, channelData);

@@ -1,3 +1,4 @@
-<label>{{label}}</label>
+<label *ngIf="label">{{label}}</label>
 <input type="range" min="0.0" max="1.0" step="0.01" [(ngModel)]="value">
+<input *ngIf="dmx != null" type="range" min="0" max="255" [(ngModel)]="dmx">
 <output>{{value}}</output>

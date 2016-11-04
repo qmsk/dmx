@@ -1,0 +1,18 @@
+.dmx-channel-control {
+  display: flex;
+  flex-direction: row;
+}
+
+label {
+  flex: 0 1 5em;
+}
+
+input.dmx {
+  flex: 1;
+}
+
+output.dmx {
+  flex: 0 1 3em;
+
+  text-align: right;
+}

@@ -18,14 +18,14 @@
     </tr>
     <tr *ngFor="let channel of head.Channels">
       <td>{{head.Config.Universe}}.{{channel.Address}}</td>
-      <th *ngIf="channel.Type.Control">Control {{channel.Type.Control}}</th>
-      <th *ngIf="channel.Type.Intensity">Intensity</th>
-      <th *ngIf="channel.Type.Color">Color {{channel.Type.Color}}</th>
-      <td>
-        <div class="dmx-channel">
-          <input class="dmx" type="range" min="0" max="255" [ngModel]="channel.DMX" (ngModelChange)="setHeadChannelDMX(head, channel, $event)">
-          <output class="dmx">{{channel.DMX}}</output>
-        </div>
+      <th>{{channel.typeClass()}}</th>
+      <td class="dmx-channel-control">
+        <label>{{channel.typeLabel()}}</label>
+        <input class="dmx" type="range" min="0" max="255"
+          [(ngModel)]="channel.DMX"
+          (ngModelChange)="setHeadChannelDMX(head, channel, $event)"
+        >
+        <output class="dmx">{{channel.DMX}}</output>
       </td>
     </tr>
   </tbody>

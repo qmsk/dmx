@@ -1,6 +1,6 @@
 import { Component, Input, HostBinding } from '@angular/core';
 
-import { Value } from './types';
+import { Value, DMX } from './types';
 
 @Component({
   moduleId: module.id,

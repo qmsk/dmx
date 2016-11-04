@@ -30,6 +30,29 @@ export class Channel {
   Address:  number;
   DMX:      DMX;
   Value:    Value;
+
+  typeClass(): string {
+    if (this.Type.Control) {
+      return "Control";
+    } else if (this.Type.Intensity) {
+      return "Intensity";
+    } else if (this.Type.Color) {
+      return "Color";
+    } else {
+      return "Unknown";
+    }
+  }
+  typeLabel(): string {
+    if (this.Type.Control) {
+      return this.Type.Control;
+    } else if (this.Type.Intensity) {
+      return "Intensity";
+    } else if (this.Type.Color) {
+      return this.Type.Color;
+    } else {
+      return "Unknown";
+    }
+  }
 }
 export class Head {
   ID:       string;
