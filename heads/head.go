@@ -86,8 +86,8 @@ func (head *Head) Parameters() HeadParameters {
 type APIHeadParameters struct {
 	head *Head
 
-	Intensity *APIHeadIntensity `json:"intensity,omitempty"`
-	Color     *APIHeadColor     `json:"color,omitempty"`
+	Intensity *APIHeadIntensity `json:",omitempty"`
+	Color     *APIHeadColor     `json:",omitempty"`
 }
 
 func (headParameters HeadParameters) makeAPI() APIHeadParameters {
