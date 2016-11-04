@@ -1,26 +1,3 @@
 :host {
-  display: flex;
-
-  width: 5em;
-  height: 5em;
-
-  margin: 0.5em;
-  padding: 0.5em;
-
-  background-color: #133337;
-  border: 0.25em solid #133337;
-  border-radius: 0.5em;
-  color: #eee;
-
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-}
-
-:host(.active) {
-  border: 0.25em solid #9f9;
-}
-
-:host(.program) {
-  border: 0.25em solid #f55;
+  color: #ccc;
 }

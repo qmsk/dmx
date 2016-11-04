@@ -1,1 +1,13 @@
-<span class="name">{{head.ID}}</span>
+<h2 *ngIf="head != null">{{head.ID}}</h2>
+
+<div *ngIf="head && head.Intensity">
+  <h3>Intensity</h3>
+  <dmx-control label="Intensity" [value]="head.Intensity.Intensity"></dmx-control>
+</div>
+
+<div *ngIf="head && head.Color">
+  <h3>Color</h3>
+  <dmx-control label="Red" [value]="head.Color.Red"></dmx-control>
+  <dmx-control label="Green" [value]="head.Color.Green"></dmx-control>
+  <dmx-control label="Blue" [value]="head.Color.Blue"></dmx-control>
+</div>

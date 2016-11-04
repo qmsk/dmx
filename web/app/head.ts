@@ -1,3 +1,5 @@
+import { DMX, Value } from './types';
+
 export interface ChannelType {
   Control?: string;
   Intensity?: boolean;
@@ -14,12 +16,20 @@ export interface HeadConfig {
   Universe: number;
   Address:  number;
 }
+export interface HeadIntensity {
+  Intensity:  Value;
+}
+export interface HeadColor {
+  Red:        Value;
+  Green:      Value;
+  Blue:       Value;
+}
 export class Channel {
   ID:       number;
   Type:     ChannelType;
   Address:  number;
-  DMX:      number;
-  Value:    number;
+  DMX:      DMX;
+  Value:    Value;
 }
 export class Head {
   ID:       string;
@@ -27,8 +37,8 @@ export class Head {
   Config:   HeadConfig;
   Channels: Channel[];
 
-  // state
-  active:   boolean;
+  Intensity?: HeadIntensity;
+  Color?:     HeadColor;
 
   cmpHead(other) : number {
     if (this.ID < other.ID)

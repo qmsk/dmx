@@ -11,8 +11,4 @@ import { Head } from './head';
 })
 export class HeadComponent {
   @Input() head: Head;
-
-  @HostBinding('class.active') get active() {
-    return this.head ? this.head.active : false;
-  }
 }

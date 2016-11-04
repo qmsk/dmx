@@ -1,0 +1,22 @@
+:host {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+
+  margin: 1em;
+}
+
+label {
+  flex: 0 1 5em;
+
+  font-weight: bold;
+}
+
+input {
+  flex: 1;
+}
+
+output {
+  flex: 0 1 3em;
+  text-align: right;
+}

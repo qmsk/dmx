@@ -4,10 +4,12 @@ import { HttpModule } from '@angular/http';
 import { FormsModule }   from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 
+import { HeadService } from './head.service';
 
 import { AppComponent } from './app.component'
 import { DashboardComponent } from './dashboard.component'
 import { ChannelsComponent } from './channels.component'
+import { ControlComponent } from './control.component'
 import { HeadsComponent } from './heads.component'
 import { HeadComponent } from './head.component'
 
@@ -27,8 +29,12 @@ const routes: Routes = [
     AppComponent,
     DashboardComponent,
     ChannelsComponent,
+    ControlComponent,
     HeadsComponent,
     HeadComponent,
+  ],
+  providers: [
+    HeadService,
   ],
   bootstrap: [ AppComponent ],
 })

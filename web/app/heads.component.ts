@@ -8,9 +8,6 @@ import { HeadService } from './head.service';
   selector: 'dmx-heads',
   templateUrl: 'heads.component.html',
   styleUrls: [ 'heads.component.css' ],
-  providers: [
-    HeadService,
-  ],
 })
 export class HeadsComponent implements OnInit {
   heads: Head[];
@@ -23,10 +20,5 @@ export class HeadsComponent implements OnInit {
         heads => this.heads = heads.sort((a: Head, b: Head) => a.cmpHead(b)),
       )
     ;
-  }
-
-  select(head :Head) {
-    head.active = !head.active;
-    console.log("Toggle head active", head)
   }
 }

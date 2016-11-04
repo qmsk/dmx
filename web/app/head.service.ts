@@ -8,6 +8,16 @@ import { Head, Channel } from './head';
 
 @Injectable()
 export class HeadService {
+  public active: Head = null;
+
+  select(head: Head) {
+    console.log("Select head", head);
+    this.active = head;
+  }
+  selected(head: Head): boolean {
+    return this.active == head;
+  }
+
   constructor(private http: Http) {
 
   }

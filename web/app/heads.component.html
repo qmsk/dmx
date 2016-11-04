@@ -1,4 +1,7 @@
-<dmx-head
-  *ngFor="let head of heads" [head]="head"
-  (click)="select(head)"
-></dmx-head>
+<button class="dmx-head"
+  *ngFor="let head of heads"
+  (click)="headService.select(head)"
+  [class.selected]="headService.selected(head)"
+>
+  <span class="ID">{{head.ID}}</span>
+</button>

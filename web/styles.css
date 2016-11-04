@@ -25,27 +25,6 @@ header {
   color: #ccc;
 }
 
-.view {
-  flex: 1;
-  padding: 1em;
-
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
-}
-
-div.view.centered {
-  justify-content: center;
-  align-items: center;
-}
-
-div.spinner {
-  width: 10%;
-  height: 10%;
-  background-color: #133337;
-}
-
 footer {
   padding: 0.5em;
 
@@ -64,6 +43,70 @@ nav a {
 nav a.active {
   background-color: #aaa;
   color: #133337;
+}
+
+/* View */
+.view {
+  flex: 1;
+  padding: 1em;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.view.centered {
+  justify-content: center;
+  align-items: center;
+}
+
+.view.split {
+  padding: 0;
+
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+div.spinner {
+  width: 10%;
+  height: 10%;
+  background-color: #133337;
+}
+
+.view.split .main {
+  flex: 1;
+
+  padding: 1em;
+}
+
+.view.split .controls {
+  flex: 0 30%;
+
+  align-self: stretch;
+}
+
+.controls {
+  padding: 0em;
+
+  background-color: #444;
+}
+
+.controls h2 {
+  background-color: #aaa;
+  color: #111;
+
+  margin: 0;
+  padding: 0.25em;
+}
+
+.controls h3 {
+  background-color: #111;
+  color: #aaa;
+  
+  margin: 0;
+  padding: 0.25em;
 }
 
 /* Elements */
@@ -86,20 +129,4 @@ th {
 }
 td {
   background-color: #888;
-}
-
-/* Forms */
-div.dmx-channel {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-
-input.dmx {
-  flex: 1;
-}
-
-output.dmx {
-  width: 3em;
-  text-align: right;
 }
