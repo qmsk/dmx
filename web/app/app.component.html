@@ -1,9 +1,10 @@
 <header>
-  {{title}}
+  <nav>
+    <a routerLink="/">{{title}}</a>
+    <a routerLink="/heads" routerLinkActive="active">Heads</a>
+  </nav>
 </header>
-<dmx-heads class="view">
-  
-</dmx-heads>
+<router-outlet></router-outlet>
 <footer>
   Loaded
 </footer>

@@ -7,6 +7,7 @@ import { HeadService } from './head.service';
 @Component({
   moduleId: module.id,
   selector: 'dmx-heads',
+  host: { class: 'view' },
   templateUrl: 'heads.component.html',
   providers: [
     HeadService,
