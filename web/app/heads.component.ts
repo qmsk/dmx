@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 import { Head } from './head';
 import { HeadService } from './head.service';
@@ -9,16 +9,6 @@ import { HeadService } from './head.service';
   templateUrl: 'heads.component.html',
   styleUrls: [ 'heads.component.css' ],
 })
-export class HeadsComponent implements OnInit {
-  heads: Head[];
-
-  constructor (private headService: HeadService) { }
-
-  ngOnInit(): void {
-    this.headService.list()
-      .subscribe(
-        heads => this.heads = heads.sort((a: Head, b: Head) => a.cmpHead(b)),
-      )
-    ;
-  }
+export class HeadsComponent {
+  constructor (private state: HeadService) { }
 }

@@ -16,8 +16,20 @@ export interface HeadConfig {
   Universe: number;
   Address:  number;
 }
-export interface HeadIntensity {
-  Intensity:  Value;
+export class HeadIntensity {
+  private post: Object = { };
+  private intensity: Value;
+
+  constructor(data :Object) {
+    this.intensity = data['Intensity'];
+  }
+
+  get Intensity(): Value {
+    return this.intensity;
+  }
+  set Intensity(value: Value) {
+    this.post["Intensity"] = value;
+  }
 }
 export interface HeadColor {
   Red:        Value;

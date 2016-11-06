@@ -1,7 +1,7 @@
 <button class="dmx-head"
-  *ngFor="let head of heads"
-  (click)="headService.select(head)"
-  [class.selected]="headService.selected(head)"
+  *ngFor="let head of state.heads"
+  (click)="state.select(head)"
+  [class.selected]="state.selected(head)"
 >
   <span class="ID">{{head.ID}}</span>
 </button>

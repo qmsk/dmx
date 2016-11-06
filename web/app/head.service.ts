@@ -4,10 +4,11 @@ import { Http, Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/map';
 
-import { Head, Channel } from './head';
+import { Head, Channel, HeadIntensity, HeadColor } from './head';
 
 @Injectable()
 export class HeadService {
+  public heads: Head[] = [];
   public active: Head = null;
 
   select(head: Head) {
@@ -33,18 +34,27 @@ export class HeadService {
     ;
   }
 
-  private decodeHead(headData:Object): Head {
+  private decodeHeads(headsData: Object[]): Head[] {
+    let heads = headsData.map(headData => this.decodeHead(headData));
+    heads.sort((a: Head, b: Head) => a.cmpHead(b));
+    return heads;
+  }
+  private decodeHead(headData: Object): Head {
     return Object.assign(new Head, headData, {
       Channels: headData['Channels'].map(channelData => this.decodeChannel(channelData)),
+      Intensity: this.decodeHeadIntensity(headData['Intensity']),
     });
   }
-  private decodeChannel(channelData:Object): Channel {
+  private decodeChannel(channelData: Object): Channel {
     return Object.assign(new Channel, channelData);
   }
+  private decodeHeadIntensity(intensityData: Object): HeadIntensity {
+    return intensityData ? new HeadIntensity(intensityData) : null;
+  }
 
-  list(): Observable<Head[]> {
+  load(): Observable<Head[]> {
     return this.http.get('/api/heads/')
-      .map(response => response.json().map(headData => this.decodeHead(headData)))
+      .map(response => this.heads = this.decodeHeads(response.json()))
     ;
   }
 

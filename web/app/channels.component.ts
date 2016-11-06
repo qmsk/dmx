@@ -1,8 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 import { Head, Channel } from './head';
 import { HeadService } from './head.service';
-
 
 @Component({
   moduleId: module.id,
@@ -10,21 +9,13 @@ import { HeadService } from './head.service';
   host: { class: 'view' },
   templateUrl: 'channels.component.html',
   styleUrls: [ 'channels.component.css' ],
-  providers: [
-    HeadService,
-  ],
 })
-export class ChannelsComponent implements OnInit {
-  heads: Head[];
-
+export class ChannelsComponent {
   constructor (private headService: HeadService) { }
 
-  ngOnInit(): void {
-    this.headService.list()
-      .subscribe(
-        heads => this.heads = heads.sort((a: Head, b: Head) => a.cmpAddress(b)),
-      )
-    ;
+  // XXX: bad
+  sortedHeads() {
+    return this.headService.heads.sort((a: Head, b: Head) => a.cmpAddress(b));
   }
 
   setHeadChannelDMX(head:Head, channel:Channel, value:string) {
