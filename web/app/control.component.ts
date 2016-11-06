@@ -15,10 +15,10 @@ export class ControlComponent {
   @Output() valueChange = new EventEmitter<Value>();
 
   update(eventValue :string) {
-    this.value = parseFloat(eventValue);
+    let value = parseFloat(eventValue);
 
-    console.log(`Update control ${this.label}`, this.value);
-    
-    this.valueChange.emit(this.value);
+    console.log(`Update control ${this.label}`, value);
+
+    this.valueChange.emit(value);
   }
 }

@@ -1,5 +1,12 @@
 import { DMX, Value } from './types';
 
+export type ValueStream = { [key: string]: ValueStream | Value };
+export type HeadStream = { head: Head, valueStream: ValueStream };
+
+export interface StreamFunc {
+  (stream: ValueStream);
+}
+
 export interface ChannelType {
   Control?: string;
   Intensity?: boolean;
@@ -16,11 +23,11 @@ export interface HeadConfig {
   Universe: number;
   Address:  number;
 }
+
 export class HeadIntensity {
-  private post: Object = { };
   private intensity: Value;
 
-  constructor(data :Object) {
+  constructor(private stream: StreamFunc, data: Object) {
     this.intensity = data['Intensity'];
   }
 
@@ -28,14 +35,48 @@ export class HeadIntensity {
     return this.intensity;
   }
   set Intensity(value: Value) {
-    this.post["Intensity"] = value;
+    this.stream({"Intensity": { "Intensity": value } });
   }
 }
-export interface HeadColor {
-  Red:        Value;
-  Green:      Value;
-  Blue:       Value;
+
+export class HeadColor {
+  red:        Value;
+  green:      Value;
+  blue:       Value;
+
+  constructor(private stream: StreamFunc, data: Object) {
+    this.red = data['Red'];
+    this.green = data['Green'];
+    this.blue = data['Blue'];
+  }
+
+  get Red(): Value { return this.red; }
+  get Green(): Value { return this.green; }
+  get Blue(): Value { return this.blue; }
+
+  set Red(value: Value) {
+    this.stream({"Color": {
+      "Red": value,
+      "Green": this.green,
+      "Blue": this.blue,
+    }});
+  }
+  set Green(value: Value) {
+    this.stream({"Color": {
+      "Red": this.red,
+      "Green": value,
+      "Blue": this.blue,
+    }});
+  }
+  set Blue(value: Value) {
+    this.stream({"Color": {
+      "Red": this.red,
+      "Green": this.green,
+      "Blue": value,
+    }});
+  }
 }
+
 export class Channel {
   ID:       number;
   Type:     ChannelType;
