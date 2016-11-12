@@ -1,10 +1,10 @@
 [heads.test-led]
 Type        = "stairville/ledpar56-5ch"
-Universe    = 0
+Universe    = 1
 Address     = 1
 Name        = "Test LED"
 
 [heads.test-dimmer]
 Type        = "generic/dimmer-1ch"
-Universe    = 0
+Universe    = 1
 Address     = 250
