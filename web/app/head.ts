@@ -3,11 +3,19 @@ import * as _ from 'lodash';
 import { DMX, Value } from './types';
 import { Observer } from 'rxjs/Observer';
 
-export type ValueStream = { [key: string]: ValueStream | Value };
-export type HeadStream = { head: Head, valueStream: ValueStream };
+export interface ChannelPost {
+  DMX?: DMX;
+  Value?: Value;
+}
+export interface HeadPost {
+  Channels?:   Map<string, ChannelPost>;
+  Intensity?: APIHeadIntensity;
+  Color?:     APIHeadColor;
+};
+export type Post = { head: Head, headPost: HeadPost };
 
-export interface PostFunc {
-  (stream: ValueStream);
+interface HeadPostFunc {
+  (post: HeadPost);
 }
 
 export interface ChannelType {
@@ -27,34 +35,44 @@ export interface HeadConfig {
   Address:  number;
 }
 
+export interface APIHeadIntensity {
+  Intensity: Value;
+}
 export class HeadIntensity {
   private intensity: Value;
 
-  constructor(private post: PostFunc, data: Object) {
-    this.intensity = data['Intensity'];
+  constructor(private post: HeadPostFunc, api: APIHeadIntensity) {
+    this.load(api)
+  }
+  load(api: APIHeadIntensity) {
+    this.intensity = api.Intensity;
   }
 
   get Intensity(): Value {
     return this.intensity;
   }
   set Intensity(value: Value) {
-    this.post({"Intensity": { "Intensity": value } });
+    this.post({Intensity: { Intensity: value } });
   }
 }
 
+export interface APIHeadColor {
+  Red:    Value;
+  Green:  Value;
+  Blue:   Value;
+}
 export class HeadColor {
   red:        Value;
   green:      Value;
   blue:       Value;
 
-  constructor(private post: PostFunc, data: Object) {
-    this.load(data);
+  constructor(private post: HeadPostFunc, api: APIHeadColor) {
+    this.load(api)
   }
-
-  load(data: Object) {
-    this.red = data['Red'];
-    this.green = data['Green'];
-    this.blue = data['Blue'];
+  load(api: APIHeadColor) {
+    this.red = api.Red;
+    this.green = api.Green;
+    this.blue = api.Blue;
   }
 
   get Red(): Value { return this.red; }
@@ -62,28 +80,35 @@ export class HeadColor {
   get Blue(): Value { return this.blue; }
 
   set Red(value: Value) {
-    this.post({"Color": {
-      "Red": value,
-      "Green": this.green,
-      "Blue": this.blue,
+    this.post({Color: {
+      Red: value,
+      Green: this.green,
+      Blue: this.blue,
     }});
   }
   set Green(value: Value) {
-    this.post({"Color": {
-      "Red": this.red,
-      "Green": value,
-      "Blue": this.blue,
+    this.post({Color: {
+      Red: this.red,
+      Green: value,
+      Blue: this.blue,
     }});
   }
   set Blue(value: Value) {
-    this.post({"Color": {
-      "Red": this.red,
-      "Green": this.green,
-      "Blue": value,
+    this.post({Color: {
+      Red: this.red,
+      Green: this.green,
+      Blue: value,
     }});
   }
 }
 
+export interface APIChannel {
+  ID:       string;
+  Type:     ChannelType;
+  Address:  number;
+  DMX:      DMX;
+  Value:    Value;
+}
 export class Channel {
   ID:       string;
   Type:     ChannelType;
@@ -91,30 +116,28 @@ export class Channel {
   dmx:      DMX;
   value:    Value;
 
-  constructor(private post: PostFunc, data: Object) {
-    this.ID = data['ID'];
-    this.Type = data['Type'];
-    this.Address = data['Address'];
+  constructor(private post: HeadPostFunc, api: APIChannel) {
+    this.ID = api.ID;
+    this.Type = api.Type;
+    this.Address = api.Address;
 
-    this.load(data);
+    this.load(api);
   }
-  load(data: Object) {
-    this.dmx = data['DMX'];
-    this.value = data['Value'];
+  load(api: APIChannel) {
+    console.log("\tChannel.load", this.ID, api);
+
+    this.dmx = api.DMX;
+    this.value = api.Value;
   }
 
   get DMX(): DMX { return this.dmx; }
   set DMX(value: DMX) {
-    let channels = {};
-    channels[this.ID] = { "DMX": value };
-    this.post({"Channels": channels});
+    this.post({Channels: {[this.ID]: {DMX: value}}});
   }
 
   get Value(): Value { return this.value; }
   set Value(value: Value) {
-    let channels = {};
-    channels[this.ID] = { "Value": value },
-    this.post({"Channels": channels});
+    this.post({Channels: {[this.ID]: {Value: value}}});
   }
 
   typeClass(): string {
@@ -140,40 +163,53 @@ export class Channel {
     }
   }
 }
+
+export interface APIHead {
+  ID:       string;
+  Type:     HeadType;
+  Config:   HeadConfig;
+
+  Channels:   {[id: string]: APIChannel};
+  Intensity?: APIHeadIntensity;
+  Color?:     APIHeadColor;
+}
 export class Head {
-  private post: PostFunc;
+  private post: HeadPostFunc;
 
   ID:       string;
   Type:     HeadType;
   Config:   HeadConfig;
 
-  channels = new Map<string, Channel>();
+  channels:   {[id: string]: Channel};
   Intensity?: HeadIntensity;
   Color?:     HeadColor;
 
-  constructor(postObserver: Observer<HeadStream>, data: Object) {
-    this.ID = data['ID'];
-    this.Type = data['Type'];
-    this.Config = data['Config'];
+  constructor(postObserver: Observer<Post>, api: APIHead) {
+    this.ID = api.ID;
+    this.Type = api.Type;
+    this.Config = api.Config;
 
-    this.post = (valueStream: ValueStream) => postObserver.next({head: this, valueStream: valueStream});
-    this.load(data);
+    this.post = (headPost: HeadPost) => postObserver.next({head: this, headPost: headPost});
+    this.channels = {};
+    this.load(api);
   }
-  load(data: Object) {
-    let channelsData = data['Channels']; if (channelsData) {
-      for (let channelID in channelsData) {
+  load(api: APIHead) {
+    console.log("Head.load", this.ID, api);
+
+    if (api.Channels) {
+      for (let channelID in api.Channels) {
         let channel = this.channels[channelID]; if (channel) {
-          this.channels[channelID].load(channelsData[channelID]);
+          channel.load(api.Channels[channelID]);
         } else {
-          this.channels[channelID] = new Channel(this.post, channelsData[channelID]);
+          this.channels[channelID] = new Channel(this.post, api.Channels[channelID]);
         }
       }
     }
-    let intensityData = data['Intensity']; if (intensityData) {
-      this.Intensity = new HeadIntensity(this.post, intensityData);
+    if (api.Intensity) {
+      this.Intensity = new HeadIntensity(this.post, api.Intensity);
     }
-    let colorData = data['Color']; if (colorData) {
-      this.Color = new HeadColor(this.post, colorData);
+    if (api.Color) {
+      this.Color = new HeadColor(this.post, api.Color);
     }
   }
 
@@ -183,4 +219,8 @@ export class Head {
 
     return _.sortBy(channels, channel => channel.Address);
   }
+}
+
+export interface APIEvents {
+  Heads: Map<string, APIHead>;
 }

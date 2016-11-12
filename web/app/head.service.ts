@@ -1,28 +1,37 @@
 import { Injectable } from '@angular/core';
 import { Http, Headers, RequestOptions } from '@angular/http';
 
+import { WebSocketService, WebSocketError } from 'websocket';
+
 import * as _ from 'lodash';
 import { Observable } from 'rxjs/Observable';
+import { Observer } from 'rxjs/Observer';
+import { Subscription } from 'rxjs/Subscription';
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/map';
 
-import { Head, ValueStream, HeadStream, PostFunc, Channel, HeadIntensity, HeadColor } from './head';
+import { Head, Post, APIHead, APIEvents } from './head';
 
 @Injectable()
 export class HeadService {
-  postSubject = new Subject<HeadStream>();
-  heads: Head[];
+  private webSocket: Subscription;
+  postSubject = new Subject<Post>();
+  heads: Map<string, Head>;
   active: Head = null;
 
-  load(headsData: Object[]) {
-    this.heads = headsData.map(headData => new Head(this.postSubject, headData));
-  }
+  list(sort?: (Head) => any) {
+    let heads = Object.keys(this.heads).map(key => this.heads[key]);
 
+    if (sort)
+      heads = _.sortBy(heads, sort);
+
+    return heads;
+  }
   byAddress(): Head[] {
-    return _.sortBy(this.heads, head => [head.Config.Universe, head.Config.Address]);
+    return this.list(head => [head.Config.Universe, head.Config.Address]);
   }
   byID(): Head[] {
-    return _.sortBy(this.heads, head => head.ID);
+    return this.list(head => head.ID);
   }
 
   select(head: Head) {
@@ -33,10 +42,12 @@ export class HeadService {
     return this.active == head;
   }
 
-  constructor(private http: Http) {
-    this.get('/api/heads/').subscribe(
-      headsData => {
-        this.load(headsData);
+  constructor(private http: Http, webSocketService: WebSocketService) {
+    this.heads = {};
+
+    this.get('/api/heads').subscribe(
+      headsMap => {
+        this.load(headsMap);
 
         console.log("Loaded heads", this.heads);
       }
@@ -44,20 +55,40 @@ export class HeadService {
 
     this.postSubject.subscribe(
       headStream => {
-        console.log(`Post head=${headStream.head.ID}`, headStream.valueStream);
+        console.log(`POST head ${headStream.head.ID}...`, headStream.headPost);
 
-        this.post(`/api/heads/${headStream.head.ID}`, headStream.valueStream).subscribe(
-          headParams => {
-            console.log(`Load head=${headStream.head.ID}`, headParams);
-
-            headStream.head.load(headParams);
+        this.post(`/api/heads/${headStream.head.ID}`, headStream.headPost).subscribe(
+          (headParams: APIHead) => {
+            console.log(`POST head ${headStream.head.ID}: OK`, headParams);
           }
         );
       }
     );
+
+    this.webSocket = webSocketService.connect<APIEvents>('/events').subscribe(
+      (apiEvents: APIEvents) => {
+        console.log("WebSocket APIEvents", apiEvents);
+
+        this.load(apiEvents.Heads);
+      },
+      (error: WebSocketError) => {
+        console.log("WebSocket Error", error);
+      },
+      () => {
+        console.log("WebSocket Close");
+      }
+    );
+  }
+  private load(headsMap: Map<string, APIHead>) {
+    for (let id in headsMap) {
+      if (this.heads[id])
+        this.heads[id].load(headsMap[id]);
+      else
+        this.heads[id] = new Head(this.postSubject, headsMap[id]);
+    }
   }
 
-  get(url): any {
+  private get(url): any {
     return this.http.get(url)
       .map(response => response.json())
     ;

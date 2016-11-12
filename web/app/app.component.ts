@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 
+import { WebSocketService } from 'websocket';
+
 import { HeadService } from './head.service';
 import { Head } from './head';
 
@@ -9,6 +11,7 @@ import { Head } from './head';
   templateUrl: 'app.component.html',
   styleUrls: [ 'app.component.css' ],
   providers: [
+    WebSocketService,
     HeadService,
   ],
 })
