@@ -13,9 +13,8 @@ import { HeadService } from './head.service';
 export class ChannelsComponent {
   constructor (private headService: HeadService) { }
 
-  // XXX: bad
-  sortedHeads() {
-    return this.headService.heads.sort((a: Head, b: Head) => a.cmpAddress(b));
+  heads() {
+    return this.headService.byAddress();
   }
 
   setHeadChannelDMX(head: Head, channel: Channel, value: string) {

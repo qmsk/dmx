@@ -1,4 +1,7 @@
+import * as _ from 'lodash';
+
 import { DMX, Value } from './types';
+import { Observer } from 'rxjs/Observer';
 
 export type ValueStream = { [key: string]: ValueStream | Value };
 export type HeadStream = { head: Head, valueStream: ValueStream };
@@ -138,6 +141,8 @@ export class Channel {
   }
 }
 export class Head {
+  private post: PostFunc;
+
   ID:       string;
   Type:     HeadType;
   Config:   HeadConfig;
@@ -146,33 +151,36 @@ export class Head {
   Intensity?: HeadIntensity;
   Color?:     HeadColor;
 
-  constructor(data: Object) {
+  constructor(postObserver: Observer<HeadStream>, data: Object) {
     this.ID = data['ID'];
     this.Type = data['Type'];
     this.Config = data['Config'];
+
+    this.post = (valueStream: ValueStream) => postObserver.next({head: this, valueStream: valueStream});
+    this.load(data);
+  }
+  load(data: Object) {
+    let channelsData = data['Channels']; if (channelsData) {
+      for (let channelID in channelsData) {
+        let channel = this.channels[channelID]; if (channel) {
+          this.channels[channelID].load(channelsData[channelID]);
+        } else {
+          this.channels[channelID] = new Channel(this.post, channelsData[channelID]);
+        }
+      }
+    }
+    let intensityData = data['Intensity']; if (intensityData) {
+      this.Intensity = new HeadIntensity(this.post, intensityData);
+    }
+    let colorData = data['Color']; if (colorData) {
+      this.Color = new HeadColor(this.post, colorData);
+    }
   }
 
   /* Channel objects */
   get Channels(): Channel[] {
-    return Object.keys(this.channels).map(key => this.channels[key]);
-  }
+    let channels = Object.keys(this.channels).map(key => this.channels[key]);
 
-  cmpHead(other): number {
-    if (this.ID < other.ID)
-      return -1;
-    else if (this.ID > other.ID)
-      return +1;
-    else
-      return 0;
-  }
-
-  cmpAddress(other): number {
-    if (this.Config.Universe != other.Config.Universe)
-      return this.Config.Universe - other.Config.Universe;
-
-    if (this.Config.Address != other.Config.Address)
-      return this.Config.Address - other.Config.Address;
-
-    return 0;
+    return _.sortBy(channels, channel => channel.Address);
   }
 }

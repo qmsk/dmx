@@ -10,5 +10,5 @@ import { HeadService } from './head.service';
   styleUrls: [ 'heads.component.css' ],
 })
 export class HeadsComponent {
-  constructor (private state: HeadService) { }
+  constructor (private service: HeadService) { }
 }

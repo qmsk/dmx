@@ -8,7 +8,7 @@
       <th>DMX</th>
     </tr>
   </thead>
-  <tbody *ngFor="let head of sortedHeads()">
+  <tbody *ngFor="let head of heads()">
     <tr>
       <td></td>
       <td [attr.rowspan]="1 + head.Channels.length">{{head.Type.Vendor}} {{head.Type.Model}} ({{head.Type.Mode}})</td>
