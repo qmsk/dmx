@@ -5,19 +5,8 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/SpComb/qmsk-dmx"
-	"github.com/SpComb/qmsk-web"
+	"github.com/qmsk/go-web"
 )
-
-// A single DMX receiver using multiple consecutive DMX channels from a base address within a single universe
-type Head struct {
-	id       string
-	config   HeadConfig
-	headType *HeadType
-	output   *Output
-
-	channels   HeadChannels
-	parameters HeadParameters
-}
 
 type HeadChannels map[ChannelType]*Channel
 
@@ -31,17 +20,53 @@ func (headChannels HeadChannels) GetID(id string) *Channel {
 	return nil
 }
 
+func (headChannels HeadChannels) makeAPI() APIChannels {
+	var apiChannels = make(APIChannels)
+
+	for channelType, channel := range headChannels {
+		apiChannels[channelType.String()] = channel.makeAPI()
+	}
+
+	return apiChannels
+}
+
+func (headChannels HeadChannels) GetREST() (web.Resource, error) {
+	log.Debugln("heads:HeadChannels.GetREST")
+
+	return headChannels.makeAPI(), nil
+}
+
+func (headChannels HeadChannels) Index(name string) (web.Resource, error) {
+	if channel := headChannels.GetID(name); channel == nil {
+		return nil, nil
+	} else {
+		return web.GetPostResource(channel), nil
+	}
+}
+
 type HeadParameters struct {
 	Intensity *HeadIntensity `json:"intensity,omitempty"`
 	Color     *HeadColor     `json:"color,omitempty"`
 }
 
-func (head *Head) Name() string {
-	return head.config.Name
+// A single DMX receiver using multiple consecutive DMX channels from a base address within a single universe
+type Head struct {
+	id       string
+	config   HeadConfig
+	headType *HeadType
+	output   *Output
+	events   *Events
+
+	channels   HeadChannels
+	parameters HeadParameters
 }
 
 func (head *Head) String() string {
-	return fmt.Sprintf("%v@%v[%d]", head.id, head.output, head.config.Address)
+	return fmt.Sprintf("%v", head.id)
+}
+
+func (head *Head) Name() string {
+	return head.config.Name
 }
 
 func (head *Head) init() {
@@ -92,36 +117,15 @@ func (head *Head) Parameters() HeadParameters {
 	return head.parameters
 }
 
-// web API
-type APIHeadParameters struct {
-	Intensity *APIHeadIntensity `json:",omitempty"`
-	Color     *APIHeadColor     `json:",omitempty"`
-}
-
+// Web API GET
 type APIHead struct {
 	ID     string
 	Config HeadConfig
 	Type   *HeadType
 
-	Channels APIChannels `json:",omitempty"`
-	APIHeadParameters
-}
-
-type APIHeadPost struct {
-	head *Head
-
-	Channels map[string]APIChannelParams
-	APIHeadParameters
-}
-
-func (head *Head) makeAPIChannels() APIChannels {
-	var apiChannels = make(APIChannels)
-
-	for _, channelType := range head.headType.Channels {
-		apiChannels[channelType.String()] = head.getChannel(channelType).makeAPI()
-	}
-
-	return apiChannels
+	Channels  map[string]APIChannel `json:",omitempty"`
+	Intensity *APIHeadIntensity     `json:",omitempty"`
+	Color     *APIHeadColor         `json:",omitempty"`
 }
 
 func (head *Head) makeAPI() APIHead {
@@ -132,11 +136,9 @@ func (head *Head) makeAPI() APIHead {
 		Config: head.config,
 		Type:   head.headType,
 
-		Channels: head.makeAPIChannels(),
-		APIHeadParameters: APIHeadParameters{
-			Intensity: head.parameters.Intensity.makeAPI(),
-			Color:     head.parameters.Color.makeAPI(),
-		},
+		Channels:  head.channels.makeAPI(),
+		Intensity: head.parameters.Intensity.makeAPI(),
+		Color:     head.parameters.Color.makeAPI(),
 	}
 }
 
@@ -144,12 +146,21 @@ func (head *Head) GetREST() (web.Resource, error) {
 	return head.makeAPI(), nil
 }
 
-func (head *Head) PostREST() (web.Resource, error) {
-	// parameters only, not configuration
-	return &APIHeadPost{head: head}, nil
+// Web API POST
+type APIHeadParams struct {
+	head *Head
+
+	Channels  map[string]APIChannelParams `json:",omitempty"`
+	Intensity *APIHeadIntensity           `json:",omitempty"`
+	Color     *APIHeadColor               `json:",omitempty"`
 }
 
-func (post *APIHeadPost) Apply() error {
+func (head *Head) PostREST() (web.Resource, error) {
+	// parameters only, not configuration
+	return &APIHeadParams{head: head}, nil
+}
+
+func (post *APIHeadParams) Apply() error {
 	log.Debugln("heads:Head.Apply", post.head,
 		"channels", post.Channels,
 		"intensity", post.Intensity,
@@ -202,26 +213,9 @@ func (head *Head) Index(name string) (web.Resource, error) {
 	}
 }
 
-func (headChannels HeadChannels) makeAPI() APIChannels {
-	var apiChannels = make(APIChannels)
+// Web API Events
+func (head *Head) Apply() error {
+	head.events.updateHead(head.String(), head.makeAPI())
 
-	for channelType, channel := range headChannels {
-		apiChannels[channelType.String()] = channel.makeAPI()
-	}
-
-	return apiChannels
-}
-
-func (headChannels HeadChannels) GetREST() (web.Resource, error) {
-	log.Debugln("heads:HeadChannels.GetREST")
-
-	return headChannels.makeAPI(), nil
-}
-
-func (headChannels HeadChannels) Index(name string) (web.Resource, error) {
-	if channel := headChannels.GetID(name); channel == nil {
-		return nil, nil
-	} else {
-		return web.GetPostResource(channel), nil
-	}
+	return nil
 }

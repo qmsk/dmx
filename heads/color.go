@@ -2,7 +2,7 @@ package heads
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"github.com/SpComb/qmsk-web"
+	"github.com/qmsk/go-web"
 )
 
 type ColorRGB struct {

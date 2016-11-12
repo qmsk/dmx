@@ -6,7 +6,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/SpComb/qmsk-dmx"
 	"github.com/SpComb/qmsk-dmx/artnet"
-	"github.com/SpComb/qmsk-web"
+	"github.com/qmsk/go-web"
 )
 
 type OutputConfig struct {

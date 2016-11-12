@@ -2,7 +2,7 @@ package heads
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"github.com/SpComb/qmsk-web"
+	"github.com/qmsk/go-web"
 )
 
 type Intensity Value // 0.0 .. 1.0

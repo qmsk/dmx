@@ -2,7 +2,7 @@ package heads
 
 import (
 	"github.com/SpComb/qmsk-dmx"
-	"github.com/SpComb/qmsk-web"
+	"github.com/qmsk/go-web"
 )
 
 type Channel struct {

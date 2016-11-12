@@ -5,7 +5,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/SpComb/qmsk-dmx"
-	"github.com/SpComb/qmsk-web"
+	"github.com/qmsk/go-web"
 )
 
 type Options struct {
@@ -17,7 +17,10 @@ func (options Options) Heads(config *Config) (*Heads, error) {
 		log:     log.WithField("package", "heads"),
 		outputs: make(outputMap),
 		heads:   make(headMap),
+		events:  new(Events),
 	}
+
+	heads.events.init()
 
 	for headID, headConfig := range config.Heads {
 		if headType, exists := config.HeadTypes[headConfig.Type]; !exists {
@@ -37,6 +40,7 @@ type Heads struct {
 	log     *log.Entry
 	outputs outputMap
 	heads   headMap
+	events  *Events
 }
 
 func (heads *Heads) output(universe Universe) *Output {
@@ -66,6 +70,7 @@ func (heads *Heads) addHead(id string, config HeadConfig, headType *HeadType) *H
 		config:   config,
 		headType: headType,
 		output:   output,
+		events:   heads.events,
 	}
 
 	head.init()
@@ -81,6 +86,7 @@ func (heads *Heads) Each(fn func(head *Head)) {
 	}
 }
 
+// refresh outputs
 func (heads *Heads) Refresh() error {
 	var refreshErr error
 

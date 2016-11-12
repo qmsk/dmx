@@ -7,9 +7,9 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/SpComb/qmsk-dmx/artnet"
 	"github.com/SpComb/qmsk-dmx/heads"
-	"github.com/SpComb/qmsk-web"
 	flags "github.com/jessevdk/go-flags"
 	colorful "github.com/lucasb-eyer/go-colorful"
+	"github.com/qmsk/go-web"
 )
 
 var options struct {
@@ -153,7 +153,8 @@ func main() {
 
 	// web
 	options.Web.Server(
-		web.RoutePrefix("/api/", headsHeads.WebAPI()),
+		options.Web.RouteEvents("/events", headsHeads.WebEvents()),
+		options.Web.RouteAPI("/api/", headsHeads),
 		options.Web.RouteStatic("/"),
 	)
 }

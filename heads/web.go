@@ -2,12 +2,8 @@ package heads
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"github.com/SpComb/qmsk-web"
+	"github.com/qmsk/go-web"
 )
-
-func (heads *Heads) WebAPI() web.API {
-	return web.MakeAPI(heads)
-}
 
 type API struct {
 	Outputs []APIOutput        `json:"outputs"`
@@ -40,6 +36,10 @@ func (heads *Heads) GetREST() (web.Resource, error) {
 func (heads *Heads) Apply() error {
 	log.Debug("heads:Heads.Apply")
 
+	// API Events
+	heads.events.flush()
+
+	// DMX output
 	if err := heads.Refresh(); err != nil {
 		log.Warnf("heads:Heads.Refresh: %v", err)
 
@@ -47,4 +47,39 @@ func (heads *Heads) Apply() error {
 	}
 
 	return nil
+}
+
+// API Events
+func (heads *Heads) WebEvents() chan web.Event {
+	heads.events.eventChan = make(chan web.Event)
+
+	return heads.events.eventChan
+}
+
+type APIEvents struct {
+	Heads map[string]APIHead
+}
+
+type Events struct {
+	eventChan chan web.Event
+	pending   APIEvents
+}
+
+func (events *Events) init() {
+	events.pending = APIEvents{
+		Heads: make(map[string]APIHead),
+	}
+}
+
+// Add pending event for Head
+// XXX: unsafe
+func (events *Events) updateHead(id string, apiHead APIHead) {
+	events.pending.Heads[id] = apiHead
+}
+
+// Write out and clear pending events
+// XXX: unsafe
+func (events *Events) flush() {
+	events.eventChan <- events.pending
+	events.init()
 }
