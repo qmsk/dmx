@@ -5,7 +5,7 @@ import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/map';
 
-import { Head, ValueStream, HeadStream, StreamFunc, Channel, HeadIntensity, HeadColor } from './head';
+import { Head, ValueStream, HeadStream, PostFunc, Channel, HeadIntensity, HeadColor } from './head';
 
 @Injectable()
 export class HeadService {
@@ -48,7 +48,7 @@ export class HeadService {
     ;
   }
 
-  private streamHead(head: Head): StreamFunc {
+  private postHeadFunc(head: Head): PostFunc {
     return (valueStream: ValueStream) => this.stream.next({head: head, valueStream: valueStream});
   }
 
@@ -56,35 +56,37 @@ export class HeadService {
    * Update head parameter values from GET/POST response.
    */
   private loadHead(head: Head, headData: Object) {
+    let post = this.postHeadFunc(head);
+
+    let channelsData = headData['Channels']; if (channelsData) {
+      for (let channelID in channelsData) {
+        let channel = head.channels[channelID]; if (channel) {
+          head.channels[channelID].load(channelsData[channelID]);
+        } else {
+          head.channels[channelID] = new Channel(post, channelsData[channelID]);
+        }
+      }
+    }
     let intensityData = headData['Intensity']; if (intensityData) {
-      head.Intensity = new HeadIntensity(this.streamHead(head), intensityData);
+      head.Intensity = new HeadIntensity(post, intensityData);
     }
     let colorData = headData['Color']; if (colorData) {
-      head.Color = new HeadColor(this.streamHead(head), colorData);
+      head.Color = new HeadColor(post, colorData);
     }
   }
-
-  private decodeHeads(headsData: Object[]): Head[] {
-    let heads = headsData.map(headData => this.decodeHead(headData));
+  private loadHeads(headsData: Object[]): Head[] {
+    let heads = headsData.map(headData => {
+      let head = new Head(headData);
+      this.loadHead(head, headData);
+      return head;
+    });
     heads.sort((a: Head, b: Head) => a.cmpHead(b));
     return heads;
-  }
-  private decodeHead(headData: Object): Head {
-    let head = new Head;
-    Object.assign(head, headData, {
-      Channels: headData['Channels'].map(channelData => this.decodeChannel(channelData)),
-    });
-    this.loadHead(head, headData);
-
-    return head;
-  }
-  private decodeChannel(channelData: Object): Channel {
-    return Object.assign(new Channel, channelData);
   }
 
   load(): Observable<Head[]> {
     return this.http.get('/api/heads/')
-      .map(response => this.heads = this.decodeHeads(response.json()))
+      .map(response => this.heads = this.loadHeads(response.json()))
     ;
   }
 

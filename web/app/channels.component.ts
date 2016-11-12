@@ -18,14 +18,7 @@ export class ChannelsComponent {
     return this.headService.heads.sort((a: Head, b: Head) => a.cmpAddress(b));
   }
 
-  setHeadChannelDMX(head:Head, channel:Channel, value:string) {
-    let params = { DMX: parseInt(value) };
-
-    console.log(`Set head ${head.ID} channel ${channel.ID}...`, params);
-    this.headService.setHeadChannel(head, channel, params)
-      .subscribe(channel => {
-        console.log(`Set head ${head.ID} channel ${channel.ID}: dmx=${channel.DMX}`);
-      })
-    ;
+  setHeadChannelDMX(head: Head, channel: Channel, value: string) {
+    channel.DMX = parseInt(value);
   }
 }

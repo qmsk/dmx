@@ -60,7 +60,7 @@ func (channel *Channel) GetREST() (web.Resource, error) {
 	return channel.makeAPI(), nil
 }
 
-type APIChannels []APIChannel
+type APIChannels map[string]APIChannel
 
 func (apiChannels APIChannels) GetREST() (web.Resource, error) {
 	return apiChannels, nil

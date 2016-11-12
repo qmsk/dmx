@@ -3,7 +3,7 @@ import { DMX, Value } from './types';
 export type ValueStream = { [key: string]: ValueStream | Value };
 export type HeadStream = { head: Head, valueStream: ValueStream };
 
-export interface StreamFunc {
+export interface PostFunc {
   (stream: ValueStream);
 }
 
@@ -27,7 +27,7 @@ export interface HeadConfig {
 export class HeadIntensity {
   private intensity: Value;
 
-  constructor(private stream: StreamFunc, data: Object) {
+  constructor(private post: PostFunc, data: Object) {
     this.intensity = data['Intensity'];
   }
 
@@ -35,7 +35,7 @@ export class HeadIntensity {
     return this.intensity;
   }
   set Intensity(value: Value) {
-    this.stream({"Intensity": { "Intensity": value } });
+    this.post({"Intensity": { "Intensity": value } });
   }
 }
 
@@ -44,7 +44,11 @@ export class HeadColor {
   green:      Value;
   blue:       Value;
 
-  constructor(private stream: StreamFunc, data: Object) {
+  constructor(private post: PostFunc, data: Object) {
+    this.load(data);
+  }
+
+  load(data: Object) {
     this.red = data['Red'];
     this.green = data['Green'];
     this.blue = data['Blue'];
@@ -55,21 +59,21 @@ export class HeadColor {
   get Blue(): Value { return this.blue; }
 
   set Red(value: Value) {
-    this.stream({"Color": {
+    this.post({"Color": {
       "Red": value,
       "Green": this.green,
       "Blue": this.blue,
     }});
   }
   set Green(value: Value) {
-    this.stream({"Color": {
+    this.post({"Color": {
       "Red": this.red,
       "Green": value,
       "Blue": this.blue,
     }});
   }
   set Blue(value: Value) {
-    this.stream({"Color": {
+    this.post({"Color": {
       "Red": this.red,
       "Green": this.green,
       "Blue": value,
@@ -78,11 +82,37 @@ export class HeadColor {
 }
 
 export class Channel {
-  ID:       number;
+  ID:       string;
   Type:     ChannelType;
   Address:  number;
-  DMX:      DMX;
-  Value:    Value;
+  dmx:      DMX;
+  value:    Value;
+
+  constructor(private post: PostFunc, data: Object) {
+    this.ID = data['ID'];
+    this.Type = data['Type'];
+    this.Address = data['Address'];
+
+    this.load(data);
+  }
+  load(data: Object) {
+    this.dmx = data['DMX'];
+    this.value = data['Value'];
+  }
+
+  get DMX(): DMX { return this.dmx; }
+  set DMX(value: DMX) {
+    let channels = {};
+    channels[this.ID] = { "DMX": value };
+    this.post({"Channels": channels});
+  }
+
+  get Value(): Value { return this.value; }
+  set Value(value: Value) {
+    let channels = {};
+    channels[this.ID] = { "Value": value },
+    this.post({"Channels": channels});
+  }
 
   typeClass(): string {
     if (this.Type.Control) {
@@ -111,12 +141,23 @@ export class Head {
   ID:       string;
   Type:     HeadType;
   Config:   HeadConfig;
-  Channels: Channel[];
 
+  channels = new Map<string, Channel>();
   Intensity?: HeadIntensity;
   Color?:     HeadColor;
 
-  cmpHead(other) : number {
+  constructor(data: Object) {
+    this.ID = data['ID'];
+    this.Type = data['Type'];
+    this.Config = data['Config'];
+  }
+
+  /* Channel objects */
+  get Channels(): Channel[] {
+    return Object.keys(this.channels).map(key => this.channels[key]);
+  }
+
+  cmpHead(other): number {
     if (this.ID < other.ID)
       return -1;
     else if (this.ID > other.ID)
@@ -125,7 +166,7 @@ export class Head {
       return 0;
   }
 
-  cmpAddress(other) : number {
+  cmpAddress(other): number {
     if (this.Config.Universe != other.Config.Universe)
       return this.Config.Universe - other.Config.Universe;
 

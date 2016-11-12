@@ -22,7 +22,7 @@
       <td class="dmx-channel-control">
         <label>{{channel.typeLabel()}}</label>
         <input class="dmx" type="range" min="0" max="255"
-          [(ngModel)]="channel.DMX"
+          [ngModel]="channel.DMX"
           (ngModelChange)="setHeadChannelDMX(head, channel, $event)"
         >
         <output class="dmx">{{channel.DMX}}</output>
