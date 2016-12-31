@@ -7,16 +7,16 @@
 }
 
 label {
-  flex: 0 1 5em;
+  flex: 0 1 6em;
 
   font-weight: bold;
 }
 
 input {
-  flex: 1;
+  flex: 1 0.5;
 }
 
 output {
-  flex: 0 1 3em;
+  flex: 0 0 4em;
   text-align: right;
 }
