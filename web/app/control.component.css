@@ -6,17 +6,38 @@
   margin: 1em;
 }
 
+:host(.vertical) {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
 label {
   flex: 0 1 6em;
 
   font-weight: bold;
 }
 
+:host(.vertical) label {
+  flex: 0 1;
+}
+
 input {
   flex: 1 0.5;
+}
+
+:host(.vertical) input[type=range] {
+  writing-mode: bt-lr; /* IE */
+  -webkit-appearance: slider-vertical; /* WebKit */
 }
 
 output {
   flex: 0 0 4em;
   text-align: right;
+}
+
+:host(.vertical) output {
+  flex: 0 0;
+  text-align: center;
 }
