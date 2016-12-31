@@ -19,8 +19,11 @@ export class HeadService {
   heads: Map<string, Head>;
   active: Head = null;
 
-  list(sort?: (Head) => any) {
+  list(sort?: (Head) => any, filter?: (Head) => boolean) {
     let heads = Object.keys(this.heads).map(key => this.heads[key]);
+
+    if (filter)
+      heads = _.filter(heads, filter);
 
     if (sort)
       heads = _.sortBy(heads, sort);
