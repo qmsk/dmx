@@ -1,0 +1,28 @@
+:host {
+  display: flex;
+
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.dmx-head {
+  width: 8em;
+  height: 12em;
+
+  margin: 0.5em;
+  padding: 0.5em;
+
+  background-color: #133337;
+  border: 0.25em solid #133337;
+  border-radius: 0.5em;
+  color: #eee;
+}
+
+.dmx-head.selected {
+  border: 0.25em solid #9f9;
+}
+
+.dmx-head.program {
+  border: 0.25em solid #f55;
+}

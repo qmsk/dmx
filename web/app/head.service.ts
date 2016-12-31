@@ -36,6 +36,9 @@ export class HeadService {
   byID(): Head[] {
     return this.list(head => head.ID);
   }
+  byIntensity(): Head[] {
+    return this.list(head => head.ID, head => !!head.Intensity);
+  }
 
   select(head: Head) {
     console.log("Select head", head);
