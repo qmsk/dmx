@@ -1,24 +1,34 @@
 <div class="dmx-heads">
   <button class="dmx-head color"
     *ngFor="let head of service.ofColor()"
-    [class.active]="service.isActive(head)"
+    [class.active]="headActive(head)"
     [style.background-color]="hexRGB(head.Color)"
-    (click)="select(head)"
+    (click)="headActive(head) ? unselect(head) : select(head)"
   >
     <label class="ID">{{head.ID}}</label>
   </button>
 </div>
 
 <div class="controls">
-  <output class="color">{{activeColor}}</output>
+  <div *ngIf="color">
+    <h3>RGB</h3>
 
-  <div class="items" *ngIf="colors">
-    <button class="item color"
-      *ngFor="let color of colors"
-      [style.background-color]="hexRGB(color)"
-      [class.active]="isActive(color)"
-      (click)="apply(color)"
-    >
-    </button>
+    <dmx-control label="Red" [value]="color.Red" (valueChange)="change('red', $event)"></dmx-control>
+    <dmx-control label="Green" [value]="color.Green" (valueChange)="change('green', $event)"></dmx-control>
+    <dmx-control label="Blue" [value]="color.Blue" (valueChange)="change('blue', $event)"></dmx-control>
+  </div>
+
+  <div *ngIf="colors">
+    <h3>Colors</h3>
+
+    <div class="items">
+      <button class="item color"
+        *ngFor="let color of colors"
+        [style.background-color]="hexRGB(color)"
+        [class.active]="isActive(color)"
+        (click)="click(color)"
+      >
+      </button>
+    </div>
   </div>
 </div>
