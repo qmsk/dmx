@@ -74,6 +74,7 @@ export class HeadService {
           (headParams: APIHead) => {
             console.log(`POST head ${headStream.head.ID}: OK`, headParams);
           }
+          // TODO: errors to console
         );
       }
     );

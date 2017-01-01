@@ -50,9 +50,7 @@ export class ColorComponent {
     };
   }
 
-  /* Build new colors map from active heads
-   * Optionally override any colors from given head.
-   */
+  /* Build new colors map from active heads */
   loadColors(): Color[] {
     let colors = new Map<string, Color>();
 
@@ -67,14 +65,19 @@ export class ColorComponent {
 
   select(head: Head) {
     this.heads.add(head);
-    this.color = this.loadColor(head.Color);
+    
     this.colors = this.loadColors();
+    this.color = this.loadColor(head.Color);
   }
 
   unselect(head: Head) {
     this.heads.delete(head);
-    // XXX: this.color = ...
-    this.colors = this.loadColors();
+
+    if (this.heads.size > 0) {
+      this.colors = this.loadColors();
+    } else {
+      this.colors = this.color = null;
+    }
   }
 
   apply(color: Color) {
