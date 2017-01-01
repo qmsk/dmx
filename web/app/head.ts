@@ -106,11 +106,7 @@ export class HeadColor {
   }
 
   hexRGB(): string {
-    let color = "#" + this.hexField(this.Red) + this.hexField(this.Green) + this.hexField(this.Blue);
-
-    console.log("Head.hexRGB", color);
-
-    return color;
+    return "#" + this.hexField(this.Red) + this.hexField(this.Green) + this.hexField(this.Blue);
   }
 }
 
