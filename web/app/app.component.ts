@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 
-import { WebSocketService } from '../lib/websocket';
+import { WebSocketService } from 'lib/websocket';
 
 import { HeadService } from './head.service';
 import { Head } from './head';

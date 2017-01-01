@@ -11,7 +11,13 @@
     "types": [
       "node",
       "core-js"
-    ]
+    ],
+
+    "baseUrl": ".",
+    "paths": {
+      "app": [ "app" ],
+      "lib": [ "lib" ]
+    }
   },
   "exclude": [
     "node_modules"
