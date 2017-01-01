@@ -1,8 +1,14 @@
-<div class="dmx-head color"
-  *ngFor="let head of service.ofColor()"
-  [class.selected]="service.selected(head)"
-  [style.background-color]="head.Color.hexRGB()"
->
-  <label class="ID">{{head.ID}}</label>
+<div class="dmx-heads">
+  <button class="dmx-head color"
+    *ngFor="let head of service.ofColor()"
+    [class.selected]="service.selected(head)"
+    [style.background-color]="head.Color.hexRGB()"
+    (click)="select(head)"
+  >
+    <label class="ID">{{head.ID}}</label>
+  </button>
+</div>
 
+<div class="controls">
+  <output class="color">{{color}}</output>
 </div>

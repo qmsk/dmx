@@ -6,7 +6,7 @@ import { HeadService } from './head.service';
 @Component({
   moduleId: module.id,
   selector: 'dmx-intensity',
-  host: { class: 'view flow' },
+  host: { class: 'view dmx-heads' },
   templateUrl: 'intensity.component.html',
   styleUrls: [ 'intensity.component.css' ],
 })

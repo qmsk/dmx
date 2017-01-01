@@ -77,7 +77,7 @@ div.spinner {
   justify-content: space-between;
 }
 
-.view.split .main {
+.view.split .dmx-heads {
   flex: 1;
 
   padding: 1em;
@@ -112,7 +112,7 @@ div.spinner {
 }
 
 /* Flow view with heads */
-.view.flow {
+.dmx-heads {
   display: flex;
 
   flex-direction: row;
