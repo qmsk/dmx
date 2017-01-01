@@ -36,7 +36,7 @@ export class HeadService {
   byID(): Head[] {
     return this.list(head => head.ID);
   }
-  byIntensity(): Head[] {
+  ofIntensity(): Head[] {
     return this.list(head => head.ID, head => !!head.Intensity);
   }
 

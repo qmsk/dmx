@@ -45,7 +45,14 @@ nav a.active {
   color: #133337;
 }
 
-/* View */
+/* Loading */
+div.spinner {
+  width: 10%;
+  height: 10%;
+  background-color: #133337;
+}
+
+/* Views */
 .view {
   flex: 1;
   padding: 1em;
@@ -61,18 +68,13 @@ nav a.active {
   align-items: center;
 }
 
+/* Split view with controls */
 .view.split {
   padding: 0;
 
   flex-direction: row;
   align-items: flex-start;
   justify-content: space-between;
-}
-
-div.spinner {
-  width: 10%;
-  height: 10%;
-  background-color: #133337;
 }
 
 .view.split .main {
@@ -107,6 +109,36 @@ div.spinner {
 
   margin: 0;
   padding: 0.25em;
+}
+
+/* Flow view with heads */
+.view.flow {
+  display: flex;
+
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.dmx-head {
+  width: 8em;
+  height: 8em;
+
+  margin: 0.5em;
+  padding: 0.5em;
+
+  background-color: #133337;
+  border: 0.25em solid #133337;
+  border-radius: 0.5em;
+  color: #eee;
+}
+
+.dmx-head.selected {
+  border: 0.25em solid #9f9;
+}
+
+.dmx-head.program {
+  border: 0.25em solid #f55;
 }
 
 /* Elements */
