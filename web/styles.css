@@ -138,6 +138,26 @@ div.spinner {
   border: 0.25em solid #9f9;
 }
 
+/* Generic flowed items */
+.items {
+  display: flex;
+
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.item {
+  width: 8em;
+  height: 8em;
+
+  margin: 0.5em;
+  padding: 0.5em;
+
+  border-width: 0.25em;
+  border-style: solid;
+  border-radius: 0.5em;
+}
 
 /* Tables */
 table {

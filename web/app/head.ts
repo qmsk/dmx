@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 
-import { DMX, Value } from './types';
+import { DMX, Value, Color } from './types';
 import { Observer } from 'rxjs/Observer';
 
 export interface ChannelPost {
@@ -28,6 +28,7 @@ export interface HeadType {
   Model:  string;
   Mode:   string;
   Channels: ChannelType[];
+  Colors:   {[ID: string]: APIHeadColor};
 }
 export interface HeadConfig {
   Type:     string;
@@ -56,12 +57,11 @@ export class HeadIntensity {
   }
 }
 
-export interface APIHeadColor {
-  Red:    Value;
-  Green:  Value;
-  Blue:   Value;
+export interface APIHeadColor extends Color {
+
 }
-export class HeadColor {
+
+export class HeadColor implements Color {
   red:        Value;
   green:      Value;
   blue:       Value;
@@ -101,12 +101,9 @@ export class HeadColor {
     }});
   }
 
-  hexField(value: Value): string {
-    return _.padStart(Math.trunc(value * 255).toString(16), 2, '0');
-  }
-
-  hexRGB(): string {
-    return "#" + this.hexField(this.Red) + this.hexField(this.Green) + this.hexField(this.Blue);
+  /* Post RGB values from Color */
+  apply(color: Color) {
+    this.post({Color: color});
   }
 }
 
