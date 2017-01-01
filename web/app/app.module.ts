@@ -7,6 +7,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AppComponent } from './app.component'
 import { DashboardComponent } from './dashboard.component'
 import { ChannelsComponent } from './channels.component'
+import { ColorComponent } from './color.component'
 import { ControlComponent } from './control.component'
 import { HeadsComponent } from './heads.component'
 import { HeadComponent } from './head.component'
@@ -15,6 +16,7 @@ import { IntensityComponent } from './intensity.component'
 const routes: Routes = [
   { path: 'channels', component: ChannelsComponent },
   { path: 'intensity', component: IntensityComponent },
+  { path: 'color', component: ColorComponent },
   { path: '', component: DashboardComponent },
 ];
 
@@ -29,6 +31,7 @@ const routes: Routes = [
     AppComponent,
     DashboardComponent,
     ChannelsComponent,
+    ColorComponent,
     ControlComponent,
     HeadsComponent,
     HeadComponent,

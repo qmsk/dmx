@@ -39,6 +39,9 @@ export class HeadService {
   ofIntensity(): Head[] {
     return this.list(head => head.ID, head => !!head.Intensity);
   }
+  ofColor(): Head[] {
+    return this.list(head => head.ID, head => !!head.Color);
+  }
 
   select(head: Head) {
     console.log("Select head", head);

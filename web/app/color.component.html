@@ -1,0 +1,8 @@
+<div class="dmx-head color"
+  *ngFor="let head of service.ofColor()"
+  [class.selected]="service.selected(head)"
+  [style.background-color]="head.Color.hexRGB()"
+>
+  <label class="ID">{{head.ID}}</label>
+
+</div>

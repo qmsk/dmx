@@ -100,6 +100,18 @@ export class HeadColor {
       Blue: value,
     }});
   }
+
+  hexField(value: Value): string {
+    return _.padStart(Math.trunc(value * 255).toString(16), 2, '0');
+  }
+
+  hexRGB(): string {
+    let color = "#" + this.hexField(this.Red) + this.hexField(this.Green) + this.hexField(this.Blue);
+
+    console.log("Head.hexRGB", color);
+
+    return color;
+  }
 }
 
 export interface APIChannel {
