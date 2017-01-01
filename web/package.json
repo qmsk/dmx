@@ -24,12 +24,12 @@
     "reflect-metadata": "^0.1.8",
     "rxjs": "5.0.0-beta.12",
     "spinkit": "1.2.5",
-    "systemjs": "0.19.39",
+    "systemjs": "^0.19.39",
+    "typescript": "^2.1.4",
     "zone.js": "^0.6.25"
   },
   "devDependencies": {
-    "@types/core-js": "^0.9.34",
-    "@types/node": "^6.0.45",
-    "typescript": "^2.0.3"
+    "@types/core-js": "^0.9.35",
+    "@types/node": "^6.0.55"
   }
 }

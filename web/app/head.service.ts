@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Http, Headers, RequestOptions } from '@angular/http';
 
-import { WebSocketService, WebSocketError } from 'websocket';
+import { WebSocketService, WebSocketError } from '../lib/websocket';
 
 import * as _ from 'lodash';
 import { Observable } from 'rxjs/Observable';
