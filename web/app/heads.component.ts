@@ -6,6 +6,8 @@ import { HeadService } from './head.service';
 @Component({
   moduleId: module.id,
   selector: 'dmx-heads',
+  host: { class: 'view split' },
+
   templateUrl: 'heads.component.html',
   styleUrls: [ 'heads.component.css' ],
 })

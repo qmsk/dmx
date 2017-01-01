@@ -5,7 +5,6 @@ import { FormsModule }   from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
 
 import { AppComponent } from './app.component'
-import { DashboardComponent } from './dashboard.component'
 import { ChannelsComponent } from './channels.component'
 import { ColorComponent } from './color.component'
 import { ControlComponent } from './control.component'
@@ -17,7 +16,7 @@ const routes: Routes = [
   { path: 'channels', component: ChannelsComponent },
   { path: 'intensity', component: IntensityComponent },
   { path: 'color', component: ColorComponent },
-  { path: '', component: DashboardComponent },
+  { path: '', component: HeadsComponent },
 ];
 
 @NgModule({
@@ -29,7 +28,6 @@ const routes: Routes = [
   ],
   declarations: [
     AppComponent,
-    DashboardComponent,
     ChannelsComponent,
     ColorComponent,
     ControlComponent,

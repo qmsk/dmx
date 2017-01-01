@@ -1,7 +1,13 @@
-<button class="dmx-head"
-  *ngFor="let head of service.byID()"
-  (click)="service.select(head)"
-  [class.selected]="service.selected(head)"
->
-  <span class="ID">{{head.ID}}</span>
-</button>
+<div class="dmx-heads">
+  <button class="dmx-head"
+    *ngFor="let head of service.byID()"
+    (click)="service.select(head)"
+    [class.selected]="service.selected(head)"
+  >
+    <label class="ID">{{head.ID}}</label>
+  </button>
+</div>
+
+<dmx-head class="controls"
+  [head]="service.active"
+></dmx-head>
