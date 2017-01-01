@@ -134,15 +134,12 @@ div.spinner {
   color: #eee;
 }
 
-.dmx-head.selected {
+.dmx-head.active {
   border: 0.25em solid #9f9;
 }
 
-.dmx-head.program {
-  border: 0.25em solid #f55;
-}
 
-/* Elements */
+/* Tables */
 table {
   width: 100%;
 

@@ -2,7 +2,7 @@
   <button class="dmx-head"
     *ngFor="let head of service.byID()"
     (click)="service.select(head)"
-    [class.selected]="service.selected(head)"
+    [class.active]="service.isActive(head)"
   >
     <label class="ID">{{head.ID}}</label>
   </button>

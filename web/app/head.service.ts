@@ -47,8 +47,12 @@ export class HeadService {
     console.log("Select head", head);
     this.active = head;
   }
-  selected(head: Head): boolean {
+  isActive(head: Head): boolean {
     return this.active == head;
+  }
+  apply(func: (Head) => any) {
+    if (this.active)
+      func(this.active);
   }
 
   constructor(private http: Http, webSocketService: WebSocketService) {

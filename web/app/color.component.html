@@ -1,7 +1,7 @@
 <div class="dmx-heads">
   <button class="dmx-head color"
     *ngFor="let head of service.ofColor()"
-    [class.selected]="service.selected(head)"
+    [class.active]="service.isActive(head)"
     [style.background-color]="head.Color.hexRGB()"
     (click)="select(head)"
   >
