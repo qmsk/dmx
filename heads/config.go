@@ -38,6 +38,7 @@ func load(obj interface{}, path string) (string, error) {
 	}
 }
 
+type ColorName string
 type ColorChannel string
 
 const (
@@ -67,11 +68,13 @@ func (channelType ChannelType) String() string {
 }
 
 type HeadType struct {
-	Vendor   string
-	Model    string
-	Mode     string
-	URL      string
+	Vendor string
+	Model  string
+	Mode   string
+	URL    string
+
 	Channels []ChannelType
+	Colors   map[ColorName]ColorRGB
 }
 
 func (headType HeadType) String() string {

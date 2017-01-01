@@ -18,3 +18,24 @@ Color    = "blue"
 
 [[Channels]]
 Control  = "speed"
+
+[Colors.red]
+Red     = 1.0
+
+[Colors.green]
+Green   = 1.0
+
+[Colors.blue]
+Blue    = 1.0
+
+[Colors.cyan]
+Green   = 1.0
+Blue    = 1.0
+
+[Colors.magenta]
+Red     = 1.0
+Blue    = 1.0
+
+[Colors.amber]
+Red     = 1.0
+Green   = 0.5
