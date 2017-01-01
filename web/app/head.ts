@@ -8,7 +8,7 @@ export interface ChannelPost {
   Value?: Value;
 }
 export interface HeadPost {
-  Channels?:   Map<string, ChannelPost>;
+  Channels?:  {[ID: string]: ChannelPost};
   Intensity?: APIHeadIntensity;
   Color?:     APIHeadColor;
 };

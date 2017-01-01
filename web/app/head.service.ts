@@ -52,7 +52,7 @@ export class HeadService {
   }
 
   constructor(private http: Http, webSocketService: WebSocketService) {
-    this.heads = {};
+    this.heads = new Map<string, Head>();
 
     this.get('/api/heads').subscribe(
       headsMap => {
