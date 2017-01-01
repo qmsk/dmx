@@ -1,6 +1,6 @@
 <dmx-control class="dmx-head vertical intensity"
   *ngFor="let head of service.ofIntensity()"
-  [class.selected]="service.selected(head)"
+  [class.active]="service.isActive(head)"
   label="{{head.ID}}" [(value)]="head.Intensity.Intensity"
 >
 </dmx-control>
