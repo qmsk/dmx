@@ -6,8 +6,16 @@
 </div>
 
 <div *ngIf="head && head.Color">
-  <h3>Color</h3>
+  <h3>Color RGB</h3>
   <dmx-control label="Red" [(value)]="head.Color.Red"></dmx-control>
   <dmx-control label="Green" [(value)]="head.Color.Green"></dmx-control>
   <dmx-control label="Blue" [(value)]="head.Color.Blue"></dmx-control>
+</div>
+
+<div *ngIf="head && head.Type.Colors">
+  <h3>Colors</h3>
+
+  <dmx-head-colors [colors]="head.Type.Colors" [color]="head.Color" (colorChange)="head.Color.apply($event)">
+
+  </dmx-head-colors>
 </div>

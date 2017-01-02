@@ -1,8 +1,7 @@
 import { Component, Input, HostBinding } from '@angular/core';
 
-import * as _ from 'lodash';
 import { Value, Color } from './types';
-import { Head } from './head';
+import { Head, APIColors } from './head';
 import { HeadService } from './head.service';
 
 @Component({
@@ -14,7 +13,7 @@ import { HeadService } from './head.service';
   styleUrls: [ 'color.component.css' ],
 })
 export class ColorComponent {
-  colors: Color[];
+  colors: APIColors;
   color: Color;
   heads: Set<Head>;
 
@@ -22,19 +21,11 @@ export class ColorComponent {
     this.heads = new Set<Head>();
   }
 
-  hexByte(value: Value): string {
-    return _.padStart(Math.trunc(value * 255).toString(16), 2, '0');
-  }
-
-  hexRGB(color: Color): string {
-    return "#" + this.hexByte(color.Red) + this.hexByte(color.Green) + this.hexByte(color.Blue);
-  }
-
   headActive(head: Head): boolean {
     return this.heads.has(head);
   }
 
-  isActive(color: Color): boolean {
+  colorActive(color: Color): boolean {
     return this.color
       && color.Red == this.color.Red
       && color.Green == this.color.Green
@@ -51,21 +42,17 @@ export class ColorComponent {
   }
 
   /* Build new colors map from active heads */
-  loadColors(): Color[] {
-    let colors = new Map<string, Color>();
-
-    this.heads.forEach((head) => {
-      for (let name in head.Type.Colors) {
-        colors.set(name, head.Type.Colors[name]);
-      }
-    });
-
-    return Array.from(colors.values());
+  loadColors(): APIColors {
+    // XXX: just return from first selected head..
+    // TODO: merge color maps from multiple heads?
+    for (let head of Array.from(this.heads)) {
+      return head.Type.Colors;
+    }
   }
 
   select(head: Head) {
     this.heads.add(head);
-    
+
     this.colors = this.loadColors();
     this.color = this.loadColor(head.Color);
   }
@@ -81,6 +68,7 @@ export class ColorComponent {
   }
 
   apply(color: Color) {
+    // XXX: this does not update the <dmx-head-colors>
     this.color = color;
     this.heads.forEach((head) => {
       head.Color.apply(color);

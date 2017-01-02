@@ -7,9 +7,11 @@ import { RouterModule, Routes } from '@angular/router';
 import { AppComponent } from './app.component'
 import { ChannelsComponent } from './channels.component'
 import { ColorComponent } from './color.component'
+import { ColorPipe } from './color.pipe'
 import { ControlComponent } from './control.component'
 import { HeadsComponent } from './heads.component'
 import { HeadComponent } from './head.component'
+import { HeadColorsComponent } from './head-colors.component'
 import { IntensityComponent } from './intensity.component'
 
 const routes: Routes = [
@@ -30,9 +32,11 @@ const routes: Routes = [
     AppComponent,
     ChannelsComponent,
     ColorComponent,
+    ColorPipe,
     ControlComponent,
     HeadsComponent,
     HeadComponent,
+    HeadColorsComponent,
     IntensityComponent,
   ],
   bootstrap: [ AppComponent ],

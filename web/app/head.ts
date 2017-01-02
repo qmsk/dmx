@@ -18,6 +18,8 @@ interface HeadPostFunc {
   (post: HeadPost);
 }
 
+export type APIColors = {[ID: string]: APIHeadColor};
+
 export interface ChannelType {
   Control?: string;
   Intensity?: boolean;
@@ -28,7 +30,7 @@ export interface HeadType {
   Model:  string;
   Mode:   string;
   Channels: ChannelType[];
-  Colors:   {[ID: string]: APIHeadColor};
+  Colors:   APIColors;
 }
 export interface HeadConfig {
   Type:     string;

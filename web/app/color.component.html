@@ -2,7 +2,7 @@
   <button class="dmx-head color"
     *ngFor="let head of service.ofColor()"
     [class.active]="headActive(head)"
-    [style.background-color]="hexRGB(head.Color)"
+    [style.background-color]="head.Color | color"
     (click)="headActive(head) ? unselect(head) : select(head)"
   >
     <label class="ID">{{head.ID}}</label>
@@ -21,14 +21,8 @@
   <div *ngIf="colors">
     <h3>Colors</h3>
 
-    <div class="items">
-      <button class="item color"
-        *ngFor="let color of colors"
-        [style.background-color]="hexRGB(color)"
-        [class.active]="isActive(color)"
-        (click)="click(color)"
-      >
-      </button>
-    </div>
+    <dmx-head-colors [colors]="colors" [color]="color" (colorChange)="click($event)">
+
+    </dmx-head-colors>
   </div>
 </div>

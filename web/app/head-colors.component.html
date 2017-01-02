@@ -1,0 +1,9 @@
+<div class="items colors">
+  <button class="item color"
+    *ngFor="let color of makeColors()"
+    [style.background-color]="color | color"
+    [class.active]="active(color)"
+    (click)="click(color)"
+  >
+  </button>
+</div>

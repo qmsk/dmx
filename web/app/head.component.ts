@@ -1,5 +1,6 @@
 import { Component, Input, HostBinding } from '@angular/core';
 
+import { Color } from './types';
 import { Head } from './head';
 
 @Component({

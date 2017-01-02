@@ -1,0 +1,10 @@
+.item.color {
+  width: 4em;
+  height: 4em;
+
+  border-color: #444;
+}
+
+.item.color.active {
+  border-color: #aaa;
+}
