@@ -221,8 +221,9 @@ export class Group implements Parameters {
   Intensity?: IntensityParameter;
   Color?: ColorParameter;
 
-  constructor(postObserver: Observer<Post>, api: APIGroup) {
+  constructor(postObserver: Observer<Post>, api: APIGroup, heads: Head[]) {
     this.ID = api.ID;
+    this.Heads = heads;
 
     this.post = (parameters: APIParameters) => postObserver.next({groupID: this.ID, groupParameters: parameters});
     this.load(api);

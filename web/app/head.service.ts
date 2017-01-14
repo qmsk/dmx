@@ -132,15 +132,20 @@ export class HeadService {
 
     console.log("Loaded heads", this.heads);
   }
+  private lookupHeads(ids: string[]) {
+    return ids.map((id) => this.heads[id]);
+  }
 
   private loadGroups(apiGroups: APIGroups) {
     for (let id in apiGroups) {
       let group: Group;
 
+      let heads = apiGroups[id].Heads.map((id) => this.heads[id]);
+
       if (group = this.groups.get(id)) {
         group.load(apiGroups[id]);
       } else {
-        this.groups.set(id, new Group(this.postSubject, apiGroups[id]));
+        this.groups.set(id, new Group(this.postSubject, apiGroups[id], heads));
       }
     }
   }

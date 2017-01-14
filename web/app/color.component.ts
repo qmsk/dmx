@@ -55,10 +55,16 @@ export class ColorComponent {
 
   /* Build new colors map from active heads */
   loadColors(): Colors {
-    // XXX: just return from first selected head..
+    // XXX: just return from first selected head or group...
     // TODO: merge color maps from multiple heads?
     for (let head of Array.from(this.heads)) {
       return head.Type.Colors;
+    }
+
+    for (let group of Array.from(this.groups)) {
+      for (let head of group.Heads) {
+        return head.Type.Colors;
+      }
     }
 
     return null;
