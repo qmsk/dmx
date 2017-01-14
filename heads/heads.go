@@ -7,7 +7,7 @@ import (
 )
 
 type Options struct {
-	LibraryPath string `long:"heads-library" value-name:"PATH"`
+	LibraryPath []string `long:"heads-library" value-name:"PATH"`
 }
 
 func (options Options) Heads(config *Config) (*Heads, error) {
@@ -23,7 +23,7 @@ func (options Options) Heads(config *Config) (*Heads, error) {
 
 	// preload groups
 	for groupID, groupConfig := range config.Groups {
-		heads.addGroup(groupID, groupConfig)
+		heads.addGroup(groupID, *groupConfig)
 	}
 
 	for headID, headConfig := range config.Heads {

@@ -8,14 +8,9 @@ import (
 	"github.com/qmsk/go-web"
 )
 
-// ID
-type HeadID string
+// Config type
+type TypeID string
 
-func (headID HeadID) index(index uint) HeadID {
-	return HeadID(fmt.Sprintf("%s.%d", headID, index+1))
-}
-
-// Config
 type HeadType struct {
 	Vendor string
 	Model  string
@@ -30,8 +25,15 @@ func (headType HeadType) String() string {
 	return fmt.Sprintf("%v/%v=%v", headType.Vendor, headType.Model, headType.Mode)
 }
 
+// Config
+type HeadID string
+
+func (headID HeadID) index(index uint) HeadID {
+	return HeadID(fmt.Sprintf("%s.%d", headID, index+1))
+}
+
 type HeadConfig struct {
-	Type     string
+	Type     TypeID
 	Universe Universe
 	Address  dmx.Address
 	Name     string

@@ -2,8 +2,10 @@ package heads
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 	log "github.com/Sirupsen/logrus"
@@ -19,63 +21,160 @@ func loadToml(obj interface{}, path string) error {
 	}
 }
 
-func load(obj interface{}, path string) (string, error) {
-	base := filepath.Base(path)
+func load(obj interface{}, path string) error {
 	ext := filepath.Ext(path)
-
-	name := base[:len(base)-len(ext)]
 
 	switch ext {
 	case ".toml":
 		if err := loadToml(obj, path); err != nil {
-			return name, err
+			return err
 		} else {
-			return name, nil
+			return nil
 		}
 	default:
-		return name, fmt.Errorf("Unknown %T file ext=%v: %v", obj, ext, path)
+		return fmt.Errorf("Unknown %T file ext=%v: %v", obj, ext, path)
+	}
+}
+
+type configMapper func(id []string) (configObject interface{}, err error)
+
+// Load config from given path, using the given stat info
+func loadsStat(path string, stat os.FileInfo, mapper configMapper, prefix []string, top bool) error {
+	name := stat.Name()
+
+	if stat.IsDir() {
+		log.Debugf("heads:loadOne path=%v: dir prefix=%v", path, prefix)
+
+		var id []string
+
+		if top {
+			id = prefix
+		} else {
+			id = append(id, prefix...)
+			id = append(id, name)
+		}
+
+		return loadsDir(path, mapper, id)
+
+	} else {
+		// take basename *.ext part
+		ext := filepath.Ext(name)
+		name = name[:len(name)-len(ext)]
+
+		var id []string
+
+		if top {
+			id = prefix
+		} else {
+			id = append(id, prefix...)
+			id = append(id, name)
+		}
+
+		log.Debugf("heads:loadOne path=%v: file id=%v", path, id)
+
+		if obj, err := mapper(id); err != nil {
+			return err
+		} else if err := load(obj, path); err != nil {
+			return err
+		} else {
+			log.Infof("heads:loads path=%v: %T id=%v ", path, obj, id)
+
+			return nil
+		}
+	}
+}
+
+// Recursively load multiple config files from a directory
+func loadsDir(dirPath string, mapper configMapper, prefix []string) error {
+	if files, err := ioutil.ReadDir(dirPath); err != nil {
+		return fmt.Errorf("read dir %v: %v", dirPath, err)
+	} else {
+		for _, stat := range files {
+			path := filepath.Join(dirPath, stat.Name())
+
+			if !(stat.Mode().IsRegular() || stat.Mode().IsDir()) {
+				log.Debugf("heads:loadsDir path=%v: skip irregular", path)
+
+				continue
+			}
+
+			if strings.HasPrefix(stat.Name(), ".") {
+				log.Debugf("heads:loadOne path=%v: skip dotfile", path)
+
+				continue
+			}
+
+			if err := loadsStat(path, stat, mapper, prefix, false); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}
+}
+
+// Load config from path, which may either be a file, or a directory to be loaded recursively
+func loads(path string, mapper configMapper) error {
+	if stat, err := os.Stat(path); err != nil {
+		return err
+	} else {
+		return loadsStat(path, stat, mapper, nil, true)
 	}
 }
 
 type Config struct {
-	HeadTypes map[string]*HeadType
+	HeadTypes map[TypeID]*HeadType
 
 	Heads  map[HeadID]*HeadConfig
-	Groups map[GroupID]GroupConfig
+	Groups map[GroupID]*GroupConfig
+
+	Presets map[PresetID]*PresetConfig
 }
 
-func (config *Config) loadTypes(rootPath string) error {
-	return filepath.Walk(rootPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
+func (config *Config) loadTypes(path string) error {
+	return loads(path, func(id []string) (interface{}, error) {
+		var typeID = TypeID(filepath.Join(id...))
+		var headType = new(HeadType)
 
-		var headType HeadType
+		config.HeadTypes[typeID] = headType
 
-		log.Debugf("heads:Config.loadTypes %v: %v mode=%v", rootPath, path, info.Mode())
-
-		if !info.Mode().IsRegular() {
-			return nil
-		}
-
-		relPath := path[len(rootPath):]
-		if relPath[0] == '/' {
-			relPath = relPath[1:]
-		}
-		dir, name := filepath.Split(relPath)
-
-		if basename, err := load(&headType, path); err != nil {
-			return err
-		} else {
-			name = filepath.Join(dir, basename)
-		}
-
-		log.Infof("heads:Config.loadTypes %v: HeadType %v", path, name)
-
-		config.HeadTypes[name] = &headType
-
-		return nil
+		return headType, nil
 	})
+}
+
+func (config *Config) load(path string) error {
+	return loads(path, func(id []string) (interface{}, error) {
+		if len(id) == 0 {
+			return config, nil
+		}
+		switch id[0] {
+		case "heads":
+			if len(id) == 1 {
+				return config.Heads, nil
+			} else {
+				var head = new(HeadConfig)
+
+				config.Heads[HeadID(filepath.Join(id[1:]...))] = head
+
+				return head, nil
+			}
+
+		case "groups":
+			if len(id) == 1 {
+				return config.Groups, nil
+			} else {
+				var group = new(GroupConfig)
+
+				config.Groups[GroupID(filepath.Join(id[1:]...))] = group
+
+				return group, nil
+			}
+
+		default:
+			return nil, fmt.Errorf("Bad config path: %v", id)
+		}
+	})
+
 }
 
 // map relative Head.Type= references
@@ -93,15 +192,18 @@ func (config *Config) mapTypes() error {
 
 func (options Options) Config(path string) (*Config, error) {
 	var config = Config{
-		HeadTypes: make(map[string]*HeadType),
-		Groups:    make(map[GroupID]GroupConfig),
+		HeadTypes: make(map[TypeID]*HeadType),
+		Heads:     make(map[HeadID]*HeadConfig),
+		Groups:    make(map[GroupID]*GroupConfig),
 	}
 
-	if err := config.loadTypes(options.LibraryPath); err != nil {
-		return nil, fmt.Errorf("loadTypes %v: %v", options.LibraryPath, err)
+	for _, libraryPath := range options.LibraryPath {
+		if err := config.loadTypes(libraryPath); err != nil {
+			return nil, fmt.Errorf("loadTypes %v: %v", libraryPath, err)
+		}
 	}
 
-	if _, err := load(&config, path); err != nil {
+	if err := config.load(path); err != nil {
 		return nil, err
 	}
 
