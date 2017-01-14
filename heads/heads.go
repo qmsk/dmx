@@ -17,29 +17,36 @@ func (options Options) Heads(config *Config) (*Heads, error) {
 		log:     log.WithField("package", "heads"),
 		outputs: make(outputMap),
 		heads:   make(headMap),
+		groups:  make(groupMap),
 		events:  new(Events),
 	}
 
 	heads.events.init()
 
 	for headID, headConfig := range config.Heads {
+		var head *Head
+
 		if headType, exists := config.HeadTypes[headConfig.Type]; !exists {
 			return nil, fmt.Errorf("Invalid Head.Type=%v", headConfig.Type)
 		} else {
-			heads.addHead(headID, headConfig, headType)
+			head = heads.addHead(headID, headConfig, headType)
 		}
 
+		for _, groupID := range headConfig.Groups {
+			heads.group(groupID, config.Groups[groupID]).heads[headID] = head
+		}
 	}
 
 	return &heads, nil
 }
 
-type headMap map[string]*Head
+type headMap map[HeadID]*Head
 
 type Heads struct {
 	log     *log.Entry
 	outputs outputMap
 	heads   headMap
+	groups  groupMap
 	events  *Events
 }
 
@@ -62,8 +69,19 @@ func (heads *Heads) Output(config OutputConfig, dmxWriter dmx.Writer) {
 	heads.output(config.Universe).init(config, dmxWriter)
 }
 
+func (heads *Heads) group(id GroupID, config GroupConfig) *Group {
+	group := heads.groups[id]
+
+	if group == nil {
+		group = makeGroup(id, config)
+		heads.groups[id] = group
+	}
+
+	return group
+}
+
 // Patch head
-func (heads *Heads) addHead(id string, config HeadConfig, headType *HeadType) *Head {
+func (heads *Heads) addHead(id HeadID, config HeadConfig, headType *HeadType) *Head {
 	var output = heads.output(config.Universe)
 	var head = Head{
 		id:       id,
@@ -100,7 +118,7 @@ func (heads *Heads) Refresh() error {
 }
 
 // Web API
-type APIHeads map[string]APIHead
+type APIHeads map[HeadID]APIHead
 
 func (heads headMap) makeAPI() APIHeads {
 	log.Debug("heads:headMap.makeAPI")
@@ -134,7 +152,7 @@ func (headMap headMap) Index(name string) (web.Resource, error) {
 	case "":
 		return headList(headMap), nil
 	default:
-		return headMap[name], nil
+		return headMap[HeadID(name)], nil
 	}
 }
 

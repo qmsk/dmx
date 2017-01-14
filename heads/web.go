@@ -6,8 +6,9 @@ import (
 )
 
 type API struct {
-	Outputs []APIOutput        `json:"outputs"`
-	Heads   map[string]APIHead `json:"heads"`
+	Outputs []APIOutput          `json:"outputs"`
+	Heads   map[HeadID]APIHead   `json:"heads"`
+	Groups  map[GroupID]APIGroup `json:"groups"`
 }
 
 func (heads *Heads) Index(name string) (web.Resource, error) {
@@ -16,6 +17,8 @@ func (heads *Heads) Index(name string) (web.Resource, error) {
 	switch name {
 	case "":
 		return heads, nil
+	case "groups":
+		return heads.groups, nil
 	case "outputs":
 		return heads.outputs, nil
 	case "heads":
@@ -30,6 +33,7 @@ func (heads *Heads) GetREST() (web.Resource, error) {
 	return API{
 		Outputs: heads.outputs.makeAPI(),
 		Heads:   heads.heads.makeAPI(),
+		Groups:  heads.groups.makeAPI(),
 	}, nil
 }
 

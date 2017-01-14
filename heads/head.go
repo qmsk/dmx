@@ -51,7 +51,7 @@ type HeadParameters struct {
 
 // A single DMX receiver using multiple consecutive DMX channels from a base address within a single universe
 type Head struct {
-	id       string
+	id       HeadID
 	config   HeadConfig
 	headType *HeadType
 	output   *Output
@@ -119,7 +119,7 @@ func (head *Head) Parameters() HeadParameters {
 
 // Web API GET
 type APIHead struct {
-	ID     string
+	ID     HeadID
 	Config HeadConfig
 	Type   *HeadType
 

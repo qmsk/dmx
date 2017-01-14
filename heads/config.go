@@ -40,6 +40,8 @@ func load(obj interface{}, path string) (string, error) {
 
 type ColorName string
 type ColorChannel string
+type GroupID string
+type HeadID string
 
 const (
 	ColorChannelRed   = "red"
@@ -86,12 +88,19 @@ type HeadConfig struct {
 	Universe Universe
 	Address  dmx.Address
 	Name     string
+	Groups   []GroupID
+}
+
+type GroupConfig struct {
+	Heads []HeadID
+	Name  string
 }
 
 type Config struct {
 	HeadTypes map[string]*HeadType
 
-	Heads map[string]HeadConfig
+	Heads  map[HeadID]HeadConfig
+	Groups map[GroupID]GroupConfig
 }
 
 func (config *Config) loadTypes(rootPath string) error {
@@ -131,6 +140,7 @@ func (config *Config) loadTypes(rootPath string) error {
 func (options Options) Config(path string) (*Config, error) {
 	var config = Config{
 		HeadTypes: make(map[string]*HeadType),
+		Groups:    make(map[GroupID]GroupConfig),
 	}
 
 	if err := config.loadTypes(options.LibraryPath); err != nil {
