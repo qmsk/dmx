@@ -1,12 +1,27 @@
-<div class="dmx-heads">
-  <button class="dmx-head color"
-    *ngFor="let head of service.ofColor()"
-    [class.active]="headActive(head)"
-    [style.background-color]="head.Color | color"
-    (click)="headActive(head) ? unselect(head) : select(head)"
-  >
-    <label class="ID">{{head.ID}}</label>
-  </button>
+<div class="split vertical">
+  <h2>Heads</h2>
+  <div class="dmx-heads">
+    <button class="dmx-head color"
+      *ngFor="let head of listHeads()"
+      [class.active]="headActive(head)"
+      [style.background-color]="head.Color | color"
+      (click)="headActive(head) ? unselectHead(head) : selectHead(head)"
+    >
+      <label class="ID">{{head.ID}}</label>
+    </button>
+  </div>
+
+  <h2>Groups</h2>
+  <div class="dmx-heads">
+    <button class="dmx-head color"
+      *ngFor="let group of listGroups()"
+      [class.active]="groupActive(group)"
+      [style.background-color]="group.Color | color"
+      (click)="groupActive(group) ? unselectGroup(group) : selectGroup(group)"
+    >
+      <label class="ID">{{group.ID}}</label>
+    </button>
+  </div>
 </div>
 
 <div class="controls">

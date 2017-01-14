@@ -1,7 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 
-import { Value, Color } from './types';
-import { APIColors } from './head';
+import { Value, Color, Colors } from './types';
 
 @Component({
   moduleId: module.id,
@@ -11,7 +10,7 @@ import { APIColors } from './head';
   styleUrls: [ 'head-colors.component.css' ],
 })
 export class HeadColorsComponent {
-  @Input() colors: APIColors;
+  @Input() colors: Colors;
   @Input() color: Color;
   @Output() colorChange = new EventEmitter<Color>();
 

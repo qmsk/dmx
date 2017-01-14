@@ -77,18 +77,23 @@ div.spinner {
   justify-content: space-between;
 }
 
-.view.split .dmx-heads {
+.split.vertical {
+  flex-direction: column;;
+}
+
+.view.split > .dmx-heads {
   flex: 1;
 
   padding: 1em;
 }
 
-.view.split .controls {
+.view.split > .controls {
   flex: 0 30%;
 
   align-self: stretch;
 }
 
+/* Controls pane on right */
 .controls {
   padding: 0em;
 
