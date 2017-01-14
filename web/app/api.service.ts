@@ -24,7 +24,7 @@ export class APIService {
   presets: Map<string, Preset>;
 
   listHeads(sort?: (Head) => any, filter?: (Head) => boolean): Head[] {
-    let heads = Object.keys(this.heads).map(key => this.heads[key]);
+    let heads = Array.from(this.heads.values());
 
     if (filter)
       heads = _.filter(heads, filter);
@@ -102,24 +102,23 @@ export class APIService {
 
   private loadHeads(apiHeads: APIHeads) {
     for (let id in apiHeads) {
-      if (this.heads[id]) {
-        this.heads[id].load(apiHeads[id]);
+      let head = this.heads.get(id)
+
+      if (head) {
+        head.load(apiHeads[id])
       } else {
-        this.heads[id] = new Head(this.postSubject, apiHeads[id]);
+        this.heads.set(id, new Head(this.postSubject, apiHeads[id]))
       }
     }
 
     console.log("Loaded heads", this.heads);
-  }
-  private lookupHeads(ids: string[]) {
-    return ids.map((id) => this.heads[id]);
   }
 
   private loadGroups(apiGroups: APIGroups) {
     for (let id in apiGroups) {
       let group: Group;
 
-      let heads = apiGroups[id].Heads.map((id) => this.heads[id]);
+      let heads = apiGroups[id].Heads.map((id) => this.heads.get(id));
 
       if (group = this.groups.get(id)) {
         group.load(apiGroups[id]);
@@ -136,7 +135,7 @@ export class APIService {
 
       if (apiPresets[id].Config.Heads) {
         heads = Object.keys(apiPresets[id].Config.Heads).map((id) => {
-          return this.heads[id]
+          return this.heads.get(id)
         })
       }
 
