@@ -43,6 +43,10 @@ type ColorChannel string
 type GroupID string
 type HeadID string
 
+func (headID HeadID) index(index uint) HeadID {
+	return HeadID(fmt.Sprintf("%s.%d", headID, index+1))
+}
+
 const (
 	ColorChannelRed   = "red"
 	ColorChannelGreen = "green"
@@ -88,7 +92,25 @@ type HeadConfig struct {
 	Universe Universe
 	Address  dmx.Address
 	Name     string
+	Count    uint // Clone multiple copies of the head at id.N
 	Groups   []GroupID
+
+	headType *HeadType
+}
+
+// Number of channels used by head for count indexing
+func (headConfig HeadConfig) step() uint {
+	return uint(len(headConfig.headType.Channels))
+}
+
+// Return an indexed copy of the head, step addresses ahead
+func (headConfig HeadConfig) index(index uint) HeadConfig {
+	// copy
+	var indexed HeadConfig = headConfig
+
+	indexed.Address = indexed.Address + dmx.Address(index*headConfig.step())
+
+	return indexed
 }
 
 type GroupConfig struct {
@@ -99,7 +121,7 @@ type GroupConfig struct {
 type Config struct {
 	HeadTypes map[string]*HeadType
 
-	Heads  map[HeadID]HeadConfig
+	Heads  map[HeadID]*HeadConfig
 	Groups map[GroupID]GroupConfig
 }
 
@@ -137,6 +159,19 @@ func (config *Config) loadTypes(rootPath string) error {
 	})
 }
 
+// map relative Head.Type= references
+func (config *Config) mapTypes() error {
+	for headID, headConfig := range config.Heads {
+		if headType, exists := config.HeadTypes[headConfig.Type]; !exists {
+			return fmt.Errorf("heads.%s: Invalid Head.Type=%v", headID, headConfig.Type)
+		} else {
+			headConfig.headType = headType
+		}
+	}
+
+	return nil
+}
+
 func (options Options) Config(path string) (*Config, error) {
 	var config = Config{
 		HeadTypes: make(map[string]*HeadType),
@@ -148,6 +183,10 @@ func (options Options) Config(path string) (*Config, error) {
 	}
 
 	if _, err := load(&config, path); err != nil {
+		return nil, err
+	}
+
+	if err := config.mapTypes(); err != nil {
 		return nil, err
 	}
 

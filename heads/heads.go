@@ -1,8 +1,6 @@
 package heads
 
 import (
-	"fmt"
-
 	log "github.com/Sirupsen/logrus"
 	"github.com/SpComb/qmsk-dmx"
 	"github.com/qmsk/go-web"
@@ -23,17 +21,19 @@ func (options Options) Heads(config *Config) (*Heads, error) {
 
 	heads.events.init()
 
+	// preload groups
+	for groupID, groupConfig := range config.Groups {
+		heads.addGroup(groupID, groupConfig)
+	}
+
 	for headID, headConfig := range config.Heads {
-		var head *Head
-
-		if headType, exists := config.HeadTypes[headConfig.Type]; !exists {
-			return nil, fmt.Errorf("Invalid Head.Type=%v", headConfig.Type)
+		if headConfig.Count > 0 {
+			var index uint
+			for index = 0; index < headConfig.Count; index++ {
+				heads.addHead(headID.index(index), headConfig.index(index), headConfig.headType)
+			}
 		} else {
-			head = heads.addHead(headID, headConfig, headType)
-		}
-
-		for _, groupID := range headConfig.Groups {
-			heads.group(groupID, config.Groups[groupID]).addHead(head)
+			heads.addHead(headID, *headConfig, headConfig.headType)
 		}
 	}
 
@@ -74,7 +74,7 @@ func (heads *Heads) Output(config OutputConfig, dmxWriter dmx.Writer) {
 	heads.output(config.Universe).init(config, dmxWriter)
 }
 
-func (heads *Heads) group(id GroupID, config GroupConfig) *Group {
+func (heads *Heads) addGroup(id GroupID, config GroupConfig) *Group {
 	group := heads.groups[id]
 
 	if group == nil {
@@ -83,6 +83,14 @@ func (heads *Heads) group(id GroupID, config GroupConfig) *Group {
 	}
 
 	return group
+}
+
+func (heads *Heads) group(id GroupID) *Group {
+	if group := heads.groups[id]; group == nil {
+		return heads.addGroup(id, GroupConfig{})
+	} else {
+		return group
+	}
 }
 
 // Patch head
@@ -96,9 +104,16 @@ func (heads *Heads) addHead(id HeadID, config HeadConfig, headType *HeadType) *H
 		events:   heads.events,
 	}
 
+	// load head parameters
 	head.init()
 
+	// map heads
 	heads.heads[id] = &head
+
+	// map groups
+	for _, groupID := range config.Groups {
+		heads.group(groupID).addHead(&head)
+	}
 
 	return &head
 }

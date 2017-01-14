@@ -5,17 +5,14 @@ Name        = "Test LED"
 Type        = "stairville/ledpar56-5ch"
 Universe    = 1
 Address     = 1
-Name        = "Test LED 1"
-Groups      = ["test-led"]
-
-[heads.test-led2]
-Type        = "stairville/ledpar56-5ch"
-Universe    = 1
-Address     = 5
-Name        = "Test LED 2"
+Count       = 2
+Name        = "Test LED"
 Groups      = ["test-led"]
 
 [heads.test-dimmer]
 Type        = "generic/dimmer-1ch"
 Universe    = 1
 Address     = 250
+Count       = 4
+Name        = "Test Dimmer"
+Groups      = ["test-dimmer"]
