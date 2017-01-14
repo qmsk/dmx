@@ -2,8 +2,7 @@ import { Component } from '@angular/core';
 
 import { WebSocketService } from 'lib/websocket';
 
-import { HeadService } from './head.service';
-import { Head } from './head';
+import { APIService } from './api.service';
 
 @Component({
   moduleId: module.id,
@@ -12,11 +11,11 @@ import { Head } from './head';
   styleUrls: [ 'app.component.css' ],
   providers: [
     WebSocketService,
-    HeadService,
+    APIService,
   ],
 })
 export class AppComponent  {
   title = "qmsk::dmx";
 
-  constructor (private headService: HeadService) { }
+  constructor (private api: APIService) { }
 }

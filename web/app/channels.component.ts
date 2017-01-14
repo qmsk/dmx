@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 
 import { Head, Channel } from './head';
-import { HeadService } from './head.service';
+import { APIService } from './api.service';
 
 @Component({
   moduleId: module.id,
@@ -11,10 +11,10 @@ import { HeadService } from './head.service';
   styleUrls: [ 'channels.component.css' ],
 })
 export class ChannelsComponent {
-  constructor (private headService: HeadService) { }
+  constructor (private api: APIService) { }
 
-  heads() {
-    return this.headService.byAddress();
+  listHeads(): Head[] {
+    return this.api.listHeads(head => [head.Config.Universe, head.Config.Address]);
   }
 
   setHeadChannelDMX(head: Head, channel: Channel, value: string) {

@@ -1,13 +1,31 @@
-<div class="dmx-heads">
-  <button class="dmx-head"
-    *ngFor="let head of service.byID()"
-    (click)="service.select(head)"
-    [class.active]="service.isActive(head)"
-  >
-    <label class="ID">{{head.ID}}</label>
-  </button>
+<div class="split vertical">
+  <div>
+    <h2>Groups</h2>
+    <div class="dmx-heads">
+      <button class="dmx-head"
+        *ngFor="let group of listGroups()"
+        (click)="selectGroup(group)"
+        [class.active]="groupActive(group)"
+      >
+        <label class="id">{{group.ID}}</label>
+      </button>
+    </div>
+  </div>
+
+  <div>
+    <h2>Heads</h2>
+    <div class="dmx-heads">
+      <button class="dmx-head"
+        *ngFor="let head of listHeads()"
+        (click)="selectHead(head)"
+        [class.active]="headActive(head)"
+      >
+        <label class="id">{{head.ID}}</label>
+      </button>
+    </div>
+  </div>
 </div>
 
 <dmx-head class="controls"
-  [head]="service.active"
+  [head]="head"
 ></dmx-head>

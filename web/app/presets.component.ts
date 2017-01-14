@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 
 import { Preset } from './head';
-import { HeadService } from './head.service';
+import { APIService } from './api.service';
 
 @Component({
   moduleId: module.id,
@@ -12,12 +12,12 @@ import { HeadService } from './head.service';
   styleUrls: [ 'presets.component.css' ],
 })
 export class PresetsComponent {
-  constructor (private service: HeadService) {
+  constructor (private api: APIService) {
 
   }
 
   list(): Preset[] {
-    return this.service.listPresets();
+    return this.api.listPresets();
   }
 
   isActive(preset: Preset): boolean {

@@ -14,13 +14,14 @@ import { API, APIEvents, APIHeads, APIGroups, APIPresets } from './api';
 import { Post, Head, Group, Preset } from './head';
 
 @Injectable()
-export class HeadService {
+export class APIService {
   private webSocket: Subscription;
   postSubject = new Subject<Post>();
+
+  // state
   heads: Map<string, Head>;
   groups: Map<string, Group>;
   presets: Map<string, Preset>;
-  active: Head = null;
 
   listHeads(sort?: (Head) => any, filter?: (Head) => boolean): Head[] {
     let heads = Object.keys(this.heads).map(key => this.heads[key]);
@@ -54,29 +55,6 @@ export class HeadService {
       presets = _.sortBy(presets, sort);
 
     return presets;
-  }
-
-  byAddress(): Head[] {
-    return this.listHeads(head => [head.Config.Universe, head.Config.Address]);
-  }
-  byID(): Head[] {
-    return this.listHeads(head => head.ID);
-  }
-
-  ofIntensity(): Head[] {
-    return this.listHeads(head => head.ID, head => !!head.Intensity);
-  }
-
-  select(head: Head) {
-    console.log("Select head", head);
-    this.active = head;
-  }
-  isActive(head: Head): boolean {
-    return this.active == head;
-  }
-  apply(func: (Head) => any) {
-    if (this.active)
-      func(this.active);
   }
 
   constructor(private http: Http, webSocketService: WebSocketService) {

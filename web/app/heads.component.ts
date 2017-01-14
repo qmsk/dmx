@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 
-import { Head } from './head';
-import { HeadService } from './head.service';
+import { Head, Group } from './head';
+import { APIService } from './api.service';
 
 @Component({
   moduleId: module.id,
@@ -12,5 +12,34 @@ import { HeadService } from './head.service';
   styleUrls: [ 'heads.component.css' ],
 })
 export class HeadsComponent {
-  constructor (private service: HeadService) { }
+  head: Head
+  group: Group
+
+  constructor (private api: APIService) {
+
+  }
+
+  listHeads(): Head[] {
+    return this.api.listHeads(head => head.ID)
+  }
+  listGroups(): Group[] {
+    return this.api.listGroups(group => group.ID)
+  }
+
+  selectHead(head: Head) {
+    this.head = head
+    this.group = null
+  }
+  selectGroup(group: Group) {
+    this.head = null
+    this.group = group
+  }
+
+  headActive(head: Head): boolean {
+    return this.head == head;
+  }
+  groupActive(group: Group): boolean {
+    return this.group == group;
+  }
+
 }

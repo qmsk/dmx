@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 
 import { Head } from './head';
-import { HeadService } from './head.service';
+import { APIService } from './api.service';
 
 @Component({
   moduleId: module.id,
@@ -11,5 +11,10 @@ import { HeadService } from './head.service';
   styleUrls: [ 'intensity.component.css' ],
 })
 export class IntensityComponent {
-  constructor (private service: HeadService) { }
+  constructor (private api: APIService) { }
+
+  listHeads(): Head[] {
+    return this.api.listHeads(head => head.ID, head => !!head.Intensity);
+  }
+
 }

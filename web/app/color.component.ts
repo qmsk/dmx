@@ -2,7 +2,7 @@ import { Component, Input, HostBinding } from '@angular/core';
 
 import { Value, Color, Colors } from './types';
 import { Head, Group, ColorParameter } from './head';
-import { HeadService } from './head.service';
+import { APIService } from './api.service';
 
 @Component({
   moduleId: module.id,
@@ -18,16 +18,16 @@ export class ColorComponent {
   heads: Set<Head>;
   groups: Set<Group>;
 
-  constructor (private service: HeadService) {
+  constructor (private api: APIService) {
     this.heads = new Set<Head>();
     this.groups = new Set<Group>();
   }
 
   listHeads(): Head[] {
-    return this.service.listHeads(head => head.ID, head => !!head.Color);
+    return this.api.listHeads(head => head.ID, head => !!head.Color);
   }
   listGroups(): Group[] {
-    return this.service.listGroups(group => group.ID, group => !!group.Color);
+    return this.api.listGroups(group => group.ID, group => !!group.Color);
   }
 
   headActive(head: Head): boolean {
