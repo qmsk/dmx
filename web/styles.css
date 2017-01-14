@@ -7,6 +7,22 @@ a {
   color: #ccc;
 }
 
+h2 {
+  background-color: #888;
+  color: #111;
+
+  margin: 0;
+  padding: 0.25em;
+}
+
+h3 {
+  background-color: #133337;
+  color: #ccc;
+
+  margin: 0;
+  padding: 0.25em;
+}
+
 /* Structure */
 .app {
   width: 100%;
@@ -78,13 +94,20 @@ div.spinner {
 }
 
 .split.vertical {
-  flex-direction: column;;
+  flex-direction: column;
+  align-items: stretch;
 }
 
 .view.split > .dmx-heads {
   flex: 1;
 
   padding: 1em;
+}
+
+.view.split > .split {
+  flex: 1;
+
+  padding: 0em;
 }
 
 .view.split > .controls {
@@ -99,22 +122,6 @@ div.spinner {
 
   background-color: #444;
   color: #ccc;
-}
-
-.controls h2 {
-  background-color: #aaa;
-  color: #111;
-
-  margin: 0;
-  padding: 0.25em;
-}
-
-.controls h3 {
-  background-color: #133337;
-  color: #ccc;
-
-  margin: 0;
-  padding: 0.25em;
 }
 
 /* Flow view with heads */
