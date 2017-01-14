@@ -135,6 +135,11 @@ func (heads *Heads) addPreset(id PresetID, config PresetConfig) error {
 	var preset = Preset{
 		ID:     id,
 		Config: config,
+		Groups: make(map[GroupID]APIGroupParams),
+	}
+
+	if preset.Config.All != nil {
+		preset.initAll(heads.heads)
 	}
 
 	for groupID, presetParameters := range preset.Config.Groups {
@@ -142,6 +147,8 @@ func (heads *Heads) addPreset(id PresetID, config PresetConfig) error {
 			return fmt.Errorf("No such group: %v", groupID)
 		} else if err := presetParameters.initGroup(group); err != nil {
 			return err
+		} else {
+			preset.initGroup(group, presetParameters)
 		}
 	}
 
@@ -150,6 +157,8 @@ func (heads *Heads) addPreset(id PresetID, config PresetConfig) error {
 			return fmt.Errorf("No such head: %v", headID)
 		} else if err := presetParameters.initHead(head); err != nil {
 			return err
+		} else {
+			preset.initHead(head, presetParameters)
 		}
 	}
 
