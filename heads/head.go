@@ -58,6 +58,53 @@ func (headConfig HeadConfig) index(index uint) HeadConfig {
 	return indexed
 }
 
+// Top-level map
+type headMap map[HeadID]*Head
+
+type APIHeads map[HeadID]APIHead
+
+func (heads headMap) makeAPI() APIHeads {
+	log.Debug("heads:headMap.makeAPI")
+
+	var apiHeads = make(APIHeads)
+
+	for headID, head := range heads {
+		apiHeads[headID] = head.makeAPI()
+	}
+	return apiHeads
+}
+
+type headList headMap
+
+func (heads headList) GetREST() (web.Resource, error) {
+	log.Debug("heads:headList.GetREST")
+
+	var apiHeads []APIHead
+
+	for _, head := range heads {
+		apiHeads = append(apiHeads, head.makeAPI())
+	}
+
+	return apiHeads, nil
+}
+
+func (headMap headMap) Index(name string) (web.Resource, error) {
+	log.Debugln("heads:headMap.Index", name)
+
+	switch name {
+	case "":
+		return headList(headMap), nil
+	default:
+		return headMap[HeadID(name)], nil
+	}
+}
+
+func (headMap headMap) GetREST() (web.Resource, error) {
+	log.Debug("heads:headMap.GetREST")
+
+	return headMap.makeAPI(), nil
+}
+
 // Channels
 type HeadChannels map[ChannelType]*Channel
 
@@ -230,26 +277,18 @@ func (post *APIHeadParams) Apply() error {
 		}
 	}
 
-	if post.Intensity == nil {
-
-	} else if post.head.parameters.Intensity == nil {
-		return web.RequestErrorf("Head does not support intensity")
-	} else {
-		post.Intensity.headIntensity = post.head.parameters.Intensity
-
-		if err := post.Intensity.Apply(); err != nil {
+	if post.Intensity != nil {
+		if err := post.Intensity.initHead(post.head.parameters.Intensity); err != nil {
+			return web.RequestError(err)
+		} else if err := post.Intensity.Apply(); err != nil {
 			return err
 		}
 	}
 
-	if post.Color == nil {
-
-	} else if post.head.parameters.Color == nil {
-		return web.RequestErrorf("Head does not support color")
-	} else {
-		post.Color.headColor = post.head.parameters.Color
-
-		if err := post.Color.Apply(); err != nil {
+	if post.Color != nil {
+		if err := post.Color.initHead(post.head.parameters.Color); err != nil {
+			return web.RequestError(err)
+		} else if err := post.Color.Apply(); err != nil {
 			return err
 		}
 	}

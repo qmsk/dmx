@@ -1,6 +1,7 @@
 package heads
 
 import (
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/qmsk/go-web"
 )
@@ -140,6 +141,26 @@ type APIColor struct {
 	groupColor *GroupColor
 
 	ColorRGB
+}
+
+func (apiColor *APIColor) initHead(headColor *HeadColor) error {
+	if headColor == nil {
+		return fmt.Errorf("Head does not support color")
+	}
+
+	apiColor.headColor = headColor
+
+	return nil
+}
+
+func (apiColor *APIColor) initGroup(groupColor *GroupColor) error {
+	if groupColor == nil {
+		return fmt.Errorf("Group does not support color")
+	}
+
+	apiColor.groupColor = groupColor
+
+	return nil
 }
 
 func (apiColor *APIColor) Apply() error {

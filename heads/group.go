@@ -145,26 +145,18 @@ func (group *Group) PostREST() (web.Resource, error) {
 }
 
 func (apiGroupParams APIGroupParams) Apply() error {
-	if apiGroupParams.Intensity == nil {
-
-	} else if apiGroupParams.group.intensity == nil {
-		return web.RequestErrorf("Group does not support intensity")
-	} else {
-		apiGroupParams.Intensity.groupIntensity = apiGroupParams.group.intensity
-
-		if err := apiGroupParams.Intensity.Apply(); err != nil {
+	if apiGroupParams.Intensity != nil {
+		if err := apiGroupParams.Intensity.initGroup(apiGroupParams.group.intensity); err != nil {
+			return web.RequestError(err)
+		} else if err := apiGroupParams.Intensity.Apply(); err != nil {
 			return err
 		}
 	}
 
-	if apiGroupParams.Color == nil {
-
-	} else if apiGroupParams.group.color == nil {
-		return web.RequestErrorf("Group does not support color")
-	} else {
-		apiGroupParams.Color.groupColor = apiGroupParams.group.color
-
-		if err := apiGroupParams.Color.Apply(); err != nil {
+	if apiGroupParams.Color != nil {
+		if err := apiGroupParams.Color.initGroup(apiGroupParams.group.color); err != nil {
+			return web.RequestError(err)
+		} else if err := apiGroupParams.Color.Apply(); err != nil {
 			return err
 		}
 	}

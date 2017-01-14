@@ -1,9 +1,9 @@
 package heads
 
 import (
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/SpComb/qmsk-dmx"
-	"github.com/qmsk/go-web"
 )
 
 type Options struct {
@@ -16,6 +16,7 @@ func (options Options) Heads(config *Config) (*Heads, error) {
 		outputs: make(outputMap),
 		heads:   make(headMap),
 		groups:  make(groupMap),
+		presets: make(presetMap),
 		events:  new(Events),
 	}
 
@@ -42,16 +43,22 @@ func (options Options) Heads(config *Config) (*Heads, error) {
 		group.init()
 	}
 
+	//  load presets
+	for presetID, presetConfig := range config.Presets {
+		if err := heads.addPreset(presetID, *presetConfig); err != nil {
+			return nil, fmt.Errorf("Load preset=%v: %v", presetID, err)
+		}
+	}
+
 	return &heads, nil
 }
-
-type headMap map[HeadID]*Head
 
 type Heads struct {
 	log     *log.Entry
 	outputs outputMap
 	heads   headMap
 	groups  groupMap
+	presets presetMap
 	events  *Events
 }
 
@@ -124,6 +131,33 @@ func (heads *Heads) addHead(id HeadID, config HeadConfig, headType *HeadType) *H
 	return &head
 }
 
+func (heads *Heads) addPreset(id PresetID, config PresetConfig) error {
+	var preset = Preset{
+		ID:     id,
+		Config: config,
+	}
+
+	for groupID, presetParameters := range preset.Config.Groups {
+		if group := heads.groups[groupID]; group == nil {
+			return fmt.Errorf("No such group: %v", groupID)
+		} else if err := presetParameters.initGroup(group); err != nil {
+			return err
+		}
+	}
+
+	for headID, presetParameters := range preset.Config.Heads {
+		if head := heads.heads[headID]; head == nil {
+			return fmt.Errorf("No such head: %v", headID)
+		} else if err := presetParameters.initHead(head); err != nil {
+			return err
+		}
+	}
+
+	heads.presets[id] = &preset
+
+	return nil
+}
+
 func (heads *Heads) Each(fn func(head *Head)) {
 	for _, head := range heads.heads {
 		fn(head)
@@ -141,49 +175,4 @@ func (heads *Heads) Refresh() error {
 	}
 
 	return refreshErr
-}
-
-// Web API
-type APIHeads map[HeadID]APIHead
-
-func (heads headMap) makeAPI() APIHeads {
-	log.Debug("heads:headMap.makeAPI")
-
-	var apiHeads = make(APIHeads)
-
-	for headID, head := range heads {
-		apiHeads[headID] = head.makeAPI()
-	}
-	return apiHeads
-}
-
-type headList headMap
-
-func (heads headList) GetREST() (web.Resource, error) {
-	log.Debug("heads:headList.GetREST")
-
-	var apiHeads []APIHead
-
-	for _, head := range heads {
-		apiHeads = append(apiHeads, head.makeAPI())
-	}
-
-	return apiHeads, nil
-}
-
-func (headMap headMap) Index(name string) (web.Resource, error) {
-	log.Debugln("heads:headMap.Index", name)
-
-	switch name {
-	case "":
-		return headList(headMap), nil
-	default:
-		return headMap[HeadID(name)], nil
-	}
-}
-
-func (headMap headMap) GetREST() (web.Resource, error) {
-	log.Debug("heads:headMap.GetREST")
-
-	return headMap.makeAPI(), nil
 }

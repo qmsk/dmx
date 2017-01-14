@@ -1,6 +1,7 @@
 package heads
 
 import (
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/qmsk/go-web"
 )
@@ -87,6 +88,26 @@ type APIIntensity struct {
 	groupIntensity *GroupIntensity
 
 	Intensity
+}
+
+func (apiIntensity *APIIntensity) initHead(headIntensity *HeadIntensity) error {
+	if headIntensity == nil {
+		return fmt.Errorf("Head does not support intensity")
+	}
+
+	apiIntensity.headIntensity = headIntensity
+
+	return nil
+}
+
+func (apiIntensity *APIIntensity) initGroup(groupIntensity *GroupIntensity) error {
+	if groupIntensity == nil {
+		return web.RequestErrorf("Group does not support intensity")
+	}
+
+	apiIntensity.groupIntensity = groupIntensity
+
+	return nil
 }
 
 func (apiIntensity *APIIntensity) Apply() error {

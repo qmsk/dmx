@@ -9,6 +9,7 @@ type API struct {
 	Outputs []APIOutput
 	Heads   map[HeadID]APIHead
 	Groups  map[GroupID]APIGroup
+	Presets presetMap
 }
 
 func (heads *Heads) Index(name string) (web.Resource, error) {
@@ -23,6 +24,8 @@ func (heads *Heads) Index(name string) (web.Resource, error) {
 		return heads.outputs, nil
 	case "heads":
 		return heads.heads, nil
+	case "presets":
+		return heads.presets, nil
 	default:
 		return nil, nil
 	}
@@ -34,6 +37,7 @@ func (heads *Heads) GetREST() (web.Resource, error) {
 		Outputs: heads.outputs.makeAPI(),
 		Heads:   heads.heads.makeAPI(),
 		Groups:  heads.groups.makeAPI(),
+		Presets: heads.presets,
 	}, nil
 }
 
