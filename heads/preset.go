@@ -107,17 +107,24 @@ type APIPresetParams struct {
 }
 
 func (apiPresetParams APIPresetParams) Apply() error {
-	for _, head := range apiPresetParams.preset.all {
-		var headParams = APIHeadParams{
-			head:      head,
-			Intensity: apiPresetParams.preset.Config.All.Intensity,
-			Color:     apiPresetParams.preset.Config.All.Color,
-		}
+	if allParams := apiPresetParams.preset.Config.All; allParams != nil {
+		for _, head := range apiPresetParams.preset.all {
+			var headParams = APIHeadParams{head: head}
 
-		if err := headParams.Apply(); err != nil {
-			return err
-		} else if err := head.Apply(); err != nil {
-			return err
+			// all params are optional
+			if allParams.Intensity != nil && head.parameters.Intensity != nil {
+				headParams.Intensity = allParams.Intensity
+			}
+
+			if allParams.Color != nil && head.parameters.Color != nil {
+				headParams.Color = allParams.Color
+			}
+
+			if err := headParams.Apply(); err != nil {
+				return err
+			} else if err := head.Apply(); err != nil {
+				return err
+			}
 		}
 	}
 
