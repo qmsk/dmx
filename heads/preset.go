@@ -68,13 +68,15 @@ type Preset struct {
 	ID     PresetID
 	Config PresetConfig
 
-	all    headMap
-	Groups map[GroupID]APIGroupParams
-	Heads  map[HeadID]APIHeadParams
+	allHeads  headMap
+	allGroups groupMap
+	Groups    map[GroupID]APIGroupParams
+	Heads     map[HeadID]APIHeadParams
 }
 
-func (preset *Preset) initAll(heads headMap) {
-	preset.all = heads
+func (preset *Preset) initAll(heads headMap, groups groupMap) {
+	preset.allHeads = heads
+	preset.allGroups = groups
 }
 
 func (preset *Preset) initGroup(group *Group, presetParameters PresetParameters) {
@@ -108,7 +110,7 @@ type APIPresetParams struct {
 
 func (apiPresetParams APIPresetParams) Apply() error {
 	if allParams := apiPresetParams.preset.Config.All; allParams != nil {
-		for _, head := range apiPresetParams.preset.all {
+		for _, head := range apiPresetParams.preset.allHeads {
 			var headParams = APIHeadParams{head: head}
 
 			// all params are optional
@@ -123,6 +125,13 @@ func (apiPresetParams APIPresetParams) Apply() error {
 			if err := headParams.Apply(); err != nil {
 				return err
 			} else if err := head.Apply(); err != nil {
+				return err
+			}
+		}
+
+		// also update groups after heads have been updated
+		for _, group := range apiPresetParams.preset.allGroups {
+			if err := group.Apply(); err != nil {
 				return err
 			}
 		}

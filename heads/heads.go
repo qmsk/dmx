@@ -139,7 +139,7 @@ func (heads *Heads) addPreset(id PresetID, config PresetConfig) error {
 	}
 
 	if preset.Config.All != nil {
-		preset.initAll(heads.heads)
+		preset.initAll(heads.heads, heads.groups)
 	}
 
 	for groupID, presetParameters := range preset.Config.Groups {
