@@ -36,7 +36,13 @@ export class MainComponent {
   }
 
   headActive(head: Head): boolean {
-    return this.head == head;
+    if (this.head) {
+      return this.head == head
+    } else if (this.group) {
+      return this.group.Heads.has(head)
+    } else {
+      return false
+    }
   }
   groupActive(group: Group): boolean {
     return this.group == group;

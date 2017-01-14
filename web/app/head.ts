@@ -219,32 +219,32 @@ export class Head implements Parameters {
 }
 
 export class Group implements Parameters {
-  private post: PostFunc;
+  private post: PostFunc
 
   ID:     string
-  Heads:  Head[]
+  Heads:  Set<Head>
   Colors: Colors
 
-  Intensity?: IntensityParameter;
-  Color?: ColorParameter;
+  Intensity?: IntensityParameter
+  Color?: ColorParameter
 
   constructor(postObserver: Observer<Post>, api: APIGroup, heads: Head[]) {
-    this.ID = api.ID;
-    this.Heads = heads;
-    this.Colors = api.Colors;
+    this.ID = api.ID
+    this.Heads = new Set<Head>(heads)
+    this.Colors = api.Colors
 
-    this.post = (parameters: APIParameters) => postObserver.next({type: "groups", id: this.ID, parameters: parameters});
-    this.load(api);
+    this.post = (parameters: APIParameters) => postObserver.next({type: "groups", id: this.ID, parameters: parameters})
+    this.load(api)
   }
 
   load(api: APIGroup) {
-    console.log("Group.load", this.ID, api);
+    console.log("Group.load", this.ID, api)
 
     if (api.Intensity) {
-      this.Intensity = new IntensityParameter(this.post, api.Intensity);
+      this.Intensity = new IntensityParameter(this.post, api.Intensity)
     }
     if (api.Color) {
-      this.Color = new ColorParameter(this.post, api.Color);
+      this.Color = new ColorParameter(this.post, api.Color)
     }
   }
 }
