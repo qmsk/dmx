@@ -61,7 +61,8 @@ func (heads *Heads) WebEvents() chan web.Event {
 }
 
 type APIEvents struct {
-	Heads map[string]APIHead
+	Heads  map[HeadID]APIHead
+	Groups map[GroupID]APIGroup
 }
 
 type Events struct {
@@ -71,14 +72,18 @@ type Events struct {
 
 func (events *Events) init() {
 	events.pending = APIEvents{
-		Heads: make(map[string]APIHead),
+		Heads:  make(map[HeadID]APIHead),
+		Groups: make(map[GroupID]APIGroup),
 	}
 }
 
 // Add pending event for Head
 // XXX: unsafe
-func (events *Events) updateHead(id string, apiHead APIHead) {
+func (events *Events) updateHead(id HeadID, apiHead APIHead) {
 	events.pending.Heads[id] = apiHead
+}
+func (events *Events) updateGroup(id GroupID, apiGroup APIGroup) {
+	events.pending.Groups[id] = apiGroup
 }
 
 // Write out and clear pending events

@@ -43,18 +43,10 @@ type Group struct {
 	id     GroupID
 	config GroupConfig
 	heads  headMap
+	events *Events
 
 	intensity *GroupIntensity
 	color     *GroupColor
-}
-
-// make empty group
-func makeGroup(id GroupID, config GroupConfig) *Group {
-	return &Group{
-		id:     id,
-		config: config,
-		heads:  make(headMap),
-	}
 }
 
 func (group *Group) addHead(head *Head) {
@@ -101,13 +93,18 @@ func (group *Group) makeColor() GroupColor {
 }
 
 // Web API
+type APIGroupParams struct {
+	group     *Group
+	Intensity *APIIntensity `json:",omitempty"`
+	Color     *APIColor     `json:",omitempty"`
+}
+
 type APIGroup struct {
 	GroupConfig
 	ID    GroupID
 	Heads []HeadID
 
-	Intensity *APIIntensity `json:",omitempty"`
-	Color     *APIColor     `json:",omitempty"`
+	APIGroupParams
 }
 
 func (group *Group) makeAPIHeads() (heads []HeadID) {
@@ -122,11 +119,56 @@ func (group *Group) makeAPI() APIGroup {
 		GroupConfig: group.config,
 		ID:          group.id,
 		Heads:       group.makeAPIHeads(),
-		Intensity:   group.intensity.makeAPI(),
-		Color:       group.color.makeAPI(),
+		APIGroupParams: APIGroupParams{
+			group:     group,
+			Intensity: group.intensity.makeAPI(),
+			Color:     group.color.makeAPI(),
+		},
 	}
 }
 
 func (group *Group) GetREST() (web.Resource, error) {
 	return group.makeAPI(), nil
+}
+func (group *Group) PostREST() (web.Resource, error) {
+	return &APIGroupParams{group: group}, nil
+}
+
+func (apiGroupParams APIGroupParams) Apply() error {
+	if apiGroupParams.Intensity == nil {
+
+	} else if apiGroupParams.group.intensity == nil {
+		return web.RequestErrorf("Group does not support intensity")
+	} else {
+		apiGroupParams.Intensity.groupIntensity = apiGroupParams.group.intensity
+
+		if err := apiGroupParams.Intensity.Apply(); err != nil {
+			return err
+		}
+	}
+
+	if apiGroupParams.Color == nil {
+
+	} else if apiGroupParams.group.color == nil {
+		return web.RequestErrorf("Group does not support color")
+	} else {
+		apiGroupParams.Color.groupColor = apiGroupParams.group.color
+
+		if err := apiGroupParams.Color.Apply(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// Web API Events
+func (group *Group) Apply() error {
+	group.events.updateGroup(group.id, group.makeAPI())
+
+	for headID, head := range group.heads {
+		head.events.updateHead(headID, head.makeAPI())
+	}
+
+	return nil
 }

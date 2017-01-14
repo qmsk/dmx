@@ -78,7 +78,13 @@ func (heads *Heads) addGroup(id GroupID, config GroupConfig) *Group {
 	group := heads.groups[id]
 
 	if group == nil {
-		group = makeGroup(id, config)
+		group = &Group{
+			id:     id,
+			config: config,
+			heads:  make(headMap),
+			events: heads.events,
+		}
+
 		heads.groups[id] = group
 	}
 

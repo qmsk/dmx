@@ -223,7 +223,7 @@ func (head *Head) Index(name string) (web.Resource, error) {
 
 // Web API Events
 func (head *Head) Apply() error {
-	head.events.updateHead(head.String(), head.makeAPI())
+	head.events.updateHead(head.id, head.makeAPI())
 
 	return nil
 }
