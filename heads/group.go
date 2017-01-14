@@ -4,6 +4,15 @@ import (
 	"github.com/qmsk/go-web"
 )
 
+// Config
+type GroupID string
+
+type GroupConfig struct {
+	Heads []HeadID
+	Name  string
+}
+
+// heads
 type groupMap map[GroupID]*Group
 
 type APIGroups map[GroupID]APIGroup
@@ -39,6 +48,7 @@ func (groupMap groupMap) Index(name string) (web.Resource, error) {
 	}
 }
 
+// Group
 type Group struct {
 	id     GroupID
 	config GroupConfig

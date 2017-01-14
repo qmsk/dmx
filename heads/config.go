@@ -7,7 +7,6 @@ import (
 
 	"github.com/BurntSushi/toml"
 	log "github.com/Sirupsen/logrus"
-	"github.com/SpComb/qmsk-dmx"
 )
 
 func loadToml(obj interface{}, path string) error {
@@ -36,86 +35,6 @@ func load(obj interface{}, path string) (string, error) {
 	default:
 		return name, fmt.Errorf("Unknown %T file ext=%v: %v", obj, ext, path)
 	}
-}
-
-type ColorName string
-type ColorChannel string
-type GroupID string
-type HeadID string
-
-func (headID HeadID) index(index uint) HeadID {
-	return HeadID(fmt.Sprintf("%s.%d", headID, index+1))
-}
-
-const (
-	ColorChannelRed   = "red"
-	ColorChannelGreen = "green"
-	ColorChannelBlue  = "blue"
-)
-
-type ChannelType struct {
-	Control   string       `json:",omitempty"`
-	Intensity bool         `json:",omitempty"`
-	Color     ColorChannel `json:",omitempty"`
-}
-
-func (channelType ChannelType) String() string {
-	if channelType.Control != "" {
-		return "control:" + channelType.Control
-	}
-	if channelType.Intensity {
-		return "intensity"
-	}
-	if channelType.Color != "" {
-		return "color:" + string(channelType.Color)
-	}
-
-	return ""
-}
-
-type HeadType struct {
-	Vendor string
-	Model  string
-	Mode   string
-	URL    string
-
-	Channels []ChannelType
-	Colors   map[ColorName]ColorRGB
-}
-
-func (headType HeadType) String() string {
-	return fmt.Sprintf("%v/%v=%v", headType.Vendor, headType.Model, headType.Mode)
-}
-
-type HeadConfig struct {
-	Type     string
-	Universe Universe
-	Address  dmx.Address
-	Name     string
-	Count    uint // Clone multiple copies of the head at id.N
-	Groups   []GroupID
-
-	headType *HeadType
-}
-
-// Number of channels used by head for count indexing
-func (headConfig HeadConfig) step() uint {
-	return uint(len(headConfig.headType.Channels))
-}
-
-// Return an indexed copy of the head, step addresses ahead
-func (headConfig HeadConfig) index(index uint) HeadConfig {
-	// copy
-	var indexed HeadConfig = headConfig
-
-	indexed.Address = indexed.Address + dmx.Address(index*headConfig.step())
-
-	return indexed
-}
-
-type GroupConfig struct {
-	Heads []HeadID
-	Name  string
 }
 
 type Config struct {

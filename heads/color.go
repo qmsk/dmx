@@ -5,6 +5,15 @@ import (
 	"github.com/qmsk/go-web"
 )
 
+type ColorName string
+type ColorChannel string
+
+const (
+	ColorChannelRed   = "red"
+	ColorChannelGreen = "green"
+	ColorChannelBlue  = "blue"
+)
+
 // Types
 type ColorRGB struct {
 	Red   Value

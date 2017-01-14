@@ -8,6 +8,55 @@ import (
 	"github.com/qmsk/go-web"
 )
 
+// ID
+type HeadID string
+
+func (headID HeadID) index(index uint) HeadID {
+	return HeadID(fmt.Sprintf("%s.%d", headID, index+1))
+}
+
+// Config
+type HeadType struct {
+	Vendor string
+	Model  string
+	Mode   string
+	URL    string
+
+	Channels []ChannelType
+	Colors   map[ColorName]ColorRGB
+}
+
+func (headType HeadType) String() string {
+	return fmt.Sprintf("%v/%v=%v", headType.Vendor, headType.Model, headType.Mode)
+}
+
+type HeadConfig struct {
+	Type     string
+	Universe Universe
+	Address  dmx.Address
+	Name     string
+	Count    uint // Clone multiple copies of the head at id.N
+	Groups   []GroupID
+
+	headType *HeadType
+}
+
+// Number of channels used by head for count indexing
+func (headConfig HeadConfig) step() uint {
+	return uint(len(headConfig.headType.Channels))
+}
+
+// Return an indexed copy of the head, step addresses ahead
+func (headConfig HeadConfig) index(index uint) HeadConfig {
+	// copy
+	var indexed HeadConfig = headConfig
+
+	indexed.Address = indexed.Address + dmx.Address(index*headConfig.step())
+
+	return indexed
+}
+
+// Channels
 type HeadChannels map[ChannelType]*Channel
 
 func (headChannels HeadChannels) GetID(id string) *Channel {

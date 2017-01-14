@@ -5,6 +5,26 @@ import (
 	"github.com/qmsk/go-web"
 )
 
+type ChannelType struct {
+	Control   string       `json:",omitempty"`
+	Intensity bool         `json:",omitempty"`
+	Color     ColorChannel `json:",omitempty"`
+}
+
+func (channelType ChannelType) String() string {
+	if channelType.Control != "" {
+		return "control:" + channelType.Control
+	}
+	if channelType.Intensity {
+		return "intensity"
+	}
+	if channelType.Color != "" {
+		return "color:" + string(channelType.Color)
+	}
+
+	return ""
+}
+
 type Channel struct {
 	channelType ChannelType
 	output      *Output
