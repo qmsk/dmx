@@ -6,3 +6,23 @@ export interface Color {
   Green:  Value;
   Blue:   Value;
 }
+export type Colors = {[ID: string]: Color};
+
+export interface ChannelType {
+  Control?: string;
+  Intensity?: boolean;
+  Color?: string;
+}
+export interface HeadType {
+  Vendor: string;
+  Model:  string;
+  Mode:   string;
+  Channels: ChannelType[];
+  Colors:   Colors;
+}
+export interface HeadConfig {
+  Type:     string;
+  Universe: number;
+  Address:  number;
+  Count:    number;
+}

@@ -10,7 +10,8 @@ import { Subscription } from 'rxjs/Subscription';
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/map';
 
-import { Head, Post, APIHead, APIEvents } from './head';
+import { APIEvents, APIHead, APIHeadParameters } from './api';
+import { Head, Post } from './head';
 
 @Injectable()
 export class HeadService {
@@ -67,14 +68,15 @@ export class HeadService {
     );
 
     this.postSubject.subscribe(
-      headStream => {
-        console.log(`POST head ${headStream.head.ID}...`, headStream.headPost);
+      post => {
+        console.log(`POST head ${post.head.ID}...`, post.headParameters);
 
-        this.post(`/api/heads/${headStream.head.ID}`, headStream.headPost).subscribe(
-          (headParams: APIHead) => {
-            console.log(`POST head ${headStream.head.ID}: OK`, headParams);
+        this.post(`/api/heads/${post.head.ID}`, post.headParameters).subscribe(
+          (headParameters: APIHeadParameters) => {
+            // do not update head from POST, wait for websocket...
+            console.log(`POST head ${post.head.ID}: OK`, headParameters);
           }
-          // TODO: errors to console
+          // TODO: errors to console?
         );
       }
     );

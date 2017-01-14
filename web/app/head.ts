@@ -1,53 +1,47 @@
 import * as _ from 'lodash';
-
-import { DMX, Value, Color } from './types';
 import { Observer } from 'rxjs/Observer';
 
-export interface ChannelPost {
-  DMX?: DMX;
-  Value?: Value;
-}
-export interface HeadPost {
-  Channels?:  {[ID: string]: ChannelPost};
-  Intensity?: APIHeadIntensity;
-  Color?:     APIHeadColor;
+import {
+  DMX,
+  Value,
+  Color,
+  Colors,
+  ChannelType,
+  HeadType,
+  HeadConfig,
+} from './types';
+
+import {
+  APIChannel,
+  APIIntensity,
+  APIColor,
+  APIHead,
+  APIParameters,
+  APIChannelParameters,
+  APIHeadParameters,
+} from './api';
+
+// POST API plumbing
+export type Post = {
+  head: Head,
+  headParameters: APIHeadParameters
 };
-export type Post = { head: Head, headPost: HeadPost };
 
-interface HeadPostFunc {
-  (post: HeadPost);
+interface PostFunc {
+  (parameters: APIParameters);
 }
-
-export type APIColors = {[ID: string]: APIHeadColor};
-
-export interface ChannelType {
-  Control?: string;
-  Intensity?: boolean;
-  Color?: string;
-}
-export interface HeadType {
-  Vendor: string;
-  Model:  string;
-  Mode:   string;
-  Channels: ChannelType[];
-  Colors:   APIColors;
-}
-export interface HeadConfig {
-  Type:     string;
-  Universe: number;
-  Address:  number;
+interface PostHeadFunc {
+  (parameters: APIHeadParameters);
 }
 
-export interface APIHeadIntensity {
-  Intensity: Value;
-}
-export class HeadIntensity {
+// Head.Intensity, Group.Intensity
+export class IntensityParameter {
   private intensity: Value;
 
-  constructor(private post: HeadPostFunc, api: APIHeadIntensity) {
+  constructor(private post: PostFunc, api: APIIntensity) {
     this.load(api)
   }
-  load(api: APIHeadIntensity) {
+  load(api: APIIntensity) {
     this.intensity = api.Intensity;
   }
 
@@ -59,19 +53,16 @@ export class HeadIntensity {
   }
 }
 
-export interface APIHeadColor extends Color {
-
-}
-
-export class HeadColor implements Color {
+// Head.Color, Group.Color
+export class ColorParameter implements Color {
   red:        Value;
   green:      Value;
   blue:       Value;
 
-  constructor(private post: HeadPostFunc, api: APIHeadColor) {
+  constructor(private post: PostFunc, api: APIColor) {
     this.load(api)
   }
-  load(api: APIHeadColor) {
+  load(api: APIColor) {
     this.red = api.Red;
     this.green = api.Green;
     this.blue = api.Blue;
@@ -109,13 +100,6 @@ export class HeadColor implements Color {
   }
 }
 
-export interface APIChannel {
-  ID:       string;
-  Type:     ChannelType;
-  Address:  number;
-  DMX:      DMX;
-  Value:    Value;
-}
 export class Channel {
   ID:       string;
   Type:     ChannelType;
@@ -123,7 +107,7 @@ export class Channel {
   dmx:      DMX;
   value:    Value;
 
-  constructor(private post: HeadPostFunc, api: APIChannel) {
+  constructor(private post: PostHeadFunc, api: APIChannel) {
     this.ID = api.ID;
     this.Type = api.Type;
     this.Address = api.Address;
@@ -171,32 +155,23 @@ export class Channel {
   }
 }
 
-export interface APIHead {
-  ID:       string;
-  Type:     HeadType;
-  Config:   HeadConfig;
-
-  Channels:   {[id: string]: APIChannel};
-  Intensity?: APIHeadIntensity;
-  Color?:     APIHeadColor;
-}
 export class Head {
-  private post: HeadPostFunc;
+  private post: PostHeadFunc;
 
   ID:       string;
   Type:     HeadType;
   Config:   HeadConfig;
 
   channels:   {[id: string]: Channel};
-  Intensity?: HeadIntensity;
-  Color?:     HeadColor;
+  Intensity?: IntensityParameter;
+  Color?:     ColorParameter;
 
   constructor(postObserver: Observer<Post>, api: APIHead) {
     this.ID = api.ID;
     this.Type = api.Type;
     this.Config = api.Config;
 
-    this.post = (headPost: HeadPost) => postObserver.next({head: this, headPost: headPost});
+    this.post = (headParameters: APIHeadParameters) => postObserver.next({head: this, headParameters: headParameters});
     this.channels = {};
     this.load(api);
   }
@@ -213,10 +188,10 @@ export class Head {
       }
     }
     if (api.Intensity) {
-      this.Intensity = new HeadIntensity(this.post, api.Intensity);
+      this.Intensity = new IntensityParameter(this.post, api.Intensity);
     }
     if (api.Color) {
-      this.Color = new HeadColor(this.post, api.Color);
+      this.Color = new ColorParameter(this.post, api.Color);
     }
   }
 
@@ -226,8 +201,4 @@ export class Head {
 
     return _.sortBy(channels, channel => channel.Address);
   }
-}
-
-export interface APIEvents {
-  Heads: Map<string, APIHead>;
 }
