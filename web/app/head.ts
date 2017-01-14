@@ -163,6 +163,7 @@ export class Channel {
 export interface Parameters {
   Intensity?: IntensityParameter;
   Color?:     ColorParameter;
+  Colors?:    Colors;
 }
 
 export class Head implements Parameters {
@@ -211,6 +212,10 @@ export class Head implements Parameters {
 
     return _.sortBy(channels, channel => channel.Address);
   }
+
+  get Colors(): Colors {
+    return this.Type.Colors;
+  }
 }
 
 export class Group implements Parameters {
@@ -240,6 +245,8 @@ export class Group implements Parameters {
       this.Color = new ColorParameter(this.post, api.Color);
     }
   }
+
+  // TODO: Colors
 }
 
 export class Preset {

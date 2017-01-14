@@ -5,13 +5,13 @@ import { APIService } from './api.service';
 
 @Component({
   moduleId: module.id,
-  selector: 'dmx-heads',
+  selector: 'dmx-main',
   host: { class: 'view split' },
 
-  templateUrl: 'heads.component.html',
-  styleUrls: [ 'heads.component.css' ],
+  templateUrl: 'main.component.html',
+  styleUrls: [ 'main.component.css' ],
 })
-export class HeadsComponent {
+export class MainComponent {
   head: Head
   group: Group
 
@@ -41,5 +41,4 @@ export class HeadsComponent {
   groupActive(group: Group): boolean {
     return this.group == group;
   }
-
 }

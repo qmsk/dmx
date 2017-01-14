@@ -9,18 +9,18 @@ import { ChannelsComponent } from './channels.component'
 import { ColorComponent } from './color.component'
 import { ColorPipe } from './color.pipe'
 import { ControlComponent } from './control.component'
-import { HeadsComponent } from './heads.component'
-import { HeadComponent } from './head.component'
+import { ControlsComponent } from './controls.component'
 import { HeadColorsComponent } from './head-colors.component'
 import { IntensityComponent } from './intensity.component'
 import { PresetsComponent } from './presets.component'
+import { MainComponent } from './main.component'
 
 const routes: Routes = [
   { path: 'presets', component: PresetsComponent },
   { path: 'channels', component: ChannelsComponent },
   { path: 'intensity', component: IntensityComponent },
   { path: 'color', component: ColorComponent },
-  { path: '', component: HeadsComponent },
+  { path: '', component: MainComponent },
 ];
 
 @NgModule({
@@ -36,11 +36,11 @@ const routes: Routes = [
     ColorComponent,
     ColorPipe,
     ControlComponent,
-    HeadsComponent,
-    HeadComponent,
+    ControlsComponent,
     HeadColorsComponent,
     IntensityComponent,
     PresetsComponent,
+    MainComponent,
   ],
   bootstrap: [ AppComponent ],
 })
