@@ -5,6 +5,7 @@ import (
 	"github.com/qmsk/go-web"
 )
 
+// Types
 type ColorRGB struct {
 	Red   Value
 	Green Value
@@ -20,6 +21,7 @@ func (color ColorRGB) scaleIntensity(intensity Intensity) ColorRGB {
 	}
 }
 
+// Head.Color
 type HeadColor struct {
 	red       *Channel
 	green     *Channel
@@ -67,19 +69,12 @@ func (hc HeadColor) SetRGBIntensity(colorRGB ColorRGB, intensity Intensity) {
 	}
 }
 
-// Web API
-type APIHeadColor struct {
-	headColor *HeadColor
-
-	ColorRGB
-}
-
-func (headColor *HeadColor) makeAPI() *APIHeadColor {
+func (headColor *HeadColor) makeAPI() *APIColor {
 	if headColor == nil {
 		return nil
 	}
 
-	return &APIHeadColor{
+	return &APIColor{
 		headColor: headColor,
 		ColorRGB:  headColor.GetRGB(),
 	}
@@ -92,14 +87,64 @@ func (headColor HeadColor) PostREST() (web.Resource, error) {
 	return headColor.makeAPI(), nil
 }
 
-func (apiHeadColor *APIHeadColor) Apply() error {
-	if apiHeadColor.headColor == nil {
-		return web.RequestErrorf("Head does not support color")
+// Group.Color
+type GroupColor struct {
+	headColors map[HeadID]HeadColor
+}
+
+func (groupColor GroupColor) exists() bool {
+	return len(groupColor.headColors) > 0
+}
+
+// Return one color for the group
+func (groupColor GroupColor) GetRGB() (colorRGB ColorRGB) {
+	for _, headColor := range groupColor.headColors {
+		// This works fine assuming they are all the same color :)
+		return headColor.GetRGB()
 	}
 
-	log.Debugln("heads:APIHeadColor.Apply", apiHeadColor.ColorRGB)
+	return
+}
 
-	apiHeadColor.ColorRGB = apiHeadColor.headColor.SetRGB(apiHeadColor.ColorRGB)
+func (groupColor GroupColor) SetRGB(colorRGB ColorRGB) ColorRGB {
+	for _, headColor := range groupColor.headColors {
+		headColor.SetRGB(colorRGB)
+	}
+
+	return colorRGB
+}
+
+func (groupColor *GroupColor) makeAPI() *APIColor {
+	if groupColor == nil {
+		return nil
+	}
+
+	return &APIColor{
+		groupColor: groupColor,
+		ColorRGB:   groupColor.GetRGB(),
+	}
+}
+
+// Web API
+type APIColor struct {
+	headColor  *HeadColor
+	groupColor *GroupColor
+
+	ColorRGB
+}
+
+func (apiColor *APIColor) Apply() error {
+	if apiColor.headColor != nil {
+		log.Debugln("heads:APIColor.Apply head", apiColor.headColor, apiColor.ColorRGB)
+
+		apiColor.ColorRGB = apiColor.headColor.SetRGB(apiColor.ColorRGB)
+	}
+
+	if apiColor.groupColor != nil {
+		log.Debugln("heads:APIColor.Apply group", apiColor.groupColor, apiColor.ColorRGB)
+
+		apiColor.ColorRGB = apiColor.groupColor.SetRGB(apiColor.ColorRGB)
+	}
 
 	return nil
 }

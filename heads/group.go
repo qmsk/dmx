@@ -43,8 +43,11 @@ type Group struct {
 	id     GroupID
 	config GroupConfig
 	heads  headMap
+
+	color *GroupColor
 }
 
+// make empty group
 func makeGroup(id GroupID, config GroupConfig) *Group {
 	return &Group{
 		id:     id,
@@ -53,10 +56,37 @@ func makeGroup(id GroupID, config GroupConfig) *Group {
 	}
 }
 
+func (group *Group) addHead(head *Head) {
+	group.heads[head.id] = head
+}
+
+// initialize group parameters from heads
+func (group *Group) init() {
+	if groupColor := group.makeColor(); groupColor.exists() {
+		group.color = &groupColor
+	}
+}
+
+func (group *Group) makeColor() GroupColor {
+	var groupColor = GroupColor{
+		headColors: make(map[HeadID]HeadColor),
+	}
+
+	for headID, head := range group.heads {
+		if headColor := head.parameters.Color; headColor != nil {
+			groupColor.headColors[headID] = *headColor
+		}
+	}
+
+	return groupColor
+}
+
 type APIGroup struct {
 	GroupConfig
 	ID    GroupID
 	Heads []HeadID
+
+	Color *APIColor
 }
 
 func (group *Group) makeAPIHeads() (heads []HeadID) {
@@ -71,6 +101,7 @@ func (group *Group) makeAPI() APIGroup {
 		GroupConfig: group.config,
 		ID:          group.id,
 		Heads:       group.makeAPIHeads(),
+		Color:       group.color.makeAPI(),
 	}
 }
 

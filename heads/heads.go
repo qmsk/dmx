@@ -33,8 +33,13 @@ func (options Options) Heads(config *Config) (*Heads, error) {
 		}
 
 		for _, groupID := range headConfig.Groups {
-			heads.group(groupID, config.Groups[groupID]).heads[headID] = head
+			heads.group(groupID, config.Groups[groupID]).addHead(head)
 		}
+	}
+
+	// once all heads are patched, init groups
+	for _, group := range heads.groups {
+		group.init()
 	}
 
 	return &heads, nil

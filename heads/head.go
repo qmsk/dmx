@@ -125,7 +125,7 @@ type APIHead struct {
 
 	Channels  map[string]APIChannel `json:",omitempty"`
 	Intensity *APIHeadIntensity     `json:",omitempty"`
-	Color     *APIHeadColor         `json:",omitempty"`
+	Color     *APIColor             `json:",omitempty"`
 }
 
 func (head *Head) makeAPI() APIHead {
@@ -152,7 +152,7 @@ type APIHeadParams struct {
 
 	Channels  map[string]APIChannelParams `json:",omitempty"`
 	Intensity *APIHeadIntensity           `json:",omitempty"`
-	Color     *APIHeadColor               `json:",omitempty"`
+	Color     *APIColor                   `json:",omitempty"`
 }
 
 func (head *Head) PostREST() (web.Resource, error) {
@@ -187,7 +187,11 @@ func (post *APIHeadParams) Apply() error {
 		}
 	}
 
-	if post.Color != nil {
+	if post.Color == nil {
+
+	} else if post.head.parameters.Color == nil {
+		return web.RequestErrorf("Head does not support color")
+	} else {
 		post.Color.headColor = post.head.parameters.Color
 
 		if err := post.Color.Apply(); err != nil {
