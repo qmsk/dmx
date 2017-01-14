@@ -44,7 +44,8 @@ type Group struct {
 	config GroupConfig
 	heads  headMap
 
-	color *GroupColor
+	intensity *GroupIntensity
+	color     *GroupColor
 }
 
 // make empty group
@@ -62,9 +63,27 @@ func (group *Group) addHead(head *Head) {
 
 // initialize group parameters from heads
 func (group *Group) init() {
+	if groupIntensity := group.makeIntensity(); groupIntensity.exists() {
+		group.intensity = &groupIntensity
+	}
+
 	if groupColor := group.makeColor(); groupColor.exists() {
 		group.color = &groupColor
 	}
+}
+
+func (group *Group) makeIntensity() GroupIntensity {
+	var groupIntensity = GroupIntensity{
+		heads: make(map[HeadID]HeadIntensity),
+	}
+
+	for headID, head := range group.heads {
+		if headIntensity := head.parameters.Intensity; headIntensity != nil {
+			groupIntensity.heads[headID] = *headIntensity
+		}
+	}
+
+	return groupIntensity
 }
 
 func (group *Group) makeColor() GroupColor {
@@ -81,12 +100,14 @@ func (group *Group) makeColor() GroupColor {
 	return groupColor
 }
 
+// Web API
 type APIGroup struct {
 	GroupConfig
 	ID    GroupID
 	Heads []HeadID
 
-	Color *APIColor
+	Intensity *APIIntensity `json:",omitempty"`
+	Color     *APIColor     `json:",omitempty"`
 }
 
 func (group *Group) makeAPIHeads() (heads []HeadID) {
@@ -101,6 +122,7 @@ func (group *Group) makeAPI() APIGroup {
 		GroupConfig: group.config,
 		ID:          group.id,
 		Heads:       group.makeAPIHeads(),
+		Intensity:   group.intensity.makeAPI(),
 		Color:       group.color.makeAPI(),
 	}
 }

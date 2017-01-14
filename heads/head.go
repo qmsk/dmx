@@ -124,7 +124,7 @@ type APIHead struct {
 	Type   *HeadType
 
 	Channels  map[string]APIChannel `json:",omitempty"`
-	Intensity *APIHeadIntensity     `json:",omitempty"`
+	Intensity *APIIntensity         `json:",omitempty"`
 	Color     *APIColor             `json:",omitempty"`
 }
 
@@ -151,7 +151,7 @@ type APIHeadParams struct {
 	head *Head
 
 	Channels  map[string]APIChannelParams `json:",omitempty"`
-	Intensity *APIHeadIntensity           `json:",omitempty"`
+	Intensity *APIIntensity               `json:",omitempty"`
 	Color     *APIColor                   `json:",omitempty"`
 }
 
@@ -179,7 +179,11 @@ func (post *APIHeadParams) Apply() error {
 		}
 	}
 
-	if post.Intensity != nil {
+	if post.Intensity == nil {
+
+	} else if post.head.parameters.Intensity == nil {
+		return web.RequestErrorf("Head does not support intensity")
+	} else {
 		post.Intensity.headIntensity = post.head.parameters.Intensity
 
 		if err := post.Intensity.Apply(); err != nil {

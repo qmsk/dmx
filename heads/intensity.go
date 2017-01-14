@@ -7,6 +7,7 @@ import (
 
 type Intensity Value // 0.0 .. 1.0
 
+// Head.Intensity
 type HeadIntensity struct {
 	channel *Channel
 }
@@ -27,19 +28,12 @@ func (it HeadIntensity) Set(intensity Intensity) Intensity {
 	return Intensity(it.channel.SetValue(Value(intensity)))
 }
 
-// Web API
-type APIHeadIntensity struct {
-	headIntensity *HeadIntensity
-
-	Intensity
-}
-
-func (headIntensity *HeadIntensity) makeAPI() *APIHeadIntensity {
+func (headIntensity *HeadIntensity) makeAPI() *APIIntensity {
 	if headIntensity == nil {
 		return nil
 	}
 
-	return &APIHeadIntensity{
+	return &APIIntensity{
 		headIntensity: headIntensity,
 		Intensity:     headIntensity.Get(),
 	}
@@ -53,14 +47,60 @@ func (headIntensity HeadIntensity) PostREST() (web.Resource, error) {
 	return headIntensity.makeAPI(), nil
 }
 
-func (apiHeadIntensity *APIHeadIntensity) Apply() error {
-	if apiHeadIntensity.headIntensity == nil {
-		return web.RequestErrorf("Head does not support intensity")
+// Group.Intensity
+type GroupIntensity struct {
+	heads map[HeadID]HeadIntensity
+}
+
+func (groupIntensity GroupIntensity) exists() bool {
+	return len(groupIntensity.heads) > 0
+}
+
+func (groupIntensity GroupIntensity) Get() (intensity Intensity) {
+	for _, headIntensity := range groupIntensity.heads {
+		return headIntensity.Get()
+	}
+	return
+}
+
+func (groupIntensity GroupIntensity) Set(intensity Intensity) Intensity {
+	for _, headIntensity := range groupIntensity.heads {
+		headIntensity.Set(intensity)
+	}
+	return intensity
+}
+
+func (groupIntensity *GroupIntensity) makeAPI() *APIIntensity {
+	if groupIntensity == nil {
+		return nil
 	}
 
-	log.Debugln("heads:APIHeadIntensity.Apply", apiHeadIntensity.Intensity)
+	return &APIIntensity{
+		groupIntensity: groupIntensity,
+		Intensity:      groupIntensity.Get(),
+	}
+}
 
-	apiHeadIntensity.Intensity = apiHeadIntensity.headIntensity.Set(apiHeadIntensity.Intensity)
+// Web API
+type APIIntensity struct {
+	headIntensity  *HeadIntensity
+	groupIntensity *GroupIntensity
+
+	Intensity
+}
+
+func (apiIntensity *APIIntensity) Apply() error {
+	if apiIntensity.headIntensity != nil {
+		log.Debugln("heads:APIIntensity.Apply head", apiIntensity.Intensity)
+
+		apiIntensity.Intensity = apiIntensity.headIntensity.Set(apiIntensity.Intensity)
+	}
+
+	if apiIntensity.groupIntensity != nil {
+		log.Debugln("heads:APIIntensity.Apply group", apiIntensity.Intensity)
+
+		apiIntensity.Intensity = apiIntensity.groupIntensity.Set(apiIntensity.Intensity)
+	}
 
 	return nil
 }
