@@ -57,6 +57,7 @@ type Group struct {
 
 	intensity *GroupIntensity
 	color     *GroupColor
+	colors    ColorMap
 }
 
 func (group *Group) addHead(head *Head) {
@@ -71,6 +72,13 @@ func (group *Group) init() {
 
 	if groupColor := group.makeColor(); groupColor.exists() {
 		group.color = &groupColor
+	}
+
+	// merge head ColorMaps
+	for _, head := range group.heads {
+		if colorMap := head.headType.Colors; colorMap != nil {
+			group.colors.Merge(colorMap)
+		}
 	}
 }
 
@@ -111,8 +119,9 @@ type APIGroupParams struct {
 
 type APIGroup struct {
 	GroupConfig
-	ID    GroupID
-	Heads []HeadID
+	ID     GroupID
+	Heads  []HeadID
+	Colors ColorMap
 
 	APIGroupParams
 }
@@ -129,6 +138,7 @@ func (group *Group) makeAPI() APIGroup {
 		GroupConfig: group.config,
 		ID:          group.id,
 		Heads:       group.makeAPIHeads(),
+		Colors:      group.colors,
 		APIGroupParams: APIGroupParams{
 			group:     group,
 			Intensity: group.intensity.makeAPI(),

@@ -18,7 +18,7 @@ type HeadType struct {
 	URL    string
 
 	Channels []ChannelType
-	Colors   map[ColorName]ColorRGB
+	Colors   ColorMap
 }
 
 func (headType HeadType) String() string {

@@ -89,6 +89,7 @@ func (heads *Heads) addGroup(id GroupID, config GroupConfig) *Group {
 			id:     id,
 			config: config,
 			heads:  make(headMap),
+			colors: make(ColorMap),
 			events: heads.events,
 		}
 

@@ -6,7 +6,7 @@ import (
 	"github.com/qmsk/go-web"
 )
 
-type ColorName string
+// Config Channels
 type ColorChannel string
 
 const (
@@ -14,6 +14,16 @@ const (
 	ColorChannelGreen = "green"
 	ColorChannelBlue  = "blue"
 )
+
+// Config
+type ColorID string
+type ColorMap map[ColorID]ColorRGB
+
+func (colorMap ColorMap) Merge(mergeMap ColorMap) {
+	for colorID, color := range mergeMap {
+		colorMap[colorID] = color
+	}
+}
 
 // Types
 type ColorRGB struct {
