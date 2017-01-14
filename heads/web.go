@@ -6,9 +6,9 @@ import (
 )
 
 type API struct {
-	Outputs []APIOutput          `json:"outputs"`
-	Heads   map[HeadID]APIHead   `json:"heads"`
-	Groups  map[GroupID]APIGroup `json:"groups"`
+	Outputs []APIOutput
+	Heads   map[HeadID]APIHead
+	Groups  map[GroupID]APIGroup
 }
 
 func (heads *Heads) Index(name string) (web.Resource, error) {
@@ -53,7 +53,7 @@ func (heads *Heads) Apply() error {
 	return nil
 }
 
-// API Events
+// Websocket
 func (heads *Heads) WebEvents() chan web.Event {
 	heads.events.eventChan = make(chan web.Event)
 
