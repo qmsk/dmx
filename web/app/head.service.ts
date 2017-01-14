@@ -10,17 +10,18 @@ import { Subscription } from 'rxjs/Subscription';
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/map';
 
-import { API, APIEvents, APIHeads, APIHeadParameters } from './api';
-import { Head, Post } from './head';
+import { API, APIEvents, APIHeads, APIGroups, APIParameters, APIHeadParameters } from './api';
+import { Post, Parameters, Head, Group } from './head';
 
 @Injectable()
 export class HeadService {
   private webSocket: Subscription;
   postSubject = new Subject<Post>();
   heads: Map<string, Head>;
+  groups: Map<string, Group>;
   active: Head = null;
 
-  list(sort?: (Head) => any, filter?: (Head) => boolean) {
+  listHeads(sort?: (Head) => any, filter?: (Head) => boolean): Head[] {
     let heads = Object.keys(this.heads).map(key => this.heads[key]);
 
     if (filter)
@@ -31,17 +32,27 @@ export class HeadService {
 
     return heads;
   }
+  listGroups(sort?: (Group) => any, filter?: (Groups) => boolean): Group[] {
+    let groups = Array.from(this.groups.values());
+
+    if (filter)
+      groups = _.filter(groups, filter);
+
+    if (sort)
+      groups = _.sortBy(groups, sort);
+
+    return groups;
+  }
+
   byAddress(): Head[] {
-    return this.list(head => [head.Config.Universe, head.Config.Address]);
+    return this.listHeads(head => [head.Config.Universe, head.Config.Address]);
   }
   byID(): Head[] {
-    return this.list(head => head.ID);
+    return this.listHeads(head => head.ID);
   }
+
   ofIntensity(): Head[] {
-    return this.list(head => head.ID, head => !!head.Intensity);
-  }
-  ofColor(): Head[] {
-    return this.list(head => head.ID, head => !!head.Color);
+    return this.listHeads(head => head.ID, head => !!head.Intensity);
   }
 
   select(head: Head) {
@@ -58,24 +69,40 @@ export class HeadService {
 
   constructor(private http: Http, webSocketService: WebSocketService) {
     this.heads = new Map<string, Head>();
+    this.groups = new Map<string, Group>();
 
     this.get('/api/').subscribe(
       api => {
         this.loadHeads(api.Heads);
+        this.loadGroups(api.Groups);
       }
     );
 
     this.postSubject.subscribe(
       post => {
-        console.log(`POST head ${post.head.ID}...`, post.headParameters);
+        if (post.headID) {
+          console.log(`POST head ${post.headID}...`, post.headParameters);
 
-        this.post(`/api/heads/${post.head.ID}`, post.headParameters).subscribe(
-          (headParameters: APIHeadParameters) => {
-            // do not update head from POST, wait for websocket...
-            console.log(`POST head ${post.head.ID}: OK`, headParameters);
-          }
-          // TODO: errors to console?
-        );
+          this.post(`/api/heads/${post.headID}`, post.headParameters).subscribe(
+            (headParameters: APIHeadParameters) => {
+              // do not update head from POST, wait for websocket...
+              console.log(`POST head ${post.headID}: OK`, headParameters);
+            }
+            // TODO: errors to console?
+          );
+        }
+
+        if (post.groupID) {
+          console.log(`POST group ${post.groupID}...`, post.groupParameters);
+
+          this.post(`/api/groups/${post.groupID}`, post.groupParameters).subscribe(
+            (groupParameters: APIParameters) => {
+              // do not update head from POST, wait for websocket...
+              console.log(`POST group ${post.groupID}: OK`, groupParameters);
+            }
+            // TODO: errors to console?
+          );
+        }
       }
     );
 
@@ -104,6 +131,18 @@ export class HeadService {
     }
 
     console.log("Loaded heads", this.heads);
+  }
+
+  private loadGroups(apiGroups: APIGroups) {
+    for (let id in apiGroups) {
+      let group: Group;
+
+      if (group = this.groups.get(id)) {
+        group.load(apiGroups[id]);
+      } else {
+        this.groups.set(id, new Group(this.postSubject, apiGroups[id]));
+      }
+    }
   }
 
   private get(url): any {

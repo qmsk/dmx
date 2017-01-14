@@ -16,15 +16,18 @@ import {
   APIIntensity,
   APIColor,
   APIHead,
+  APIGroup,
   APIParameters,
   APIChannelParameters,
   APIHeadParameters,
 } from './api';
 
 // POST API plumbing
-export type Post = {
-  head: Head,
-  headParameters: APIHeadParameters
+export interface Post {
+  headID?: string,
+  groupID?: string,
+  headParameters?: APIHeadParameters,
+  groupParameters?: APIParameters,
 };
 
 interface PostFunc {
@@ -155,7 +158,13 @@ export class Channel {
   }
 }
 
-export class Head {
+// Common API for Head and Group
+export interface Parameters {
+  Intensity?: IntensityParameter;
+  Color?:     ColorParameter;
+}
+
+export class Head implements Parameters {
   private post: PostHeadFunc;
 
   ID:       string;
@@ -171,7 +180,7 @@ export class Head {
     this.Type = api.Type;
     this.Config = api.Config;
 
-    this.post = (headParameters: APIHeadParameters) => postObserver.next({head: this, headParameters: headParameters});
+    this.post = (headParameters: APIHeadParameters) => postObserver.next({headID: this.ID, headParameters: headParameters});
     this.channels = {};
     this.load(api);
   }
@@ -200,5 +209,33 @@ export class Head {
     let channels = Object.keys(this.channels).map(key => this.channels[key]);
 
     return _.sortBy(channels, channel => channel.Address);
+  }
+}
+
+export class Group implements Parameters {
+  private post: PostFunc;
+
+  ID:     string
+  Heads:  Head[];
+
+  Intensity?: IntensityParameter;
+  Color?: ColorParameter;
+
+  constructor(postObserver: Observer<Post>, api: APIGroup) {
+    this.ID = api.ID;
+
+    this.post = (parameters: APIParameters) => postObserver.next({groupID: this.ID, groupParameters: parameters});
+    this.load(api);
+  }
+
+  load(api: APIGroup) {
+    console.log("Group.load", this.ID, api);
+
+    if (api.Intensity) {
+      this.Intensity = new IntensityParameter(this.post, api.Intensity);
+    }
+    if (api.Color) {
+      this.Color = new ColorParameter(this.post, api.Color);
+    }
   }
 }
