@@ -10,7 +10,7 @@ import { Subscription } from 'rxjs/Subscription';
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/map';
 
-import { APIEvents, APIHead, APIHeadParameters } from './api';
+import { API, APIEvents, APIHeads, APIHeadParameters } from './api';
 import { Head, Post } from './head';
 
 @Injectable()
@@ -59,11 +59,9 @@ export class HeadService {
   constructor(private http: Http, webSocketService: WebSocketService) {
     this.heads = new Map<string, Head>();
 
-    this.get('/api/heads').subscribe(
-      headsMap => {
-        this.load(headsMap);
-
-        console.log("Loaded heads", this.heads);
+    this.get('/api/').subscribe(
+      api => {
+        this.loadHeads(api.Heads);
       }
     );
 
@@ -85,7 +83,7 @@ export class HeadService {
       (apiEvents: APIEvents) => {
         console.log("WebSocket APIEvents", apiEvents);
 
-        this.load(apiEvents.Heads);
+        this.loadHeads(apiEvents.Heads);
       },
       (error: WebSocketError) => {
         console.log("WebSocket Error", error);
@@ -95,13 +93,17 @@ export class HeadService {
       }
     );
   }
-  private load(headsMap: Map<string, APIHead>) {
-    for (let id in headsMap) {
-      if (this.heads[id])
-        this.heads[id].load(headsMap[id]);
-      else
-        this.heads[id] = new Head(this.postSubject, headsMap[id]);
+
+  private loadHeads(apiHeads: APIHeads) {
+    for (let id in apiHeads) {
+      if (this.heads[id]) {
+        this.heads[id].load(apiHeads[id]);
+      } else {
+        this.heads[id] = new Head(this.postSubject, apiHeads[id]);
+      }
     }
+
+    console.log("Loaded heads", this.heads);
   }
 
   private get(url): any {

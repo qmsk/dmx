@@ -26,6 +26,22 @@ export interface APIHead {
   Intensity?: APIIntensity;
   Color?:     APIColor;
 }
+export type APIHeads = {[id: string]: APIHead};
+
+export interface APIGroup {
+  ID:     string;
+  Heads:  string[];
+
+  Intensity?: APIIntensity;
+  Color?:     APIColor;
+}
+export type APIGroups = {[id: string]: APIGroup};
+
+
+export interface API {
+  Heads:  APIHeads;
+  Groups: APIGroups;
+}
 
 // POST
 export interface APIChannelParameters {
@@ -44,5 +60,5 @@ export interface APIHeadParameters extends APIParameters {
 
 // WebSocket
 export interface APIEvents {
-  Heads: Map<string, APIHead>;
+  Heads: APIHeads;
 }
