@@ -17,6 +17,13 @@ export interface APIColor extends Color {
 
 }
 
+export interface PresetConfig {
+  Name:     string;
+  All?:   APIParameters
+  Groups: {[id: string]: APIParameters}
+  Heads:  {[id: string]: APIParameters}
+}
+
 export interface APIHead {
   ID:       string;
   Type:     HeadType;
@@ -35,12 +42,19 @@ export interface APIGroup {
   Intensity?: APIIntensity;
   Color?:     APIColor;
 }
-export type APIGroups = {[id: string]: APIGroup};
+export type APIGroups = {[id: string]: APIGroup}
 
+
+export interface APIPreset {
+  ID:   string
+  Config: PresetConfig
+}
+export type APIPresets = {[id: string]: APIPreset}
 
 export interface API {
-  Heads:  APIHeads;
-  Groups: APIGroups;
+  Heads:   APIHeads
+  Groups:  APIGroups
+  Presets: APIPresets
 }
 
 // POST
@@ -60,5 +74,5 @@ export interface APIHeadParameters extends APIParameters {
 
 // WebSocket
 export interface APIEvents extends API {
-  
+
 }

@@ -1,0 +1,9 @@
+<div class="items">
+  <button class="item dmx-preset"
+    *ngFor="let preset of list()"
+    (click)="click(preset)"
+    [class.active]="isActive(preset)"
+  >
+    <label class="name">{{preset.Name}}</label>
+  </button>
+</div>

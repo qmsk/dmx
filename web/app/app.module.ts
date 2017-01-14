@@ -13,8 +13,10 @@ import { HeadsComponent } from './heads.component'
 import { HeadComponent } from './head.component'
 import { HeadColorsComponent } from './head-colors.component'
 import { IntensityComponent } from './intensity.component'
+import { PresetsComponent } from './presets.component'
 
 const routes: Routes = [
+  { path: 'presets', component: PresetsComponent },
   { path: 'channels', component: ChannelsComponent },
   { path: 'intensity', component: IntensityComponent },
   { path: 'color', component: ColorComponent },
@@ -38,6 +40,7 @@ const routes: Routes = [
     HeadComponent,
     HeadColorsComponent,
     IntensityComponent,
+    PresetsComponent,
   ],
   bootstrap: [ AppComponent ],
 })

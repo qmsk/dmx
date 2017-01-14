@@ -10,8 +10,8 @@ import { Subscription } from 'rxjs/Subscription';
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/map';
 
-import { API, APIEvents, APIHeads, APIGroups, APIParameters, APIHeadParameters } from './api';
-import { Post, Parameters, Head, Group } from './head';
+import { API, APIEvents, APIHeads, APIGroups, APIPresets } from './api';
+import { Post, Head, Group, Preset } from './head';
 
 @Injectable()
 export class HeadService {
@@ -19,6 +19,7 @@ export class HeadService {
   postSubject = new Subject<Post>();
   heads: Map<string, Head>;
   groups: Map<string, Group>;
+  presets: Map<string, Preset>;
   active: Head = null;
 
   listHeads(sort?: (Head) => any, filter?: (Head) => boolean): Head[] {
@@ -42,6 +43,17 @@ export class HeadService {
       groups = _.sortBy(groups, sort);
 
     return groups;
+  }
+  listPresets(sort?: (Preset) => any, filter?: (Preset) => boolean): Preset[] {
+    let presets = Array.from(this.presets.values());
+
+    if (filter)
+      presets = _.filter(presets, filter);
+
+    if (sort)
+      presets = _.sortBy(presets, sort);
+
+    return presets;
   }
 
   byAddress(): Head[] {
@@ -70,39 +82,27 @@ export class HeadService {
   constructor(private http: Http, webSocketService: WebSocketService) {
     this.heads = new Map<string, Head>();
     this.groups = new Map<string, Group>();
+    this.presets = new Map<string, Preset>();
 
     this.get('/api/').subscribe(
       api => {
         this.loadHeads(api.Heads);
         this.loadGroups(api.Groups);
+        this.loadPresets(api.Presets);
       }
     );
 
     this.postSubject.subscribe(
       post => {
-        if (post.headID) {
-          console.log(`POST head ${post.headID}...`, post.headParameters);
+        console.log(`POST ${post.type} ${post.id}...`, post.parameters);
 
-          this.post(`/api/heads/${post.headID}`, post.headParameters).subscribe(
-            (headParameters: APIHeadParameters) => {
-              // do not update head from POST, wait for websocket...
-              console.log(`POST head ${post.headID}: OK`, headParameters);
-            }
-            // TODO: errors to console?
-          );
-        }
-
-        if (post.groupID) {
-          console.log(`POST group ${post.groupID}...`, post.groupParameters);
-
-          this.post(`/api/groups/${post.groupID}`, post.groupParameters).subscribe(
-            (groupParameters: APIParameters) => {
-              // do not update head from POST, wait for websocket...
-              console.log(`POST group ${post.groupID}: OK`, groupParameters);
-            }
-            // TODO: errors to console?
-          );
-        }
+        this.post(`/api/${post.type}/${post.id}`, post.parameters).subscribe(
+          (response) => {
+            // do not update head from POST, wait for websocket...
+            console.log(`POST ${post.type} ${post.id} OK`, response);
+          }
+          // TODO: errors to console?
+        );
       }
     );
 
@@ -148,6 +148,12 @@ export class HeadService {
       } else {
         this.groups.set(id, new Group(this.postSubject, apiGroups[id], heads));
       }
+    }
+  }
+
+  private loadPresets(apiPresets: APIPresets) {
+    for (let id in apiPresets) {
+      this.presets.set(id, new Preset(this.postSubject, apiPresets[id]));
     }
   }
 

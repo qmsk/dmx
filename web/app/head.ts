@@ -17,17 +17,18 @@ import {
   APIColor,
   APIHead,
   APIGroup,
+  APIPreset,
   APIParameters,
   APIChannelParameters,
   APIHeadParameters,
+  PresetConfig
 } from './api';
 
 // POST API plumbing
 export interface Post {
-  headID?: string,
-  groupID?: string,
-  headParameters?: APIHeadParameters,
-  groupParameters?: APIParameters,
+  type: String
+  id: string
+  parameters: Object
 };
 
 interface PostFunc {
@@ -180,7 +181,7 @@ export class Head implements Parameters {
     this.Type = api.Type;
     this.Config = api.Config;
 
-    this.post = (headParameters: APIHeadParameters) => postObserver.next({headID: this.ID, headParameters: headParameters});
+    this.post = (headParameters: APIHeadParameters) => postObserver.next({type: "heads", id: this.ID, parameters: headParameters});
     this.channels = {};
     this.load(api);
   }
@@ -225,7 +226,7 @@ export class Group implements Parameters {
     this.ID = api.ID;
     this.Heads = heads;
 
-    this.post = (parameters: APIParameters) => postObserver.next({groupID: this.ID, groupParameters: parameters});
+    this.post = (parameters: APIParameters) => postObserver.next({type: "groups", id: this.ID, parameters: parameters});
     this.load(api);
   }
 
@@ -238,5 +239,30 @@ export class Group implements Parameters {
     if (api.Color) {
       this.Color = new ColorParameter(this.post, api.Color);
     }
+  }
+}
+
+export class Preset {
+  private post: PostFunc;
+
+  ID:     string
+  Config: PresetConfig
+
+  constructor(postObserver: Observer<Post>, api: APIPreset) {
+    this.ID = api.ID
+    this.Config = api.Config
+
+    this.post = (parameters: APIParameters) => postObserver.next({type: "presets", id: this.ID, parameters: parameters})
+  }
+
+  get Name(): string {
+    if (this.Config.Name)
+      return this.Config.Name
+    else
+      return this.ID
+  }
+
+  apply() {
+    this.post({});
   }
 }
