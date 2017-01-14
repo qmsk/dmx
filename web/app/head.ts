@@ -222,7 +222,8 @@ export class Group implements Parameters {
   private post: PostFunc;
 
   ID:     string
-  Heads:  Head[];
+  Heads:  Head[]
+  Colors: Colors
 
   Intensity?: IntensityParameter;
   Color?: ColorParameter;
@@ -230,6 +231,7 @@ export class Group implements Parameters {
   constructor(postObserver: Observer<Post>, api: APIGroup, heads: Head[]) {
     this.ID = api.ID;
     this.Heads = heads;
+    this.Colors = api.Colors;
 
     this.post = (parameters: APIParameters) => postObserver.next({type: "groups", id: this.ID, parameters: parameters});
     this.load(api);
@@ -245,8 +247,6 @@ export class Group implements Parameters {
       this.Color = new ColorParameter(this.post, api.Color);
     }
   }
-
-  // TODO: Colors
 }
 
 export class Preset {

@@ -1,4 +1,4 @@
-import { DMX, Value, Color, ChannelType, HeadType, HeadConfig } from './types';
+import { DMX, Value, Color, Colors, ChannelType, HeadType, HeadConfig } from './types';
 
 // GET
 export interface APIChannel {
@@ -36,11 +36,12 @@ export interface APIHead {
 export type APIHeads = {[id: string]: APIHead};
 
 export interface APIGroup {
-  ID:     string;
-  Heads:  string[];
+  ID:     string
+  Heads:  string[]
+  Colors: Colors
 
-  Intensity?: APIIntensity;
-  Color?:     APIColor;
+  Intensity?: APIIntensity
+  Color?:     APIColor
 }
 export type APIGroups = {[id: string]: APIGroup}
 
