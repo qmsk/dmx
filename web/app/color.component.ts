@@ -83,23 +83,22 @@ export class ColorComponent {
     this.color = this.loadColor(group.Color);
   }
 
+  unselect() {
+    if (this.colors = this.loadColors()) {
+      // keep selected color
+    } else {
+      this.color = null;
+    }
+  }
+
   unselectHead(head: Head) {
     this.heads.delete(head);
-
-    if (this.heads.size > 0) {
-      this.colors = this.loadColors();
-    } else {
-      this.colors = this.color = null;
-    }
+    this.unselect();
   }
   unselectGroup(group: Group) {
     this.groups.delete(group);
 
-    if (this.groups.size > 0) {
-      this.colors = this.loadColors();
-    } else {
-      this.colors = this.color = null;
-    }
+    this.unselect();
   }
 
   apply(color: Color) {
