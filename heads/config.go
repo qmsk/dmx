@@ -27,7 +27,7 @@ func load(obj interface{}, path string) error {
 	switch ext {
 	case ".toml":
 		if err := loadToml(obj, path); err != nil {
-			return err
+			return fmt.Errorf("Load %T file %v: %v", obj, path, err)
 		} else {
 			return nil
 		}
@@ -170,6 +170,17 @@ func (config *Config) load(path string) error {
 				return group, nil
 			}
 
+		case "presets":
+			if len(id) == 1 {
+				return config.Presets, nil
+			} else {
+				var preset = new(PresetConfig)
+
+				config.Presets[PresetID(filepath.Join(id[1:]...))] = preset
+
+				return preset, nil
+			}
+
 		default:
 			return nil, fmt.Errorf("Bad config path: %v", id)
 		}
@@ -195,6 +206,7 @@ func (options Options) Config(path string) (*Config, error) {
 		HeadTypes: make(map[TypeID]*HeadType),
 		Heads:     make(map[HeadID]*HeadConfig),
 		Groups:    make(map[GroupID]*GroupConfig),
+		Presets:   make(map[PresetID]*PresetConfig),
 	}
 
 	for _, libraryPath := range options.LibraryPath {
