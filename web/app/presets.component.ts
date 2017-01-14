@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 
+import { APIParameters } from './api';
 import { Preset, Group, Head } from './head';
 import { APIService } from './api.service';
 
@@ -32,9 +33,17 @@ export class PresetsComponent {
   }
 
   listGroups(): Group[] {
-    return this.preset.Groups ? Array.from(this.preset.Groups.keys()) : [];
+    return this.preset.Groups ? Array.from(this.preset.Groups.keys()) : []
   }
   listHeads(): Head[] {
-    return this.preset.Heads ? Array.from(this.preset.Heads.keys()) : [];
+    return this.preset.Heads ? Array.from(this.preset.Heads.keys()) : []
   }
+
+  groupParameters(group: Group): APIParameters {
+    return this.preset.Groups.get(group)
+  }
+  headParameters(head: Head): APIParameters {
+    return this.preset.Heads.get(head)
+  }
+
 }

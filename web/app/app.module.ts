@@ -13,6 +13,7 @@ import { ControlsComponent } from './controls.component'
 import { HeadColorsComponent } from './head-colors.component'
 import { IntensityComponent } from './intensity.component'
 import { PresetsComponent } from './presets.component'
+import { PresetParametersComponent } from './preset-parameters.component'
 import { MainComponent } from './main.component'
 
 const routes: Routes = [
@@ -40,6 +41,7 @@ const routes: Routes = [
     HeadColorsComponent,
     IntensityComponent,
     PresetsComponent,
+    PresetParametersComponent,
     MainComponent,
   ],
   bootstrap: [ AppComponent ],

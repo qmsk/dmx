@@ -12,16 +12,19 @@
   <div *ngIf="preset">
     <h1>{{preset.Name}}</h1>
 
-    <div *ngIf="preset.Config.All">
-      <h2>All</h2>
-    </div>
+    <dmx-preset-parameters *ngIf="preset.Config.All"
+      [parameters]="preset.Config.All"
+      title="All"
+    ></dmx-preset-parameters>
 
-    <div *ngFor="let group of listGroups()">
-      <h2>Group: {{group.ID}}</h2>
-    </div>
+    <dmx-preset-parameters *ngFor="let group of listGroups()"
+      [parameters]="groupParameters(group)"
+      title="Group: {{group.ID}}"
+    ></dmx-preset-parameters>
 
-    <div *ngFor="let head of listHeads()">
-      <h2>Head: {{head.ID}}</h2>
-    </div>
+    <dmx-preset-parameters *ngFor="let head of listHeads()"
+      [parameters]="headParameters(head)"
+      title="Head: {{head.ID}}"
+    ></dmx-preset-parameters>
   </div>
 </div>

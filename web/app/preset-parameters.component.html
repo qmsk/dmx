@@ -1,0 +1,27 @@
+<h2>{{title}}</h2>
+
+<div *ngIf="parameters.Intensity">
+  <h3>Intensity</h3>
+
+  <div class="dmx-parameter">
+    <label>Intensity</label>
+    <output class="value">{{parameters.Intensity.Intensity | percent:'1.1-1'}}</output>
+  </div>
+</div>
+
+<div *ngIf="parameters.Color">
+  <h3>Color</h3>
+
+  <div class="dmx-parameter">
+    <label>Red</label>
+    <output class="value">{{parameters.Color.Red | percent:'1.1-1'}}</output>
+  </div>
+  <div class="dmx-parameter">
+    <label>Green</label>
+    <output class="value">{{parameters.Color.Green | percent:'1.1-1'}}</output>
+  </div>
+  <div class="dmx-parameter">
+    <label>Blue</label>
+    <output class="value">{{parameters.Color.Blue | percent:'1.1-1'}}</output>
+  </div>
+</div>
