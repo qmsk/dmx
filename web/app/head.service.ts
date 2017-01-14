@@ -111,6 +111,7 @@ export class HeadService {
         console.log("WebSocket APIEvents", apiEvents);
 
         this.loadHeads(apiEvents.Heads);
+        this.loadGroups(apiEvents.Groups);
       },
       (error: WebSocketError) => {
         console.log("WebSocket Error", error);

@@ -59,6 +59,6 @@ export interface APIHeadParameters extends APIParameters {
 };
 
 // WebSocket
-export interface APIEvents {
-  Heads: APIHeads;
+export interface APIEvents extends API {
+  
 }
