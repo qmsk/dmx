@@ -7,6 +7,14 @@ a {
   color: #ccc;
 }
 
+h1 {
+  background-color: #aaa;
+  color: #111;
+
+  margin: 0;
+  padding: 0.25em;
+}
+
 h2 {
   background-color: #888;
   color: #111;

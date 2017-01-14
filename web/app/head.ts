@@ -255,9 +255,28 @@ export class Preset {
   ID:     string
   Config: PresetConfig
 
-  constructor(postObserver: Observer<Post>, api: APIPreset) {
+  Heads?: Map<Head, APIParameters>
+  Groups?: Map<Group, APIParameters>
+
+  constructor(postObserver: Observer<Post>, api: APIPreset, heads: Head[], groups: Group[]) {
     this.ID = api.ID
     this.Config = api.Config
+
+    if (heads) {
+      this.Heads = new Map<Head, APIParameters>();
+
+      for (let head of heads) {
+        this.Heads.set(head, api.Config.Heads[head.ID]);
+      }
+    }
+
+    if (groups) {
+      this.Groups = new Map<Group, APIParameters>();
+
+      for (let group of groups) {
+        this.Groups.set(group, api.Config.Groups[group.ID]);
+      }
+    }
 
     this.post = (parameters: APIParameters) => postObserver.next({type: "presets", id: this.ID, parameters: parameters})
   }

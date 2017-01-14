@@ -131,7 +131,22 @@ export class APIService {
 
   private loadPresets(apiPresets: APIPresets) {
     for (let id in apiPresets) {
-      this.presets.set(id, new Preset(this.postSubject, apiPresets[id]));
+      let heads: Head[] = null
+      let groups: Group[] = null
+
+      if (apiPresets[id].Config.Heads) {
+        heads = Object.keys(apiPresets[id].Config.Heads).map((id) => {
+          return this.heads[id]
+        })
+      }
+
+      if (apiPresets[id].Config.Groups) {
+        groups = Object.keys(apiPresets[id].Config.Groups).map((id) => {
+          return this.groups.get(id)
+        })
+      }
+
+      this.presets.set(id, new Preset(this.postSubject, apiPresets[id], heads, groups));
     }
   }
 

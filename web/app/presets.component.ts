@@ -1,17 +1,19 @@
 import { Component } from '@angular/core';
 
-import { Preset } from './head';
+import { Preset, Group, Head } from './head';
 import { APIService } from './api.service';
 
 @Component({
   moduleId: module.id,
   selector: 'dmx-presets',
-  host: { class: 'view' },
+  host: { class: 'split view' },
 
   templateUrl: 'presets.component.html',
   styleUrls: [ 'presets.component.css' ],
 })
 export class PresetsComponent {
+  preset?: Preset
+
   constructor (private api: APIService) {
 
   }
@@ -21,10 +23,18 @@ export class PresetsComponent {
   }
 
   isActive(preset: Preset): boolean {
-    return false
+    return preset == this.preset
   }
 
   click(preset: Preset) {
-    preset.apply();
+    preset.apply()
+    this.preset = preset
+  }
+
+  listGroups(): Group[] {
+    return this.preset.Groups ? Array.from(this.preset.Groups.keys()) : [];
+  }
+  listHeads(): Head[] {
+    return this.preset.Heads ? Array.from(this.preset.Heads.keys()) : [];
   }
 }

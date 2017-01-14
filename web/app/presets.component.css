@@ -3,3 +3,7 @@
   background-color: #eee;
   color: #444;
 }
+
+.dmx-preset.active {
+  border-color: #9f9;
+}

@@ -7,3 +7,21 @@
     <label class="name">{{preset.Name}}</label>
   </button>
 </div>
+
+<div class="controls">
+  <div *ngIf="preset">
+    <h1>{{preset.Name}}</h1>
+
+    <div *ngIf="preset.Config.All">
+      <h2>All</h2>
+    </div>
+
+    <div *ngFor="let group of listGroups()">
+      <h2>Group: {{group.ID}}</h2>
+    </div>
+
+    <div *ngFor="let head of listHeads()">
+      <h2>Head: {{head.ID}}</h2>
+    </div>
+  </div>
+</div>
