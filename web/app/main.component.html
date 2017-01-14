@@ -19,6 +19,7 @@
         *ngFor="let head of listHeads()"
         (click)="selectHead(head)"
         [class.active]="headActive(head)"
+        [class.semi-active]="headSemiActive(head)"
       >
         <label class="id">{{head.ID}}</label>
       </button>

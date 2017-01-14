@@ -36,9 +36,10 @@ export class MainComponent {
   }
 
   headActive(head: Head): boolean {
-    if (this.head) {
-      return this.head == head
-    } else if (this.group) {
+    return this.head == head
+  }
+  headSemiActive(head: Head): boolean {
+    if (this.group) {
       return this.group.Heads.has(head)
     } else {
       return false

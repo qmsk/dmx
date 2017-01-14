@@ -149,6 +149,9 @@ div.spinner {
 .dmx-head.active {
   border: 0.25em solid #9f9;
 }
+.dmx-head.semi-active {
+  border: 0.25em dotted #9f9;
+}
 
 /* Generic flowed items */
 .items {
