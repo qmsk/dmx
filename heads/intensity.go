@@ -8,6 +8,10 @@ import (
 
 type Intensity Value // 0.0 .. 1.0
 
+func (intensity Intensity) ScaleIntensity(scale Intensity) Intensity {
+	return intensity * scale
+}
+
 // Head.Intensity
 type HeadIntensity struct {
 	channel *Channel
@@ -87,6 +91,7 @@ type APIIntensity struct {
 	headIntensity  *HeadIntensity
 	groupIntensity *GroupIntensity
 
+	ScaleIntensity *Intensity
 	Intensity
 }
 
@@ -111,6 +116,12 @@ func (apiIntensity *APIIntensity) initGroup(groupIntensity *GroupIntensity) erro
 }
 
 func (apiIntensity *APIIntensity) Apply() error {
+	if apiIntensity.ScaleIntensity != nil {
+		apiIntensity.Intensity = apiIntensity.Intensity.ScaleIntensity(*apiIntensity.ScaleIntensity)
+
+		log.Debugln("heads:APIIntensity.Apply scale", *apiIntensity.ScaleIntensity, "=", apiIntensity.Intensity)
+	}
+
 	if apiIntensity.headIntensity != nil {
 		log.Debugln("heads:APIIntensity.Apply head", apiIntensity.Intensity)
 

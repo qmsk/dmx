@@ -136,7 +136,8 @@ func (heads *Heads) addPreset(id PresetID, config PresetConfig) error {
 	var preset = Preset{
 		ID:     id,
 		Config: config,
-		Groups: make(map[GroupID]APIGroupParams),
+		Groups: make(map[GroupID]PresetParameters),
+		Heads:  make(map[HeadID]PresetParameters),
 	}
 
 	if preset.Config.All != nil {

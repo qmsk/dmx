@@ -33,7 +33,7 @@ type ColorRGB struct {
 }
 
 // Linear RGB intensity scaling
-func (color ColorRGB) scaleIntensity(intensity Intensity) ColorRGB {
+func (color ColorRGB) ScaleIntensity(intensity Intensity) ColorRGB {
 	return ColorRGB{
 		Red:   color.Red * Value(intensity),
 		Green: color.Green * Value(intensity),
@@ -85,7 +85,7 @@ func (hc HeadColor) SetRGBIntensity(colorRGB ColorRGB, intensity Intensity) {
 		hc.SetRGB(colorRGB)
 		hc.intensity.SetValue(Value(intensity))
 	} else {
-		hc.SetRGB(colorRGB.scaleIntensity(intensity))
+		hc.SetRGB(colorRGB.ScaleIntensity(intensity))
 	}
 }
 
@@ -150,6 +150,7 @@ type APIColor struct {
 	headColor  *HeadColor
 	groupColor *GroupColor
 
+	ScaleIntensity *Intensity
 	ColorRGB
 }
 
@@ -174,6 +175,13 @@ func (apiColor *APIColor) initGroup(groupColor *GroupColor) error {
 }
 
 func (apiColor *APIColor) Apply() error {
+	if apiColor.ScaleIntensity != nil {
+		apiColor.ColorRGB = apiColor.ColorRGB.ScaleIntensity(*apiColor.ScaleIntensity)
+
+		log.Debugln("heads:APIColor.Apply scale", *apiColor.ScaleIntensity, "=", apiColor.ColorRGB)
+
+	}
+
 	if apiColor.headColor != nil {
 		log.Debugln("heads:APIColor.Apply head", apiColor.headColor, apiColor.ColorRGB)
 
