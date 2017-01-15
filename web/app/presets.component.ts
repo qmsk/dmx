@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 
+import { Value } from './types';
 import { APIParameters } from './api';
 import { Preset, Group, Head } from './head';
 import { APIService } from './api.service';
@@ -13,10 +14,11 @@ import { APIService } from './api.service';
   styleUrls: [ 'presets.component.css' ],
 })
 export class PresetsComponent {
+  intensity: Value
   preset?: Preset
 
   constructor (private api: APIService) {
-
+    this.intensity = 1.0
   }
 
   list(): Preset[] {
@@ -28,8 +30,15 @@ export class PresetsComponent {
   }
 
   click(preset: Preset) {
-    preset.apply()
+    preset.apply(this.intensity)
     this.preset = preset
+  }
+  update(intensity) {
+    this.intensity = intensity;
+
+    if (this.preset) {
+      this.preset.apply(intensity)
+    }
   }
 
   listGroups(): Group[] {

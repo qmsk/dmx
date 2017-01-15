@@ -21,6 +21,7 @@ import {
   APIParameters,
   APIChannelParameters,
   APIHeadParameters,
+  APIPresetParameters,
   PresetConfig
 } from './api';
 
@@ -36,6 +37,9 @@ interface PostFunc {
 }
 interface PostHeadFunc {
   (parameters: APIHeadParameters);
+}
+interface PostPresetFunc {
+  (parameters: APIPresetParameters);
 }
 
 // Head.Intensity, Group.Intensity
@@ -250,7 +254,7 @@ export class Group implements Parameters {
 }
 
 export class Preset {
-  private post: PostFunc;
+  private post: PostPresetFunc;
 
   ID:     string
   Config: PresetConfig
@@ -278,7 +282,7 @@ export class Preset {
       }
     }
 
-    this.post = (parameters: APIParameters) => postObserver.next({type: "presets", id: this.ID, parameters: parameters})
+    this.post = (parameters: APIPresetParameters) => postObserver.next({type: "presets", id: this.ID, parameters: parameters})
   }
 
   get Name(): string {
@@ -288,7 +292,7 @@ export class Preset {
       return this.ID
   }
 
-  apply() {
-    this.post({});
+  apply(intensity: Value) {
+    this.post({Intensity: intensity});
   }
 }

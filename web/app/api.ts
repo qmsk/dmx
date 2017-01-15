@@ -73,6 +73,10 @@ export interface APIHeadParameters extends APIParameters {
   Channels?:  {[ID: string]: APIChannelParameters};
 };
 
+export interface APIPresetParameters {
+  Intensity?: Value
+}
+
 // WebSocket
 export interface APIEvents extends API {
 

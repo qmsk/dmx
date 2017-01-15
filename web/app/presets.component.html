@@ -9,6 +9,8 @@
 </div>
 
 <div class="controls">
+  <dmx-control label="Intensity" [value]="intensity" (valueChange)="update($event)"></dmx-control>
+
   <div *ngIf="preset">
     <h1>{{preset.Name}}</h1>
 

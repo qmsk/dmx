@@ -15,7 +15,9 @@
 <div *ngIf="parameters && parameters.Colors">
   <h3>Colors</h3>
 
-  <dmx-head-colors [colors]="parameters.Colors" [color]="parameters.Color" (colorChange)="parameters.Color.apply($event)">
-
-  </dmx-head-colors>
+  <dmx-head-colors
+    [colors]="parameters.Colors"
+    [color]="parameters.Color"
+    (colorChange)="parameters.Color.apply($event)"
+  ></dmx-head-colors>
 </div>
