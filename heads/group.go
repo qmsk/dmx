@@ -133,11 +133,13 @@ type APIGroup struct {
 	APIGroupParams
 }
 
-func (group *Group) makeAPIHeads() (heads []HeadID) {
+func (group *Group) makeAPIHeads() []HeadID {
+	var heads = make([]HeadID, 0)
+
 	for headID, _ := range group.heads {
 		heads = append(heads, headID)
 	}
-	return
+	return heads
 }
 
 func (group *Group) makeAPI() APIGroup {
