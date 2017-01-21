@@ -154,7 +154,7 @@ func main() {
 	// web
 	options.Web.Server(
 		options.Web.RouteEvents("/events", headsHeads.WebEvents()),
-		options.Web.RouteAPI("/api/", headsHeads),
+		options.Web.RouteAPI("/api/", headsHeads.WebAPI()),
 		options.Web.RouteStatic("/"),
 	)
 }

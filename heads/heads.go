@@ -17,10 +17,7 @@ func (options Options) Heads(config *Config) (*Heads, error) {
 		heads:   make(headMap),
 		groups:  make(groupMap),
 		presets: make(presetMap),
-		events:  new(Events),
 	}
-
-	heads.events.init()
 
 	// preload groups
 	for groupID, groupConfig := range config.Groups {
@@ -59,7 +56,7 @@ type Heads struct {
 	heads   headMap
 	groups  groupMap
 	presets presetMap
-	events  *Events
+	events  *Events // optional
 }
 
 func (heads *Heads) output(universe Universe) *Output {
