@@ -1,0 +1,20 @@
+[red]
+Red     = 1.0
+
+[green]
+Green   = 1.0
+
+[blue]
+Blue    = 1.0
+
+[cyan]
+Green   = 1.0
+Blue    = 1.0
+
+[magenta]
+Red     = 1.0
+Blue    = 1.0
+
+[amber]
+Red     = 1.0
+Green   = 0.5
