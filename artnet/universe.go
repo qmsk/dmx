@@ -5,8 +5,8 @@ import (
 	"io"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
-	dmx "github.com/SpComb/qmsk-dmx"
+	"github.com/SpComb/qmsk-dmx"
+	"github.com/SpComb/qmsk-dmx/logging"
 )
 
 type Address struct {
@@ -32,7 +32,7 @@ func (controller *Controller) Universe(address Address) *Universe {
 
 	if universe == nil {
 		universe = &Universe{
-			log:        controller.log.WithField("universe", address),
+			log:        controller.config.Log.Logger("universe", address),
 			controller: controller,
 			address:    address,
 
@@ -49,7 +49,7 @@ func (controller *Controller) Universe(address Address) *Universe {
 }
 
 type Universe struct {
-	log        *log.Entry
+	log        logging.Logger
 	controller *Controller
 	address    Address
 

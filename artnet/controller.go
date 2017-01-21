@@ -6,8 +6,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
-	dmx "github.com/SpComb/qmsk-dmx"
+	"github.com/SpComb/qmsk-dmx"
+	"github.com/SpComb/qmsk-dmx/logging"
 )
 
 type Config struct {
@@ -18,16 +18,20 @@ type Config struct {
 	DiscoveryTimeout  time.Duration `long:"artnet-discovery-timeout" value-name:"DURATION" default:"3s"`
 
 	DMXRefresh time.Duration `long:"artnet-dmx-refresh" value-name:"DURATION" default:"1s"`
+
+	Log logging.Option `long:"artnet-log" default:"info"`
 }
 
 func (config Config) Controller() (*Controller, error) {
-	var controller = Controller{
-		log: log.WithFields(log.Fields{"prefix": "artnet:Controller"}),
+	config.Log.Package = "artnet"
 
+	var controller = Controller{
 		config: config,
 
 		universes: make(map[Address]*Universe),
 	}
+
+	controller.log = config.Log.Logger("controller", &controller)
 
 	listenAddr := net.JoinHostPort(config.Listen, fmt.Sprintf("%d", Port))
 
@@ -65,7 +69,7 @@ func (event pollEvent) String() string {
 }
 
 type Controller struct {
-	log *log.Entry
+	log logging.Logger
 
 	config Config
 
@@ -79,6 +83,10 @@ type Controller struct {
 
 	// state
 	universes map[Address]*Universe
+}
+
+func (controller *Controller) String() string {
+	return fmt.Sprintf("%v", controller.transport)
 }
 
 func (controller *Controller) Start(discoveryChan chan Discovery) {

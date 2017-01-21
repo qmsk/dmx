@@ -21,6 +21,10 @@ type Transport struct {
 	udpConn *net.UDPConn // listening on port
 }
 
+func (transport *Transport) String() string {
+	return transport.udpConn.LocalAddr().String()
+}
+
 func (t *Transport) recv() (ArtPacket, *net.UDPAddr, error) {
 	var header ArtHeader
 	var buf = make([]byte, MTU)

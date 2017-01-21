@@ -1,7 +1,6 @@
 package artnet
 
 import (
-	"net"
 	"time"
 )
 
@@ -83,20 +82,6 @@ func (controller *Controller) discovery(pollChan chan pollEvent) {
 			}
 		}
 	}
-}
-
-func (controller *Controller) makeNode(addr *net.UDPAddr, config NodeConfig) (*Node, error) {
-	var node = Node{
-		log: controller.log.WithField("node", addr.String()),
-
-		timeout: controller.config.DiscoveryTimeout,
-
-		transport: controller.transport,
-		addr:      addr,
-		config:    config,
-	}
-
-	return &node, nil
 }
 
 func (controller *Controller) update(nodes map[string]*Node) {

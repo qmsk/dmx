@@ -2,7 +2,6 @@ package artnet
 
 import (
 	"fmt"
-	log "github.com/Sirupsen/logrus"
 	"net"
 )
 
@@ -79,8 +78,6 @@ func (p ArtPollReply) NodeConfig() NodeConfig {
 	}
 
 	for i := 0; i < int(p.NumPorts) && i < 4; i++ {
-		log.Debugf("decode poll reply: port=%d type=%04x", i, p.PortTypes[i])
-
 		if p.PortTypes[i]&0x80 != 0 {
 			nodeConfig.OutputPorts = append(nodeConfig.OutputPorts, OutputPort{
 				Address: Address{

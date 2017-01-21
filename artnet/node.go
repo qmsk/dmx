@@ -4,8 +4,8 @@ import (
 	"net"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	dmx "github.com/SpComb/qmsk-dmx"
+	"github.com/SpComb/qmsk-dmx/logging"
 )
 
 type InputPort struct {
@@ -35,8 +35,20 @@ type NodeConfig struct {
 	OutputPorts []OutputPort
 }
 
+func (controller *Controller) makeNode(addr *net.UDPAddr, config NodeConfig) (*Node, error) {
+	var node = Node{
+		log:       controller.config.Log.Logger("node", addr.String()),
+		timeout:   controller.config.DiscoveryTimeout,
+		transport: controller.transport,
+		addr:      addr,
+		config:    config,
+	}
+
+	return &node, nil
+}
+
 type Node struct {
-	log *log.Entry
+	log logging.Logger
 
 	timeout time.Duration
 
