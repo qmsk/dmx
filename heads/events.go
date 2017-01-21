@@ -7,10 +7,7 @@ import (
 
 // Websocket
 func (heads *Heads) WebEvents() web.Events {
-	heads.events = &Events{
-		log:       heads.options.Log.Logger("events", nil),
-		eventChan: make(chan web.Event),
-	}
+	heads.events.eventChan = make(chan web.Event)
 
 	return web.MakeEvents(heads.events.eventChan)
 }
@@ -26,13 +23,14 @@ type Events struct {
 }
 
 func (events *Events) updateHead(id HeadID, apiHead APIHead) {
-	if events != nil {
+	if events.eventChan != nil {
 		events.log.Infof("update head %v", id)
 		events.eventChan <- APIEvents{Heads: APIHeads{id: apiHead}}
 	}
 }
+
 func (events *Events) updateGroup(id GroupID, apiGroup APIGroup) {
-	if events != nil {
+	if events.eventChan != nil {
 		events.log.Infof("update group %v", id)
 		events.eventChan <- APIEvents{Groups: APIGroups{id: apiGroup}}
 	}

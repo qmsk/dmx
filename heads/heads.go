@@ -22,6 +22,9 @@ func (options Options) Heads(config *Config) (*Heads, error) {
 		heads:   make(headMap),
 		groups:  make(groupMap),
 		presets: make(presetMap),
+		events: &Events{
+			log: options.Log.Logger("events", nil),
+		},
 	}
 
 	// preload groups
