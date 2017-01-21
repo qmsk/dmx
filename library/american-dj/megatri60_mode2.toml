@@ -1,0 +1,18 @@
+Vendor  = "American DJ"
+Model   = "Mega Tri 60"
+Mode    = "2"
+
+[[Channels]]
+Color = "red"
+
+[[Channels]]
+Color = "green"
+
+[[Channels]]
+Color = "blue"
+
+[[Channels]]
+Control = "control"
+
+[[Channels]]
+Intensity = true

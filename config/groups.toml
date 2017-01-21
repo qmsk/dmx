@@ -1,2 +1,5 @@
-[test-led]
-Name        = "Test LED"
+[led-par]
+Name        = "LED-Par"
+
+[tri-bar]
+Name        = "Tri-Bar"

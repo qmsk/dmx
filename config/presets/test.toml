@@ -1,3 +1,9 @@
-[Groups.test-led.Color]
+[Groups.led-par.Color]
+Red = 1.0
+Blue = 0.5
+
+[Groups.tri-bar.Intensity]
+Intensity = 1.0
+[Groups.tri-bar.Color]
 Red = 1.0
 Blue = 0.5

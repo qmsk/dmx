@@ -1,15 +1,29 @@
-[test-led]
+[led-par]
 Type        = "stairville/ledpar56-5ch"
 Universe    = 1
 Address     = 1
-Count       = 2
-Name        = "Test LED"
-Groups      = ["test-led"]
+Count       = 6
+Name        = "LED-Par"
+Groups      = ["led-par"]
 
-[test-dimmer]
+[tribar-1]
+Type        = "american-dj/megatri60_mode2"
+Universe    = 1
+Address     = 20
+Name        = "TriBar @ floor"
+Groups      = ["tri-bar"]
+
+[tribar-2]
+Type        = "american-dj/megatri60_mode2"
+Universe    = 1
+Address     = 30
+Name        = "TriBar @ wall"
+Groups      = ["tri-bar"]
+
+[dimmer]
 Type        = "generic/dimmer-1ch"
 Universe    = 1
 Address     = 250
 Count       = 4
-Name        = "Test Dimmer"
-Groups      = ["test-dimmer"]
+Name        = "Dimmer"
+Groups      = ["dimmer"]
