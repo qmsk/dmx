@@ -70,7 +70,7 @@ func demo(hh *heads.Heads) {
 	for range time.NewTicker(100 * time.Millisecond).C {
 		var color = colorful.Hsv(hue, 1.0, 1.0) // FastHappyColor()
 
-		var headsColor = heads.ColorRGB{
+		var headsColor = heads.Color{
 			Red:   heads.Value(color.R),
 			Green: heads.Value(color.G),
 			Blue:  heads.Value(color.B),
@@ -84,7 +84,7 @@ func demo(hh *heads.Heads) {
 			if headParameters.Color != nil {
 				logging.Log.Debugf("head %v: Color %v @ %v", head, color, intensity)
 
-				headParameters.Color.SetRGBIntensity(headsColor, intensity)
+				headParameters.Color.SetIntensity(headsColor, intensity)
 
 			} else if headParameters.Intensity != nil {
 				logging.Log.Debugf("head %v: Intensity %v", head, intensity)

@@ -16,7 +16,8 @@ const (
 
 // Config
 type ColorID string
-type ColorMap map[ColorID]ColorRGB
+
+type ColorMap map[ColorID]Color
 
 func (colorMap ColorMap) Merge(mergeMap ColorMap) {
 	for colorID, color := range mergeMap {
@@ -25,15 +26,15 @@ func (colorMap ColorMap) Merge(mergeMap ColorMap) {
 }
 
 // Types
-type ColorRGB struct {
+type Color struct {
 	Red   Value
 	Green Value
 	Blue  Value
 }
 
 // Linear RGB intensity scaling
-func (color ColorRGB) ScaleIntensity(intensity Intensity) ColorRGB {
-	return ColorRGB{
+func (color Color) ScaleIntensity(intensity Intensity) Color {
+	return Color{
 		Red:   color.Red * Value(intensity),
 		Green: color.Green * Value(intensity),
 		Blue:  color.Blue * Value(intensity),
@@ -52,39 +53,39 @@ func (it HeadColor) exists() bool {
 	return it.red != nil || it.green != nil || it.blue != nil
 }
 
-func (hc HeadColor) GetRGB() (colorRGB ColorRGB) {
+func (hc HeadColor) Get() (color Color) {
 	if hc.red != nil {
-		colorRGB.Red = hc.red.GetValue()
+		color.Red = hc.red.GetValue()
 	}
 	if hc.green != nil {
-		colorRGB.Green = hc.green.GetValue()
+		color.Green = hc.green.GetValue()
 	}
 	if hc.blue != nil {
-		colorRGB.Blue = hc.blue.GetValue()
+		color.Blue = hc.blue.GetValue()
 	}
 	return
 }
 
-func (hc HeadColor) SetRGB(colorRGB ColorRGB) ColorRGB {
+func (hc HeadColor) Set(color Color) Color {
 	if hc.red != nil {
-		colorRGB.Red = hc.red.SetValue(colorRGB.Red)
+		color.Red = hc.red.SetValue(color.Red)
 	}
 	if hc.green != nil {
-		colorRGB.Green = hc.green.SetValue(colorRGB.Green)
+		color.Green = hc.green.SetValue(color.Green)
 	}
 	if hc.blue != nil {
-		colorRGB.Blue = hc.blue.SetValue(colorRGB.Blue)
+		color.Blue = hc.blue.SetValue(color.Blue)
 	}
-	return colorRGB
+	return color
 }
 
 // Set color with intensity, using either head intensity channel or linear RGB scaling
-func (hc HeadColor) SetRGBIntensity(colorRGB ColorRGB, intensity Intensity) {
+func (hc HeadColor) SetIntensity(color Color, intensity Intensity) {
 	if hc.intensity != nil {
-		hc.SetRGB(colorRGB)
+		hc.Set(color)
 		hc.intensity.SetValue(Value(intensity))
 	} else {
-		hc.SetRGB(colorRGB.ScaleIntensity(intensity))
+		hc.Set(color.ScaleIntensity(intensity))
 	}
 }
 
@@ -95,7 +96,7 @@ func (headColor *HeadColor) makeAPI() *APIColor {
 
 	return &APIColor{
 		headColor: headColor,
-		ColorRGB:  headColor.GetRGB(),
+		Color:     headColor.Get(),
 	}
 }
 
@@ -116,21 +117,21 @@ func (groupColor GroupColor) exists() bool {
 }
 
 // Return one color for the group
-func (groupColor GroupColor) GetRGB() (colorRGB ColorRGB) {
+func (groupColor GroupColor) Get() (color Color) {
 	for _, headColor := range groupColor.headColors {
 		// This works fine assuming they are all the same color :)
-		return headColor.GetRGB()
+		return headColor.Get()
 	}
 
 	return
 }
 
-func (groupColor GroupColor) SetRGB(colorRGB ColorRGB) ColorRGB {
+func (groupColor GroupColor) Set(color Color) Color {
 	for _, headColor := range groupColor.headColors {
-		headColor.SetRGB(colorRGB)
+		headColor.Set(color)
 	}
 
-	return colorRGB
+	return color
 }
 
 func (groupColor *GroupColor) makeAPI() *APIColor {
@@ -140,7 +141,7 @@ func (groupColor *GroupColor) makeAPI() *APIColor {
 
 	return &APIColor{
 		groupColor: groupColor,
-		ColorRGB:   groupColor.GetRGB(),
+		Color:      groupColor.Get(),
 	}
 }
 
@@ -150,7 +151,7 @@ type APIColor struct {
 	groupColor *GroupColor
 
 	ScaleIntensity *Intensity
-	ColorRGB
+	Color
 }
 
 func (apiColor *APIColor) initHead(headColor *HeadColor) error {
@@ -175,16 +176,15 @@ func (apiColor *APIColor) initGroup(groupColor *GroupColor) error {
 
 func (apiColor *APIColor) Apply() error {
 	if apiColor.ScaleIntensity != nil {
-		apiColor.ColorRGB = apiColor.ColorRGB.ScaleIntensity(*apiColor.ScaleIntensity)
-
+		apiColor.Color = apiColor.Color.ScaleIntensity(*apiColor.ScaleIntensity)
 	}
 
 	if apiColor.headColor != nil {
-		apiColor.ColorRGB = apiColor.headColor.SetRGB(apiColor.ColorRGB)
+		apiColor.Color = apiColor.headColor.Set(apiColor.Color)
 	}
 
 	if apiColor.groupColor != nil {
-		apiColor.ColorRGB = apiColor.groupColor.SetRGB(apiColor.ColorRGB)
+		apiColor.Color = apiColor.groupColor.Set(apiColor.Color)
 	}
 
 	return nil
