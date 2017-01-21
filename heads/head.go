@@ -146,6 +146,7 @@ type Head struct {
 	headType *HeadType
 	output   *Output
 	events   *Events
+	groups   groupMap
 
 	channels   HeadChannels
 	parameters HeadParameters
@@ -186,6 +187,11 @@ func (head *Head) init() {
 	if headColor := head.getColor(); headColor.exists() {
 		head.parameters.Color = &headColor
 	}
+}
+
+// Head is member of Group
+func (head *Head) initGroup(group *Group) {
+	head.groups[group.id] = group
 }
 
 func (head *Head) getChannel(channelType ChannelType) *Channel {
@@ -305,7 +311,12 @@ func (head *Head) Index(name string) (web.Resource, error) {
 func (head *Head) Apply() error {
 	head.log.Info("Apply")
 
-	head.events.updateHead(head.id, head.makeAPI())
+	head.events.update(APIEvents{
+		Heads: APIHeads{
+			head.id: head.makeAPI(),
+		},
+		Groups: head.groups.makeAPI(),
+	})
 
 	return nil
 }

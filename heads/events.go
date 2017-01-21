@@ -13,8 +13,44 @@ func (heads *Heads) WebEvents() web.Events {
 }
 
 type APIEvents struct {
-	Heads  map[HeadID]APIHead
-	Groups map[GroupID]APIGroup
+	Heads  APIHeads
+	Groups APIGroups
+}
+
+func (event *APIEvents) addHead(head *Head) {
+	if event.Heads == nil {
+		event.Heads = APIHeads{head.id: head.makeAPI()}
+	} else {
+		event.Heads[head.id] = head.makeAPI()
+	}
+}
+
+func (event *APIEvents) addHeads(heads headMap) {
+	if event.Heads == nil {
+		event.Heads = heads.makeAPI()
+	} else {
+		for headID, head := range heads {
+			event.Heads[headID] = head.makeAPI()
+		}
+	}
+}
+
+func (events *APIEvents) addGroup(group *Group) {
+	if events.Groups == nil {
+		events.Groups = APIGroups{group.id: group.makeAPI()}
+	} else {
+		events.Groups[group.id] = group.makeAPI()
+	}
+}
+
+func (event *APIEvents) addGroups(groups groupMap) {
+	if event.Groups == nil {
+		event.Groups = groups.makeAPI()
+	} else {
+		for groupID, group := range groups {
+			event.Groups[groupID] = group.makeAPI()
+		}
+	}
 }
 
 type Events struct {
@@ -22,16 +58,9 @@ type Events struct {
 	eventChan chan web.Event
 }
 
-func (events *Events) updateHead(id HeadID, apiHead APIHead) {
+func (events *Events) update(event APIEvents) {
 	if events.eventChan != nil {
-		events.log.Infof("update head %v", id)
-		events.eventChan <- APIEvents{Heads: APIHeads{id: apiHead}}
-	}
-}
-
-func (events *Events) updateGroup(id GroupID, apiGroup APIGroup) {
-	if events.eventChan != nil {
-		events.log.Infof("update group %v", id)
-		events.eventChan <- APIEvents{Groups: APIGroups{id: apiGroup}}
+		events.log.Infof("update")
+		events.eventChan <- event
 	}
 }

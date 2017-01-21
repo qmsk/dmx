@@ -9,37 +9,37 @@ import (
 type PresetID string
 
 type PresetParameters struct {
-	resource  web.MutableResource
+	head  *Head
+	group *Group
+
 	Intensity *APIIntensity
 	Color     *APIColor
 }
 
-func (presetParameters *PresetParameters) initGroup(group *Group) error {
+func (presetParameters *PresetParameters) init() error {
 	if presetParameters.Intensity != nil {
-		if err := presetParameters.Intensity.initGroup(group.intensity); err != nil {
-			return err
+		if presetParameters.group != nil {
+			if err := presetParameters.Intensity.initGroup(presetParameters.group.intensity); err != nil {
+				return err
+			}
+		}
+		if presetParameters.head != nil {
+			if err := presetParameters.Intensity.initHead(presetParameters.head.parameters.Intensity); err != nil {
+				return err
+			}
 		}
 	}
 
 	if presetParameters.Color != nil {
-		if err := presetParameters.Color.initGroup(group.color); err != nil {
-			return err
+		if presetParameters.group != nil {
+			if err := presetParameters.Color.initGroup(presetParameters.group.color); err != nil {
+				return err
+			}
 		}
-	}
-
-	return nil
-}
-
-func (presetParameters *PresetParameters) initHead(head *Head) error {
-	if presetParameters.Intensity != nil {
-		if err := presetParameters.Intensity.initHead(head.parameters.Intensity); err != nil {
-			return err
-		}
-	}
-
-	if presetParameters.Color != nil {
-		if err := presetParameters.Color.initHead(head.parameters.Color); err != nil {
-			return err
+		if presetParameters.head != nil {
+			if err := presetParameters.Color.initHead(presetParameters.head.parameters.Color); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -101,6 +101,8 @@ func (presetMap presetMap) Index(name string) (web.Resource, error) {
 
 type Preset struct {
 	log    logging.Logger
+	events *Events
+
 	ID     PresetID
 	Config PresetConfig
 
@@ -117,12 +119,12 @@ func (preset *Preset) initAll(heads headMap, groups groupMap) {
 
 func (preset *Preset) initGroup(group *Group, presetParameters PresetParameters) error {
 	var groupParameters = PresetParameters{
-		resource:  group,
+		group:     group,
 		Intensity: presetParameters.Intensity,
 		Color:     presetParameters.Color,
 	}
 
-	if err := groupParameters.initGroup(group); err != nil {
+	if err := groupParameters.init(); err != nil {
 		return err
 	}
 
@@ -133,12 +135,12 @@ func (preset *Preset) initGroup(group *Group, presetParameters PresetParameters)
 
 func (preset *Preset) initHead(head *Head, presetParameters PresetParameters) error {
 	var headParameters = PresetParameters{
-		resource:  head,
+		head:      head,
 		Intensity: presetParameters.Intensity,
 		Color:     presetParameters.Color,
 	}
 
-	if err := headParameters.initHead(head); err != nil {
+	if err := headParameters.init(); err != nil {
 		return err
 	}
 
@@ -163,11 +165,16 @@ type APIPresetParams struct {
 }
 
 func (apiPresetParams APIPresetParams) Apply() error {
-	apiPresetParams.preset.log.Info("Apply")
+	var preset = apiPresetParams.preset
+	var event APIEvents
 
-	if allParams := apiPresetParams.preset.Config.All; allParams != nil {
-		for _, head := range apiPresetParams.preset.allHeads {
-			var headParams = PresetParameters{}
+	preset.log.Info("Apply")
+
+	if allParams := preset.Config.All; allParams != nil {
+		for _, head := range preset.allHeads {
+			var headParams = PresetParameters{
+				head: head,
+			}
 
 			// all params are optional
 			if allParams.Intensity != nil && head.parameters.Intensity != nil {
@@ -182,14 +189,16 @@ func (apiPresetParams APIPresetParams) Apply() error {
 				headParams = headParams.scaleIntensity(*apiPresetParams.Intensity)
 			}
 
-			if err := headParams.initHead(head); err != nil {
+			if err := headParams.init(); err != nil {
 				return err
 			} else if err := headParams.Apply(); err != nil {
 				return err
-			} else if err := head.Apply(); err != nil {
-				return err
 			}
 		}
+
+		// update everything
+		event.addHeads(preset.allHeads)
+		event.addGroups(preset.allGroups)
 
 		// also update groups after heads have been updated
 		for _, group := range apiPresetParams.preset.allGroups {
@@ -206,9 +215,10 @@ func (apiPresetParams APIPresetParams) Apply() error {
 
 		if err := apiGroupParams.Apply(); err != nil {
 			return err
-		} else if err := apiGroupParams.resource.Apply(); err != nil {
-			return err
 		}
+
+		event.addGroup(apiGroupParams.group)
+		event.addHeads(apiGroupParams.group.heads)
 	}
 
 	for _, apiHeadParams := range apiPresetParams.preset.Heads {
@@ -218,10 +228,13 @@ func (apiPresetParams APIPresetParams) Apply() error {
 
 		if err := apiHeadParams.Apply(); err != nil {
 			return err
-		} else if err := apiHeadParams.resource.Apply(); err != nil {
-			return err
 		}
+
+		event.addHead(apiHeadParams.head)
+		event.addGroups(apiHeadParams.head.groups)
 	}
+
+	preset.events.update(event)
 
 	return nil
 }

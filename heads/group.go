@@ -68,6 +68,11 @@ func (group *Group) addHead(head *Head) {
 
 // initialize group parameters from heads
 func (group *Group) init() {
+	// reverse-mappings for apply updates
+	for _, head := range group.heads {
+		head.initGroup(group)
+	}
+
 	if groupIntensity := group.makeIntensity(); groupIntensity.exists() {
 		group.intensity = &groupIntensity
 	}
@@ -180,11 +185,12 @@ func (apiGroupParams APIGroupParams) Apply() error {
 func (group *Group) Apply() error {
 	group.log.Info("Apply")
 
-	for headID, head := range group.heads {
-		head.events.updateHead(headID, head.makeAPI())
-	}
-
-	group.events.updateGroup(group.id, group.makeAPI())
+	group.events.update(APIEvents{
+		Heads: group.heads.makeAPI(),
+		Groups: APIGroups{
+			group.id: group.makeAPI(),
+		},
+	})
 
 	return nil
 }

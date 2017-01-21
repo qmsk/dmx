@@ -124,6 +124,7 @@ func (heads *Heads) addHead(id HeadID, config HeadConfig, headType *HeadType) *H
 		headType: headType,
 		output:   output,
 		events:   heads.events,
+		groups:   make(groupMap),
 	}
 
 	// load head parameters
@@ -143,6 +144,7 @@ func (heads *Heads) addHead(id HeadID, config HeadConfig, headType *HeadType) *H
 func (heads *Heads) addPreset(id PresetID, config PresetConfig) error {
 	var preset = Preset{
 		log:    heads.options.Log.Logger("preset", id),
+		events: heads.events,
 		ID:     id,
 		Config: config,
 		Groups: make(map[GroupID]PresetParameters),
@@ -156,8 +158,6 @@ func (heads *Heads) addPreset(id PresetID, config PresetConfig) error {
 	for groupID, presetParameters := range preset.Config.Groups {
 		if group := heads.groups[groupID]; group == nil {
 			return fmt.Errorf("No such group: %v", groupID)
-		} else if err := presetParameters.initGroup(group); err != nil {
-			return err
 		} else {
 			preset.initGroup(group, presetParameters)
 		}
@@ -166,8 +166,6 @@ func (heads *Heads) addPreset(id PresetID, config PresetConfig) error {
 	for headID, presetParameters := range preset.Config.Heads {
 		if head := heads.heads[headID]; head == nil {
 			return fmt.Errorf("No such head: %v", headID)
-		} else if err := presetParameters.initHead(head); err != nil {
-			return err
 		} else {
 			preset.initHead(head, presetParameters)
 		}
