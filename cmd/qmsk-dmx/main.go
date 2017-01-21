@@ -3,16 +3,16 @@ package main
 import (
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/SpComb/qmsk-dmx/artnet"
 	"github.com/SpComb/qmsk-dmx/heads"
+	"github.com/SpComb/qmsk-dmx/logging"
 	flags "github.com/jessevdk/go-flags"
 	colorful "github.com/lucasb-eyer/go-colorful"
 	"github.com/qmsk/go-web"
 )
 
 var options struct {
-	Options
+	Log logging.Option `long:"log"`
 
 	Artnet artnet.Config `group:"ArtNet"`
 	Heads  heads.Options `group:"Heads"`
@@ -33,17 +33,17 @@ func discovery(artnetController *artnet.Controller, hh *heads.Heads) {
 
 	for discovery := range discoveryChan {
 		for _, node := range discovery.Nodes {
-			log.Infof("artnet.Discovery: %v:", node)
+			logging.Log.Infof("artnet.Discovery: %v:", node)
 
 			config := node.Config()
 
-			log.Infof("\tName: %v\n", config.Name)
+			logging.Log.Infof("\tName: %v", config.Name)
 
 			for i, inputPort := range config.InputPorts {
-				log.Infof("\tInput %d: %v\n", i, inputPort.Address)
+				logging.Log.Infof("\tInput %d: %v", i, inputPort.Address)
 			}
 			for i, outputPort := range config.OutputPorts {
-				log.Infof("\tOutput %d: %v\n", i, outputPort.Address)
+				logging.Log.Infof("\tOutput %d: %v", i, outputPort.Address)
 
 				// patch outputs
 				universe := artnetController.Universe(outputPort.Address)
@@ -60,7 +60,7 @@ func discovery(artnetController *artnet.Controller, hh *heads.Heads) {
 		}
 	}
 
-	log.Fatalf("artnet discovery ended")
+	logging.Log.Fatalf("artnet discovery ended")
 }
 
 func demo(hh *heads.Heads) {
@@ -79,15 +79,15 @@ func demo(hh *heads.Heads) {
 		hh.Each(func(head *heads.Head) {
 			headParameters := head.Parameters()
 
-			log.Debugf("head %v: intensity=%v color=%v", head, headParameters.Intensity, headParameters.Color)
+			logging.Log.Debugf("head %v: intensity=%v color=%v", head, headParameters.Intensity, headParameters.Color)
 
 			if headParameters.Color != nil {
-				log.Debugf("head %v: Color %v @ %v", head, color, intensity)
+				logging.Log.Debugf("head %v: Color %v @ %v", head, color, intensity)
 
 				headParameters.Color.SetRGBIntensity(headsColor, intensity)
 
 			} else if headParameters.Intensity != nil {
-				log.Debugf("head %v: Intensity %v", head, intensity)
+				logging.Log.Debugf("head %v: Intensity %v", head, intensity)
 
 				headParameters.Intensity.Set(intensity)
 			}
@@ -111,20 +111,22 @@ func demo(hh *heads.Heads) {
 }
 
 func main() {
+	options.Log.Package = "main"
+
 	if args, err := flags.Parse(&options); err != nil {
-		log.Fatalf("flags.Parse")
+		logging.Log.Fatalf("flags.Parse")
 	} else if len(args) > 0 {
-		log.Fatalf("Usage")
+		logging.Log.Fatalf("Usage")
 	} else {
-		options.Setup()
+		logging.Setup(options.Log)
 	}
 
 	var artnetController *artnet.Controller
 
 	if c, err := options.Artnet.Controller(); err != nil {
-		log.Fatalf("artnet.Controller: %v", err)
+		logging.Log.Fatalf("artnet.Controller: %v", err)
 	} else {
-		log.Infof("artnet.Controller: %v", c)
+		logging.Log.Infof("artnet.Controller: %v", c)
 
 		artnetController = c
 	}
@@ -133,9 +135,9 @@ func main() {
 	var headsHeads *heads.Heads
 
 	if headsConfig, err := options.Heads.Config(options.Args.HeadsConfig); err != nil {
-		log.Fatalf("heads.Config %v: %v", options.Args.HeadsConfig, err)
+		logging.Log.Fatalf("heads.Config %v: %v", options.Args.HeadsConfig, err)
 	} else if heads, err := options.Heads.Heads(headsConfig); err != nil {
-		log.Fatalf("heads.Heads: %v", err)
+		logging.Log.Fatalf("heads.Heads: %v", err)
 	} else {
 		headsHeads = heads
 	}

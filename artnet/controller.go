@@ -19,7 +19,7 @@ type Config struct {
 
 	DMXRefresh time.Duration `long:"artnet-dmx-refresh" value-name:"DURATION" default:"1s"`
 
-	Log logging.Option `long:"artnet-log" default:"info"`
+	Log logging.Option `long:"log.artnet"`
 }
 
 func (config Config) Controller() (*Controller, error) {
