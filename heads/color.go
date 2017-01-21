@@ -19,9 +19,13 @@ type ColorID string
 
 type ColorMap map[ColorID]Color
 
+// Merge in new colors from given map
+// Preserves existing colors
 func (colorMap ColorMap) Merge(mergeMap ColorMap) {
 	for colorID, color := range mergeMap {
-		colorMap[colorID] = color
+		if _, exists := colorMap[colorID]; !exists {
+			colorMap[colorID] = color
+		}
 	}
 }
 

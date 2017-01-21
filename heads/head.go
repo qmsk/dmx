@@ -25,6 +25,15 @@ func (headType HeadType) String() string {
 	return fmt.Sprintf("%v/%v=%v", headType.Vendor, headType.Model, headType.Mode)
 }
 
+func (headType HeadType) IsColor() bool {
+	for _, channelType := range headType.Channels {
+		if channelType.Color != "" {
+			return true
+		}
+	}
+	return false
+}
+
 // Config
 type HeadID string
 

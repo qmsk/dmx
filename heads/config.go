@@ -124,6 +124,7 @@ func loads(path string, mapper configMapper) error {
 
 type Config struct {
 	HeadTypes map[TypeID]*HeadType
+	Colors    map[ColorID]*Color
 
 	Heads  map[HeadID]*HeadConfig
 	Groups map[GroupID]*GroupConfig
@@ -148,6 +149,17 @@ func (config *Config) load(path string) error {
 			return config, nil
 		}
 		switch id[0] {
+		case "colors":
+			if len(id) == 1 {
+				return config.Colors, nil
+			} else {
+				var color = new(Color)
+
+				config.Colors[ColorID(filepath.Join(id[1:]...))] = color
+
+				return color, nil
+			}
+
 		case "heads":
 			if len(id) == 1 {
 				return config.Heads, nil
@@ -190,6 +202,26 @@ func (config *Config) load(path string) error {
 
 // map relative Head.Type= references
 func (config *Config) mapTypes() error {
+	// clone to ColorMap without pointers
+	var colors = make(ColorMap)
+	for colorID, color := range config.Colors {
+		colors[colorID] = *color
+	}
+
+	// inherit colors
+	for _, headType := range config.HeadTypes {
+		if !headType.IsColor() {
+			continue
+		}
+
+		if headType.Colors == nil {
+			headType.Colors = make(ColorMap)
+		}
+
+		// each headType has its own copy
+		headType.Colors.Merge(colors)
+	}
+
 	for headID, headConfig := range config.Heads {
 		if headType, exists := config.HeadTypes[headConfig.Type]; !exists {
 			return fmt.Errorf("heads.%s: Invalid Head.Type=%v", headID, headConfig.Type)
@@ -204,6 +236,7 @@ func (config *Config) mapTypes() error {
 func (options Options) Config(path string) (*Config, error) {
 	var config = Config{
 		HeadTypes: make(map[TypeID]*HeadType),
+		Colors:    make(map[ColorID]*Color),
 		Heads:     make(map[HeadID]*HeadConfig),
 		Groups:    make(map[GroupID]*GroupConfig),
 		Presets:   make(map[PresetID]*PresetConfig),
