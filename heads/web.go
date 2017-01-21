@@ -1,7 +1,6 @@
 package heads
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"github.com/qmsk/go-web"
 )
 
@@ -17,8 +16,6 @@ func (heads *Heads) WebAPI() web.API {
 }
 
 func (heads *Heads) Index(name string) (web.Resource, error) {
-	log.Debugln("heads:Heads.Index", name)
-
 	switch name {
 	case "":
 		return heads, nil
@@ -36,7 +33,6 @@ func (heads *Heads) Index(name string) (web.Resource, error) {
 }
 
 func (heads *Heads) GetREST() (web.Resource, error) {
-	log.Debug("heads:Heads.GetREST")
 	return API{
 		Outputs: heads.outputs.makeAPI(),
 		Heads:   heads.heads.makeAPI(),
@@ -46,11 +42,11 @@ func (heads *Heads) GetREST() (web.Resource, error) {
 }
 
 func (heads *Heads) Apply() error {
-	log.Debug("heads:Heads.Apply")
+	heads.log.Info("Apply")
 
 	// Refresh DMX output
 	if err := heads.Refresh(); err != nil {
-		log.Warnf("heads:Heads.Refresh: %v", err)
+		heads.log.Warn("Refresh: ", err)
 
 		return err
 	}

@@ -3,8 +3,8 @@ package heads
 import (
 	"fmt"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/SpComb/qmsk-dmx"
+	"github.com/SpComb/qmsk-dmx/logging"
 	"github.com/qmsk/go-web"
 )
 
@@ -64,8 +64,6 @@ type headMap map[HeadID]*Head
 type APIHeads map[HeadID]APIHead
 
 func (heads headMap) makeAPI() APIHeads {
-	log.Debug("heads:headMap.makeAPI")
-
 	var apiHeads = make(APIHeads)
 
 	for headID, head := range heads {
@@ -77,8 +75,6 @@ func (heads headMap) makeAPI() APIHeads {
 type headList headMap
 
 func (heads headList) GetREST() (web.Resource, error) {
-	log.Debug("heads:headList.GetREST")
-
 	var apiHeads []APIHead
 
 	for _, head := range heads {
@@ -89,8 +85,6 @@ func (heads headList) GetREST() (web.Resource, error) {
 }
 
 func (headMap headMap) Index(name string) (web.Resource, error) {
-	log.Debugln("heads:headMap.Index", name)
-
 	switch name {
 	case "":
 		return headList(headMap), nil
@@ -100,8 +94,6 @@ func (headMap headMap) Index(name string) (web.Resource, error) {
 }
 
 func (headMap headMap) GetREST() (web.Resource, error) {
-	log.Debug("heads:headMap.GetREST")
-
 	return headMap.makeAPI(), nil
 }
 
@@ -129,8 +121,6 @@ func (headChannels HeadChannels) makeAPI() APIChannels {
 }
 
 func (headChannels HeadChannels) GetREST() (web.Resource, error) {
-	log.Debugln("heads:HeadChannels.GetREST")
-
 	return headChannels.makeAPI(), nil
 }
 
@@ -149,6 +139,8 @@ type HeadParameters struct {
 
 // A single DMX receiver using multiple consecutive DMX channels from a base address within a single universe
 type Head struct {
+	log logging.Logger
+
 	id       HeadID
 	config   HeadConfig
 	headType *HeadType
@@ -160,11 +152,15 @@ type Head struct {
 }
 
 func (head *Head) String() string {
-	return fmt.Sprintf("%v", head.id)
+	return string(head.id)
 }
 
 func (head *Head) Name() string {
-	return head.config.Name
+	if head.config.Name != "" {
+		return head.config.Name
+	} else {
+		return string(head.id)
+	}
 }
 
 func (head *Head) init() {
@@ -227,8 +223,6 @@ type APIHead struct {
 }
 
 func (head *Head) makeAPI() APIHead {
-	log.Debugln("heads:Head.makeAPI", head)
-
 	return APIHead{
 		ID:     head.id,
 		Config: head.config,
@@ -259,11 +253,7 @@ func (head *Head) PostREST() (web.Resource, error) {
 }
 
 func (post *APIHeadParams) Apply() error {
-	log.Debugln("heads:Head.Apply", post.head,
-		"channels", post.Channels,
-		"intensity", post.Intensity,
-		"color", post.Color,
-	)
+	post.head.log.Info("Apply parameters: %#v", post)
 
 	for channelID, channelParams := range post.Channels {
 		if channel := post.head.channels.GetID(channelID); channel == nil {
@@ -313,6 +303,8 @@ func (head *Head) Index(name string) (web.Resource, error) {
 
 // Web API Events
 func (head *Head) Apply() error {
+	head.log.Info("Apply")
+
 	head.events.updateHead(head.id, head.makeAPI())
 
 	return nil

@@ -2,7 +2,6 @@ package heads
 
 import (
 	"fmt"
-	log "github.com/Sirupsen/logrus"
 	"github.com/qmsk/go-web"
 )
 
@@ -178,19 +177,13 @@ func (apiColor *APIColor) Apply() error {
 	if apiColor.ScaleIntensity != nil {
 		apiColor.ColorRGB = apiColor.ColorRGB.ScaleIntensity(*apiColor.ScaleIntensity)
 
-		log.Debugln("heads:APIColor.Apply scale", *apiColor.ScaleIntensity, "=", apiColor.ColorRGB)
-
 	}
 
 	if apiColor.headColor != nil {
-		log.Debugln("heads:APIColor.Apply head", apiColor.headColor, apiColor.ColorRGB)
-
 		apiColor.ColorRGB = apiColor.headColor.SetRGB(apiColor.ColorRGB)
 	}
 
 	if apiColor.groupColor != nil {
-		log.Debugln("heads:APIColor.Apply group", apiColor.groupColor, apiColor.ColorRGB)
-
 		apiColor.ColorRGB = apiColor.groupColor.SetRGB(apiColor.ColorRGB)
 	}
 

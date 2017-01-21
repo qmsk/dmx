@@ -1,6 +1,7 @@
 package heads
 
 import (
+	"github.com/SpComb/qmsk-dmx/logging"
 	"github.com/qmsk/go-web"
 )
 
@@ -13,7 +14,6 @@ type PresetParameters struct {
 	Color     *APIColor
 }
 
-// XXX: this is called on a copy for the error-checking
 func (presetParameters *PresetParameters) initGroup(group *Group) error {
 	if presetParameters.Intensity != nil {
 		if err := presetParameters.Intensity.initGroup(group.intensity); err != nil {
@@ -30,7 +30,6 @@ func (presetParameters *PresetParameters) initGroup(group *Group) error {
 	return nil
 }
 
-// XXX: this is called on a copy for the error-checking
 func (presetParameters *PresetParameters) initHead(head *Head) error {
 	if presetParameters.Intensity != nil {
 		if err := presetParameters.Intensity.initHead(head.parameters.Intensity); err != nil {
@@ -101,6 +100,7 @@ func (presetMap presetMap) Index(name string) (web.Resource, error) {
 }
 
 type Preset struct {
+	log    logging.Logger
 	ID     PresetID
 	Config PresetConfig
 
@@ -163,6 +163,8 @@ type APIPresetParams struct {
 }
 
 func (apiPresetParams APIPresetParams) Apply() error {
+	apiPresetParams.preset.log.Info("Apply")
+
 	if allParams := apiPresetParams.preset.Config.All; allParams != nil {
 		for _, head := range apiPresetParams.preset.allHeads {
 			var headParams = PresetParameters{}

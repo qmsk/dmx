@@ -2,17 +2,22 @@ package heads
 
 import (
 	"fmt"
-	log "github.com/Sirupsen/logrus"
 	"github.com/SpComb/qmsk-dmx"
+	"github.com/SpComb/qmsk-dmx/logging"
 )
 
 type Options struct {
+	Log logging.Option `long:"log.heads"`
+
 	LibraryPath []string `long:"heads-library" value-name:"PATH"`
 }
 
 func (options Options) Heads(config *Config) (*Heads, error) {
+	options.Log.Package = "heads"
+
 	var heads = Heads{
-		log:     log.WithField("package", "heads"),
+		options: options,
+		log:     options.Log.Logger("package", "heads"),
 		outputs: make(outputMap),
 		heads:   make(headMap),
 		groups:  make(groupMap),
@@ -51,7 +56,8 @@ func (options Options) Heads(config *Config) (*Heads, error) {
 }
 
 type Heads struct {
-	log     *log.Entry
+	options Options
+	log     logging.Logger
 	outputs outputMap
 	heads   headMap
 	groups  groupMap
@@ -63,7 +69,7 @@ func (heads *Heads) output(universe Universe) *Output {
 	output := heads.outputs[universe]
 	if output == nil {
 		output = &Output{
-			log: heads.log.WithField("universe", universe),
+			log: heads.options.Log.Logger("universe", universe),
 			dmx: dmx.MakeUniverse(),
 		}
 
@@ -83,6 +89,7 @@ func (heads *Heads) addGroup(id GroupID, config GroupConfig) *Group {
 
 	if group == nil {
 		group = &Group{
+			log:    heads.options.Log.Logger("group", id),
 			id:     id,
 			config: config,
 			heads:  make(headMap),
@@ -108,6 +115,7 @@ func (heads *Heads) group(id GroupID) *Group {
 func (heads *Heads) addHead(id HeadID, config HeadConfig, headType *HeadType) *Head {
 	var output = heads.output(config.Universe)
 	var head = Head{
+		log:      heads.options.Log.Logger("head", id),
 		id:       id,
 		config:   config,
 		headType: headType,
@@ -131,6 +139,7 @@ func (heads *Heads) addHead(id HeadID, config HeadConfig, headType *HeadType) *H
 
 func (heads *Heads) addPreset(id PresetID, config PresetConfig) error {
 	var preset = Preset{
+		log:    heads.options.Log.Logger("preset", id),
 		ID:     id,
 		Config: config,
 		Groups: make(map[GroupID]PresetParameters),

@@ -3,9 +3,9 @@ package heads
 import (
 	"fmt"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/SpComb/qmsk-dmx"
 	"github.com/SpComb/qmsk-dmx/artnet"
+	"github.com/SpComb/qmsk-dmx/logging"
 	"github.com/qmsk/go-web"
 )
 
@@ -17,8 +17,7 @@ type OutputConfig struct {
 type outputMap map[Universe]*Output
 
 type Output struct {
-	log *log.Entry
-
+	log      logging.Logger
 	config   OutputConfig
 	universe Universe
 	dmx      dmx.Universe

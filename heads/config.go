@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
-	log "github.com/Sirupsen/logrus"
+	"github.com/SpComb/qmsk-dmx/logging"
 )
 
 func loadToml(obj interface{}, path string) error {
@@ -43,7 +43,7 @@ func loadsStat(path string, stat os.FileInfo, mapper configMapper, prefix []stri
 	name := stat.Name()
 
 	if stat.IsDir() {
-		log.Debugf("heads:loadOne path=%v: dir prefix=%v", path, prefix)
+		logging.Log.Debugf("heads:loadOne path=%v: dir prefix=%v", path, prefix)
 
 		var id []string
 
@@ -70,14 +70,14 @@ func loadsStat(path string, stat os.FileInfo, mapper configMapper, prefix []stri
 			id = append(id, name)
 		}
 
-		log.Debugf("heads:loadOne path=%v: file id=%v", path, id)
+		logging.Log.Debugf("heads:loadOne path=%v: file id=%v", path, id)
 
 		if obj, err := mapper(id); err != nil {
 			return err
 		} else if err := load(obj, path); err != nil {
 			return err
 		} else {
-			log.Infof("heads:loads path=%v: %T id=%v ", path, obj, id)
+			logging.Log.Infof("heads:loads path=%v: %T %v ", path, obj, id)
 
 			return nil
 		}
@@ -93,13 +93,13 @@ func loadsDir(dirPath string, mapper configMapper, prefix []string) error {
 			path := filepath.Join(dirPath, stat.Name())
 
 			if !(stat.Mode().IsRegular() || stat.Mode().IsDir()) {
-				log.Debugf("heads:loadsDir path=%v: skip irregular", path)
+				logging.Log.Debugf("heads:loadsDir path=%v: skip irregular", path)
 
 				continue
 			}
 
 			if strings.HasPrefix(stat.Name(), ".") {
-				log.Debugf("heads:loadOne path=%v: skip dotfile", path)
+				logging.Log.Debugf("heads:loadOne path=%v: skip dotfile", path)
 
 				continue
 			}

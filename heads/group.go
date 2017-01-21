@@ -1,6 +1,7 @@
 package heads
 
 import (
+	"github.com/SpComb/qmsk-dmx/logging"
 	"github.com/qmsk/go-web"
 )
 
@@ -50,6 +51,7 @@ func (groupMap groupMap) Index(name string) (web.Resource, error) {
 
 // Group
 type Group struct {
+	log    logging.Logger
 	id     GroupID
 	config GroupConfig
 	heads  headMap
@@ -176,11 +178,13 @@ func (apiGroupParams APIGroupParams) Apply() error {
 
 // Web API Events
 func (group *Group) Apply() error {
-	group.events.updateGroup(group.id, group.makeAPI())
+	group.log.Info("Apply")
 
 	for headID, head := range group.heads {
 		head.events.updateHead(headID, head.makeAPI())
 	}
+
+	group.events.updateGroup(group.id, group.makeAPI())
 
 	return nil
 }

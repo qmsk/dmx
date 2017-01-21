@@ -2,7 +2,6 @@ package heads
 
 import (
 	"fmt"
-	log "github.com/Sirupsen/logrus"
 	"github.com/qmsk/go-web"
 )
 
@@ -118,19 +117,13 @@ func (apiIntensity *APIIntensity) initGroup(groupIntensity *GroupIntensity) erro
 func (apiIntensity *APIIntensity) Apply() error {
 	if apiIntensity.ScaleIntensity != nil {
 		apiIntensity.Intensity = apiIntensity.Intensity.ScaleIntensity(*apiIntensity.ScaleIntensity)
-
-		log.Debugln("heads:APIIntensity.Apply scale", *apiIntensity.ScaleIntensity, "=", apiIntensity.Intensity)
 	}
 
 	if apiIntensity.headIntensity != nil {
-		log.Debugln("heads:APIIntensity.Apply head", apiIntensity.Intensity)
-
 		apiIntensity.Intensity = apiIntensity.headIntensity.Set(apiIntensity.Intensity)
 	}
 
 	if apiIntensity.groupIntensity != nil {
-		log.Debugln("heads:APIIntensity.Apply group", apiIntensity.Intensity)
-
 		apiIntensity.Intensity = apiIntensity.groupIntensity.Set(apiIntensity.Intensity)
 	}
 
