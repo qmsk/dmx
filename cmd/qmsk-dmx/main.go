@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -33,20 +32,18 @@ func discovery(artnetController *artnet.Controller, hh *heads.Heads) {
 	artnetController.Start(discoveryChan)
 
 	for discovery := range discoveryChan {
-		log.Infof("artnet.Discovery:")
-
 		for _, node := range discovery.Nodes {
-			fmt.Printf("%v:\n", node)
+			log.Infof("artnet.Discovery: %v:", node)
 
 			config := node.Config()
 
-			fmt.Printf("\tName: %v\n", config.Name)
+			log.Infof("\tName: %v\n", config.Name)
 
 			for i, inputPort := range config.InputPorts {
-				fmt.Printf("\tInput %d: %v\n", i, inputPort.Address)
+				log.Infof("\tInput %d: %v\n", i, inputPort.Address)
 			}
 			for i, outputPort := range config.OutputPorts {
-				fmt.Printf("\tOutput %d: %v\n", i, outputPort.Address)
+				log.Infof("\tOutput %d: %v\n", i, outputPort.Address)
 
 				// patch outputs
 				universe := artnetController.Universe(outputPort.Address)
