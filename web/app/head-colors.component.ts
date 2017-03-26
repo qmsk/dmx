@@ -15,7 +15,7 @@ export class HeadColorsComponent {
   @Output() colorChange = new EventEmitter<Color>();
 
   makeColors(): Color[] {
-    return Object.values(this.colors);
+    return Object.keys(this.colors).map((id) => this.colors[id]);
   }
 
   active(color: Color): boolean {
