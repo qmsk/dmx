@@ -151,7 +151,7 @@ func (config *Config) load(path string) error {
 		switch id[0] {
 		case "colors":
 			if len(id) == 1 {
-				return config.Colors, nil
+				return &config.Colors, nil
 			} else {
 				var color = new(Color)
 
@@ -162,7 +162,7 @@ func (config *Config) load(path string) error {
 
 		case "heads":
 			if len(id) == 1 {
-				return config.Heads, nil
+				return &config.Heads, nil
 			} else {
 				var head = new(HeadConfig)
 
@@ -173,7 +173,7 @@ func (config *Config) load(path string) error {
 
 		case "groups":
 			if len(id) == 1 {
-				return config.Groups, nil
+				return &config.Groups, nil
 			} else {
 				var group = new(GroupConfig)
 
@@ -184,7 +184,7 @@ func (config *Config) load(path string) error {
 
 		case "presets":
 			if len(id) == 1 {
-				return config.Presets, nil
+				return &config.Presets, nil
 			} else {
 				var preset = new(PresetConfig)
 
