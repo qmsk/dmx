@@ -27,3 +27,11 @@ Address     = 250
 Count       = 4
 Name        = "Dimmer"
 Groups      = ["dimmer"]
+
+[ledwall]
+Type        = "generic/dimmer-1ch"
+Universe    = 2
+Address     = 1
+Count       = 3
+Name        = "LED Wall"
+Groups      = ["led-wall"]

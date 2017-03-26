@@ -3,3 +3,6 @@ Name        = "LED-Par"
 
 [tri-bar]
 Name        = "Tri-Bar"
+
+[led-wall]
+Name        = "LED Wall"
