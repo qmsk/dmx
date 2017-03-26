@@ -12,7 +12,7 @@ import (
 
 type Config struct {
 	Listen    string   `long:"artnet-listen" value-name:"ADDR" default:"0.0.0.0"`
-	Discovery []string `long:"artnet-discovery" value-name:"ADDR" default:"255.255.255.255"`
+	Discovery []string `long:"artnet-discovery" value-name:"ADDR" default:"255.255.255.255" env:"ARTNET_DISCOVERY" env-delim:","`
 
 	DiscoveryInterval time.Duration `long:"artnet-discovery-interval" value-name:"DURATION" default:"3s"`
 	DiscoveryTimeout  time.Duration `long:"artnet-discovery-timeout" value-name:"DURATION" default:"3s"`
