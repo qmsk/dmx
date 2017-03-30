@@ -44,8 +44,8 @@ Go package supporting Art-Net discovery and DMX output.
 * Supports multiple `--artnet-discovery=192.168.2.102` targets for unicast or broadcast use
 * Supports dynamic [Device Discovery](http://art-net.org.uk/?page_id=454) of nodes and output ports using [`ArtPoll`](http://art-net.org.uk/?page_id=575) and [`ArtPollReply`](http://art-net.org.uk/?page_id=570) packets
 * Supports outgoing [DMX Streaming](http://art-net.org.uk/?page_id=456) using [Broadcast/Unicast Subscription](http://art-net.org.uk/?page_id=649)
-** Sequence numbers for outgoing packets
-** Periodic output refresh
+  * Sequence numbers for outgoing packets
+  * Periodic output refresh
 
 ## `github.com/qmsk/dmx/heads`
 
