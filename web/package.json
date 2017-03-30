@@ -4,7 +4,7 @@
   "description": "Go DMX controller with ArtNet discovery + Angular Web UI with WebSockets",
   "repository": {
     "type": "git",
-    "url": "https://github.com/SpComb/qmsk-dmx.git"
+    "url": "https://github.com/qmsk/dmx.git"
   },
   "license": "MPL-2.0",
 

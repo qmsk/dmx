@@ -3,9 +3,9 @@ package heads
 import (
 	"fmt"
 
-	"github.com/SpComb/qmsk-dmx"
-	"github.com/SpComb/qmsk-dmx/artnet"
-	"github.com/SpComb/qmsk-dmx/logging"
+	"github.com/qmsk/dmx"
+	"github.com/qmsk/dmx/artnet"
+	"github.com/qmsk/dmx/logging"
 	"github.com/qmsk/go-web"
 )
 

@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
-	"github.com/SpComb/qmsk-dmx/logging"
+	"github.com/qmsk/dmx/logging"
 )
 
 func loadToml(obj interface{}, path string) error {

@@ -6,13 +6,13 @@ RUN apt-get update && apt-get install -y \
   nodejs nodejs-legacy npm
 
 ENV GOPATH=/go
-ADD . /go/src/github.com/SpComb/qmsk-dmx
+ADD . /go/src/github.com/qmsk/dmx
 
-WORKDIR /go/src/github.com/SpComb/qmsk-dmx/web
+WORKDIR /go/src/github.com/qmsk/dmx/web
 RUN npm install
 RUN ./node_modules/typescript/bin/tsc
 
-WORKDIR /go/src/github.com/SpComb/qmsk-dmx
+WORKDIR /go/src/github.com/qmsk/dmx
 RUN go get -d ./cmd/...
 RUN go install -v ./cmd/...
 

@@ -4,8 +4,8 @@ import (
 	"net"
 	"time"
 
-	dmx "github.com/SpComb/qmsk-dmx"
-	"github.com/SpComb/qmsk-dmx/logging"
+	dmx "github.com/qmsk/dmx"
+	"github.com/qmsk/dmx/logging"
 )
 
 type InputPort struct {

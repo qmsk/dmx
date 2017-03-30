@@ -1,7 +1,7 @@
 package heads
 
 import (
-	"github.com/SpComb/qmsk-dmx"
+	"github.com/qmsk/dmx"
 	"github.com/qmsk/go-web"
 )
 

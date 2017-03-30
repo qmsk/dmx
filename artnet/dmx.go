@@ -3,7 +3,7 @@ package artnet
 import (
 	"net"
 
-	dmx "github.com/SpComb/qmsk-dmx"
+	dmx "github.com/qmsk/dmx"
 )
 
 type DMXUniverse []uint8

@@ -2,8 +2,8 @@ package heads
 
 import (
 	"fmt"
-	"github.com/SpComb/qmsk-dmx"
-	"github.com/SpComb/qmsk-dmx/logging"
+	"github.com/qmsk/dmx"
+	"github.com/qmsk/dmx/logging"
 )
 
 type Options struct {

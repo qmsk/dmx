@@ -3,9 +3,9 @@ package main
 import (
 	"time"
 
-	"github.com/SpComb/qmsk-dmx/artnet"
-	"github.com/SpComb/qmsk-dmx/heads"
-	"github.com/SpComb/qmsk-dmx/logging"
+	"github.com/qmsk/dmx/artnet"
+	"github.com/qmsk/dmx/heads"
+	"github.com/qmsk/dmx/logging"
 	flags "github.com/jessevdk/go-flags"
 	colorful "github.com/lucasb-eyer/go-colorful"
 	"github.com/qmsk/go-web"

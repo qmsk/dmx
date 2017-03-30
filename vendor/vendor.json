@@ -1,7 +1,7 @@
 {
 	"comment": "",
 	"ignore": "test",
-	"rootPath": "github.com/SpComb/qmsk-dmx",
+	"rootPath": "github.com/qmsk/dmx",
 	"package": [
 		{
 			"path": "github.com/qmsk/go-web",
