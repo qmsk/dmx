@@ -1,6 +1,11 @@
  Go DMX controller with ArtNet discovery + Angular Web UI with WebSockets
 
- # `qmsk-dmx`
+## Web UI
+
+![EMTS Contact field](https://raw.githubusercontent.com/qmsk/dmx/master/docs/web-main.png)
+
+
+## `github.com/qmsk/dmx/cmd/qmsk-dmx`
 
 ```
 
@@ -31,7 +36,7 @@ Help Options:
   -h, --help                                  Show this help message
 ```
 
-# `github.com/qmsk/dmx/artnet`
+## `github.com/qmsk/dmx/artnet`
 
 Go package supporting Art-Net discovery and DMX output.
 
@@ -42,7 +47,7 @@ Go package supporting Art-Net discovery and DMX output.
 ** Sequence numbers for outgoing packets
 ** Periodic output refresh
 
-# `github.com/qmsk/dmx/heads`
+## `github.com/qmsk/dmx/heads`
 
 DMX controller with support for multi-channel heads.
 Configured using TOML configuration files, outputs DMX over Art-Net, controlled using a REST API and WebSocket event stream.
