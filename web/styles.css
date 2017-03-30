@@ -1,6 +1,9 @@
 body {
   background-color: #aaa;
   color: #111;
+
+  margin: 0;
+  padding: 0;
 }
 
 a {
@@ -85,6 +88,7 @@ div.spinner {
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
+  align-content: flex-start;
 }
 
 .view.centered {
@@ -139,6 +143,7 @@ div.spinner {
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: flex-start;
+  align-content: flex-start;
 }
 
 .dmx-head {
