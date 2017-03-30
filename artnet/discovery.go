@@ -74,7 +74,7 @@ func (controller *Controller) discovery(pollChan chan pollEvent) {
 			} else {
 				node.discoveryTime = pollEvent.recvTime
 
-				controller.log.Debugf("discovery new: %v", node)
+				controller.log.Debugf("discovery new %v: %#v", node, nodeConfig)
 
 				nodes[pollEvent.String()] = node
 

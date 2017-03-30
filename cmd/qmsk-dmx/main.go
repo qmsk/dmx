@@ -38,6 +38,7 @@ func discovery(artnetController *artnet.Controller, hh *heads.Heads) {
 			config := node.Config()
 
 			logging.Log.Infof("\tName: %v", config.Name)
+			logging.Log.Infof("\tPorts: input=%d output=%d", len(config.InputPorts), len(config.OutputPorts))
 
 			for i, inputPort := range config.InputPorts {
 				logging.Log.Infof("\tInput %d: %v", i, inputPort.Address)
