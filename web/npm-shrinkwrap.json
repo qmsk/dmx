@@ -52,6 +52,11 @@
       "from": "lodash@4.17.4",
       "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.17.4.tgz"
     },
+    "material-design-icons": {
+      "version": "3.0.1",
+      "from": "material-design-icons@latest",
+      "resolved": "https://registry.npmjs.org/material-design-icons/-/material-design-icons-3.0.1.tgz"
+    },
     "normalize.css": {
       "version": "6.0.0",
       "from": "normalize.css@6.0.0",
