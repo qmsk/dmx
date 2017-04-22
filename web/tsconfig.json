@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "es5",
     "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
@@ -8,9 +8,10 @@
     "experimentalDecorators": true,
     "removeComments": false,
     "noImplicitAny": false,
+
+    "lib": [ "es2015", "dom" ],
     "types": [
-      "node",
-      "core-js"
+      "node"
     ],
 
     "baseUrl": ".",
