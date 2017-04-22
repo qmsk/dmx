@@ -63,6 +63,32 @@ footer .status {
   font-family: monospace;
 }
 
+footer .status ul {
+  margin: 0;
+  padding: 0;
+
+  list-style-type: none;
+}
+
+footer .status li {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+footer .status li .icon {
+  margin-right: 0.25em;
+}
+
+footer .status li div {
+
+}
+
+footer .icon.error {
+  color: #ff4444;
+}
+
 /* Navigation */
 nav a {
   display: inline-block;
@@ -85,7 +111,6 @@ nav a.active {
 
 .loading .icon {
   font-size: 96px;
-  color: #884444;
 }
 
 /* Views */
@@ -216,4 +241,9 @@ th {
 }
 td {
   background-color: #888;
+}
+
+/* Icons */
+.icon.error {
+  color: #884444;
 }

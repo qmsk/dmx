@@ -17,14 +17,18 @@
     <script src="node_modules/systemjs/dist/system.src.js"></script>
     <script src="systemjs.config.js"></script>
     <script>
-      /* Global error handler to abort app */
-      function abort(err, message = null) {
+      /* Bootstrap error handler to abort app loading */
+      function loading_abort(err, message = null) {
         var loading_spinner = document.getElementById("dmx-loading-spinner");
         var loading_error = document.getElementById("dmx-loading-error");
         var status = document.getElementById("dmx-status");
 
-        loading_spinner.style.display = 'none';
-        loading_error.style.display = '';
+        if (loading_spinner) {
+          loading_spinner.style.display = 'none';
+        }
+        if (loading_error) {
+          loading_error.style.display = '';
+        }
         status.innerText = message || err.toString();
       }
 
@@ -32,24 +36,31 @@
         console.error(err);
 
         // this is a wrapped error
-        abort(err.originalErr, err.originalErr.name + ": " + err.message);
+        loading_abort(err.originalErr, err.originalErr.name + ": " + err.message);
       });
     </script>
   </head>
   <body>
-    <dmx-app class="app loading">
+    <dmx-app id="app" class="app">
       <header>
         <nav>
           <a>qmsk::dmx</a>
         </nav>
       </header>
-      <div class="view centered">
+      <div class="view centered loading">
         <div id="dmx-loading-spinner" class="spinner sk-rotating-plane"></div>
-        <i id="dmx-loading-error" class="icon material-icons" style="display: none">error</i>
+        <i id="dmx-loading-error" class="icon error material-icons" style="display: none">error</i>
       </div>
       <footer>
         <div id="dmx-status" class="status">
-          Loading...
+          <ul>
+            <li>
+              <i class="icon material-icons">autorenew</i>
+              <div>
+                Loading...
+              </div>
+            </li>
+          </ul>
         </div>
       </footer>
     </dmx-app>
