@@ -1,8 +1,11 @@
-import { NgModule } from '@angular/core';
+import { NgModule, ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpModule } from '@angular/http';
 import { FormsModule }   from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
+
+import { StatusService } from './status.service'
+import { AppErrorHandler } from './error-handler'
 
 import { AppComponent } from './app.component'
 import { ChannelsComponent } from './channels.component'
@@ -15,6 +18,7 @@ import { IntensityComponent } from './intensity.component'
 import { PresetsComponent } from './presets.component'
 import { PresetParametersComponent } from './preset-parameters.component'
 import { MainComponent } from './main.component'
+import { StatusComponent } from './status.component'
 
 const routes: Routes = [
   { path: 'presets', component: PresetsComponent },
@@ -43,6 +47,11 @@ const routes: Routes = [
     PresetsComponent,
     PresetParametersComponent,
     MainComponent,
+    StatusComponent,
+  ],
+  providers: [
+    StatusService,
+    {provide: ErrorHandler, useClass: AppErrorHandler},
   ],
   bootstrap: [ AppComponent ],
 })

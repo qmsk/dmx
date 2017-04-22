@@ -1,0 +1,14 @@
+<ul>
+  <li>
+    <i class="icon material-icons">done</i>
+    <div>
+      Loaded
+    </div>
+  </li>
+  <li *ngIf="status.error">
+    <i class="icon error material-icons">error</i>
+    <div>
+      {{status.error.name}}: {{status.error.message}}
+    </div>
+  </li>
+</ul>
