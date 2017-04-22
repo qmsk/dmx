@@ -1,4 +1,4 @@
 export {
   WebSocketService,
-  Error as WebSocketError,
+  WebSocketError,
 } from './websocket';

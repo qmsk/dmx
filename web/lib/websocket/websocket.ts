@@ -11,7 +11,7 @@ export enum ReadyState {
     Closed      = 3,
 }
 
-export interface Error {
+export class WebSocketError extends Error {
   code: number;
   reason: string;
 }
@@ -26,16 +26,20 @@ export class WebSocketService {
     let subject = new Subject<T>();
 
     ws.onopen = (event: Event) => {
-
+      // wait for first message before advancing subject
     };
     ws.onerror = (event: Event) => {
+      // the websocket error event is intentionally useless, it does not contain any other information
+      // just wait for the close event...
       console.log("WebSocket onerror", event);
     };
     ws.onmessage = (event: MessageEvent) => {
       subject.next(JSON.parse(event.data));
     };
     ws.onclose = (closeEvent: CloseEvent) => {
-      let error = <Error>{code: closeEvent.code, reason: closeEvent.reason};
+      let error = new WebSocketError("Websocket closed with code=" + closeEvent.code + ": " + closeEvent.reason);
+      error.code = closeEvent.code;
+      error.reason = closeEvent.reason;
 
       if (closeEvent.wasClean) {
         subject.complete();
