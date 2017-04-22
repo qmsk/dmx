@@ -3,6 +3,9 @@
     <i class="icon material-icons" [class.error]="!!s.error" >{{s.icon}}</i>
     <div>
       {{s.message}}
+      <span class="error" *ngIf="s.error">
+        ({{s.error}})
+      </span>
     </div>
   </li>
 </ul>

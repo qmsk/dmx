@@ -40,7 +40,7 @@ export class StatusService {
     this.app = null;
   }
   AppError(error: Error) {
-    this.app = new Status('error', error.toString(), error);
+    this.app = new Status('error', "Application error", error);
   }
 
   WebsocketConnecting() {
@@ -61,7 +61,7 @@ export class StatusService {
     this.websocket_connected = false;
 
     if (error) {
-      this.websocket = new Status('cloud_off', "Websocket Error", error);
+      this.websocket = new Status('cloud_off', "Websocket Disconnected", error);
     } else {
       this.websocket = new Status('cloud_off', "Websocket Disconnected");
     }

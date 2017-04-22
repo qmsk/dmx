@@ -78,7 +78,8 @@ footer .status li div {
 
 }
 
-footer .icon.error {
+footer .icon.error, 
+footer span.error {
   color: #ff4444;
 }
 
