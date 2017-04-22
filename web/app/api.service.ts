@@ -11,6 +11,8 @@ import { Subscription } from 'rxjs/Subscription';
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/toPromise';
+import 'rxjs/add/operator/retryWhen';
+import 'rxjs/add/operator/delay';
 
 import { API, APIEvents, APIHeads, APIGroups, APIPresets } from './api';
 import { Post, Head, Group, Preset } from './head';
@@ -83,26 +85,35 @@ export class APIService {
       }
     );
 
-    this.webSocket = webSocketService.connect<APIEvents>('/events').subscribe(
-      (apiEvents: APIEvents) => {
-        this.status.Connected();
+    this.webSocket = webSocketService.connect<APIEvents>('/events')
+      .retryWhen(errors =>
+        errors.map(error => {
+          console.log("WebSocket retry error", error);
 
-        console.log("WebSocket APIEvents", apiEvents);
+          this.status.Disconnected(error);
+        })
+        .delay(3 * 1000)
+      )
+      .subscribe(
+        (apiEvents: APIEvents) => {
+          this.status.Connected();
 
-        this.loadHeads(apiEvents.Heads);
-        this.loadGroups(apiEvents.Groups);
-      },
-      (error: Error) => {
-        console.log("WebSocket error", error);
+          console.log("WebSocket APIEvents", apiEvents);
 
-        this.status.Disconnected(error);
-      },
-      () => {
-        console.log("WebSocket close");
+          this.loadHeads(apiEvents.Heads);
+          this.loadGroups(apiEvents.Groups);
+        },
+        (error: Error) => {
+          console.log("WebSocket fail error", error);
 
-        this.status.Disconnected();
-      }
-    );
+        },
+        () => {
+          console.log("WebSocket close");
+
+          this.status.Disconnected();
+        }
+      )
+    ;
   }
 
   private loadHeads(apiHeads: APIHeads) {
