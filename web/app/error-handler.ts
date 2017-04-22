@@ -9,6 +9,6 @@ export class AppErrorHandler implements ErrorHandler {
   handleError(error) {
     console.error(error);
 
-    this.status.setError(error);
+    this.status.AppError(error);
   }
 }

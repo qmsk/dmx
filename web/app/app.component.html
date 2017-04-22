@@ -7,14 +7,8 @@
     <a routerLink="/color" routerLinkActive="active">Color</a>
   </nav>
 
-  <div *ngIf="api.status.state() == 'offline'">
-    <i class="icon material-icons">cloud_off</i>
-  </div>
-  <div *ngIf="api.status.state() == 'download'">
-    <i class="icon material-icons">cloud_download</i>
-  </div>
-  <div *ngIf="api.status.state() == 'upload'">
-    <i class="icon material-icons">cloud_upload</i>
+  <div *ngIf="api.status.websocket">
+    <i class="icon material-icons">{{api.status.websocket.icon}}</i>
   </div>
 </header>
 <router-outlet></router-outlet>

@@ -2,26 +2,72 @@ import { Injectable } from '@angular/core';
 
 import { Response } from '@angular/http';
 
+export class Status {
+  constructor(public icon: string, public message: string, public error?: Error) {
+
+  }
+}
+
 @Injectable()
 export class StatusService {
-  // Managed by APIService from Websocket state
-  connected: Boolean;
+  app?: Status;
+  request?: Status;
+  websocket?: Status;
 
-  error?: Error;
+  // APIService WebSocket connection
+  websocket_connected: Boolean;
 
+  // APIService GET/POST requests
   requests_pending: number = 0;
 
+  constructor() {
+    this.AppLoading();
+  }
+
+  all(): Status[] {
+    return [this.app, this.request, this.websocket].filter(status => !!status);
+  }
+
+  AppLoading() {
+    this.app = new Status('autorenew', "Application loading...")
+  }
+  AppOK() {
+    this.app = null;
+  }
+  AppError(error: Error) {
+    this.app = new Status('error', error.toString(), error);
+  }
+
+  Connecting() {
+    // keep disconnect error
+    let error = this.websocket ? this.websocket.error : null;
+
+    this.websocket_connected = false;
+    this.websocket = new Status('cloud_queue', "Websocket Connecting...", error);
+  }
   Connected() {
-    this.connected = true;
+    // debounce, this can get called multiple times
+    if (!this.websocket_connected) {
+      this.websocket_connected = true;
+      this.websocket = new Status('cloud', "Websocket Connected");
+    }
   }
   Disconnected(error?: Error) {
-    this.connected = false;
+    this.websocket_connected = false;
 
     if (error) {
-      this.setError(error);
+      this.websocket = new Status('cloud_off', "Websocket Error", error);
+    } else {
+      this.websocket = new Status('cloud_off', "Websocket Disconnected");
     }
   }
 
+  RequestOK() {
+    this.request = null;
+  }
+  RequestError(error: Error) {
+    this.request = new Status('warning', error.toString(), error);
+  }
   TrackRequest(method: string, promise: Promise<any>) {
     this.requests_pending += 1;
 
@@ -29,38 +75,26 @@ export class StatusService {
       (value) => {
         this.requests_pending -= 1;
 
+        this.RequestOK();
+
         return value;
       },
       (error) => {
         this.requests_pending -= 1;
 
+        // XXX: this is horrible in here
         if (error instanceof Response) {
-          this.setError(new Error(error.toString()));
+          this.RequestError(new Error(error.toString()));
 
         } else if (error instanceof Error) {
-          this.setError(error);
+          this.RequestError(error);
 
         } else {
-          this.setError(new Error(error));
+          this.RequestError(new Error(error));
         }
 
         throw error;
       }
     );
-  }
-
-  // Called by AppErrorHandler
-  setError(error: Error) {
-    this.error = error;
-  }
-
-  state(): string {
-    if (!this.connected) {
-      return 'offline';
-    } else if (this.requests_pending > 0) {
-      return 'upload';
-    } else {
-      return 'download';
-    }
   }
 }

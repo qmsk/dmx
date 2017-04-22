@@ -1,14 +1,8 @@
 <ul>
-  <li>
-    <i class="icon material-icons">done</i>
+  <li *ngFor="let s of status.all()">
+    <i class="icon material-icons" [class.error]="!!s.error" >{{s.icon}}</i>
     <div>
-      Loaded
-    </div>
-  </li>
-  <li *ngIf="status.error">
-    <i class="icon error material-icons">error</i>
-    <div>
-      {{status.error.name}}: {{status.error.message}}
+      {{s.message}}
     </div>
   </li>
 </ul>
