@@ -10,6 +10,7 @@ import { Observer } from 'rxjs/Observer';
 import { Subscription } from 'rxjs/Subscription';
 import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/toPromise';
 
 import { API, APIEvents, APIHeads, APIGroups, APIPresets } from './api';
 import { Post, Head, Group, Preset } from './head';
@@ -63,25 +64,22 @@ export class APIService {
     this.groups = new Map<string, Group>();
     this.presets = new Map<string, Preset>();
 
-    this.get('/api/').subscribe(
-      api => {
-        this.loadHeads(api.Heads);
-        this.loadGroups(api.Groups);
-        this.loadPresets(api.Presets);
-      }
-    );
+    this.get('/api/').then((api: API) => {
+      console.log("GET OK");
+
+      this.loadHeads(api.Heads);
+      this.loadGroups(api.Groups);
+      this.loadPresets(api.Presets);
+    });
 
     this.postSubject.subscribe(
       post => {
         console.log(`POST ${post.type} ${post.id}...`, post.parameters);
 
-        this.post(`/api/${post.type}/${post.id}`, post.parameters).subscribe(
-          (response) => {
-            // do not update head from POST, wait for websocket...
-            console.log(`POST ${post.type} ${post.id} OK`, response);
-          }
-          // TODO: errors to console?
-        );
+        this.post(`/api/${post.type}/${post.id}`, post.parameters).then((response) => {
+          // do not update head from POST, wait for websocket...
+          console.log(`POST ${post.type} ${post.id} OK`, response);
+        });
       }
     );
 
@@ -156,20 +154,20 @@ export class APIService {
     }
   }
 
-  private get(url): any {
-    return this.http.get(url)
-      .map(response => response.json())
-    ;
+  private get(url): Promise<any> {
+    return this.status.TrackRequest('get', this.http.get(url).toPromise()
+      .then(response => response.json())
+    );
   }
 
-  private post(url, params): Observable<Object> {
+  private post(url, params): Promise<any> {
     let headers = new Headers({
       'Content-Type': 'application/json',
     });
     let options = new RequestOptions({ headers: headers });
 
-    return this.http.post(url, params, options)
-      .map(response => response.json())
-    ;
+    return this.status.TrackRequest('post', this.http.post(url, params, options).toPromise()
+      .then(response => response.json())
+    );
   }
 }
