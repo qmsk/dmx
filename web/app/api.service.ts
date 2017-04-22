@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Http, Headers, RequestOptions } from '@angular/http';
 
 import { WebSocketService, WebSocketError } from 'lib/websocket';
+import { StatusService } from './status.service'
 
 import * as _ from 'lodash';
 import { Observable } from 'rxjs/Observable';
@@ -57,7 +58,7 @@ export class APIService {
     return presets;
   }
 
-  constructor(private http: Http, webSocketService: WebSocketService) {
+  constructor(private http: Http, webSocketService: WebSocketService, public status: StatusService) {
     this.heads = new Map<string, Head>();
     this.groups = new Map<string, Group>();
     this.presets = new Map<string, Preset>();
@@ -86,16 +87,22 @@ export class APIService {
 
     this.webSocket = webSocketService.connect<APIEvents>('/events').subscribe(
       (apiEvents: APIEvents) => {
+        this.status.Connected();
+
         console.log("WebSocket APIEvents", apiEvents);
 
         this.loadHeads(apiEvents.Heads);
         this.loadGroups(apiEvents.Groups);
       },
-      (error: WebSocketError) => {
-        console.log("WebSocket Error", error);
+      (error: Error) => {
+        console.log("WebSocket error", error);
+
+        this.status.Disconnected(error);
       },
       () => {
-        console.log("WebSocket Close");
+        console.log("WebSocket close");
+
+        this.status.Disconnected();
       }
     );
   }

@@ -6,6 +6,13 @@
     <a routerLink="/intensity" routerLinkActive="active">Intensity</a>
     <a routerLink="/color" routerLinkActive="active">Color</a>
   </nav>
+
+  <div *ngIf="!api.status.connected">
+    <i class="icon material-icons">cloud_off</i>
+  </div>
+  <div *ngIf="api.status.connected">
+    <i class="icon material-icons">cloud_download</i>
+  </div>
 </header>
 <router-outlet></router-outlet>
 <footer>
