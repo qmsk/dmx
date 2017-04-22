@@ -85,24 +85,23 @@ export class APIService {
       }
     );
 
-    this.status.Connecting();
     this.webSocket = webSocketService.connect<APIEvents>('/events')
       .retryWhen(errors =>
         errors.map(error => {
           console.log("WebSocket retry error", error);
 
-          this.status.Disconnected(error);
+          this.status.WebsocketDisconnected(error);
         })
         .delay(3 * 1000)
         .map(() => {
           console.log("WebSocket retry connect");
 
-          this.status.Connecting();
+          this.status.WebsocketConnecting();
         })
       )
       .subscribe(
         (apiEvents: APIEvents) => {
-          this.status.Connected();
+          this.status.WebsocketEvent();
 
           console.log("WebSocket APIEvents", apiEvents);
 
@@ -116,10 +115,12 @@ export class APIService {
         () => {
           console.log("WebSocket close");
 
-          this.status.Disconnected();
+          this.status.WebsocketDisconnected();
         }
       )
     ;
+    this.status.WebsocketConnecting();
+
   }
 
   private loadHeads(apiHeads: APIHeads) {

@@ -43,21 +43,21 @@ export class StatusService {
     this.app = new Status('error', error.toString(), error);
   }
 
-  Connecting() {
+  WebsocketConnecting() {
     // keep disconnect error
     let error = this.websocket ? this.websocket.error : null;
 
     this.websocket_connected = false;
     this.websocket = new Status('cloud_queue', "Websocket Connecting...", error);
   }
-  Connected() {
+  WebsocketEvent() {
     // debounce, this can get called multiple times
     if (!this.websocket_connected) {
       this.websocket_connected = true;
       this.websocket = new Status('cloud', "Websocket Connected");
     }
   }
-  Disconnected(error?: Error) {
+  WebsocketDisconnected(error?: Error) {
     this.websocket_connected = false;
 
     if (error) {
