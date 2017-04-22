@@ -53,10 +53,14 @@ header {
 }
 
 footer {
-  padding: 0.5em;
+  padding: 0.25em;
 
   background-color: #111;
   color: #44ff44;
+}
+
+footer .status {
+  font-family: monospace;
 }
 
 /* Navigation */
@@ -73,10 +77,15 @@ nav a.active {
 }
 
 /* Loading */
-div.spinner {
+.loading .spinner {
   width: 10%;
   height: 10%;
   background-color: #133337;
+}
+
+.loading .icon {
+  font-size: 96px;
+  color: #884444;
 }
 
 /* Views */

@@ -17,20 +17,41 @@
     <script src="node_modules/systemjs/dist/system.src.js"></script>
     <script src="systemjs.config.js"></script>
     <script>
-      System.import('app').catch(function(err){ console.error(err); });
+      /* Global error handler to abort app */
+      function abort(err, message = null) {
+        var loading_spinner = document.getElementById("dmx-loading-spinner");
+        var loading_error = document.getElementById("dmx-loading-error");
+        var status = document.getElementById("dmx-status");
+
+        loading_spinner.style.display = 'none';
+        loading_error.style.display = '';
+        status.innerText = message || err.toString();
+      }
+
+      System.import('app').catch(function(err){
+        console.error(err);
+
+        // this is a wrapped error
+        abort(err.originalErr, err.originalErr.name + ": " + err.message);
+      });
     </script>
   </head>
   <body>
-    <dmx-app class="app">
+    <dmx-app class="app loading">
       <header>
         <nav>
           <a>qmsk::dmx</a>
         </nav>
       </header>
       <div class="view centered">
-        <div class="spinner sk-rotating-plane"></div>
+        <div id="dmx-loading-spinner" class="spinner sk-rotating-plane"></div>
+        <i id="dmx-loading-error" class="icon material-icons" style="display: none">error</i>
       </div>
-      <footer>Loading...</footer>
+      <footer>
+        <div id="dmx-status" class="status">
+          Loading...
+        </div>
+      </footer>
     </dmx-app>
   </body>
 </html>
