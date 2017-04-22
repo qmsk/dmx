@@ -7,8 +7,8 @@
     <a routerLink="/color" routerLinkActive="active">Color</a>
   </nav>
 
-  <div *ngIf="api.status.websocket">
-    <i class="icon material-icons">{{api.status.websocket.icon}}</i>
+  <div *ngIf="api.status.status()">
+    <i class="icon material-icons">{{api.status.status().icon}}</i>
   </div>
 </header>
 <router-outlet></router-outlet>

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Http, Headers, RequestOptions } from '@angular/http';
+import { Http, Headers, Request, RequestMethod, RequestOptions, Response } from '@angular/http';
 
 import { WebSocketService, WebSocketError } from 'lib/websocket';
 import { StatusService } from './status.service'
@@ -85,6 +85,7 @@ export class APIService {
       }
     );
 
+    this.status.Connecting();
     this.webSocket = webSocketService.connect<APIEvents>('/events')
       .retryWhen(errors =>
         errors.map(error => {
@@ -93,6 +94,11 @@ export class APIService {
           this.status.Disconnected(error);
         })
         .delay(3 * 1000)
+        .map(() => {
+          console.log("WebSocket retry connect");
+
+          this.status.Connecting();
+        })
       )
       .subscribe(
         (apiEvents: APIEvents) => {
@@ -165,20 +171,61 @@ export class APIService {
     }
   }
 
-  private get(url): Promise<any> {
-    return this.status.TrackRequest('get', this.http.get(url).toPromise()
+  private request(request: Request): Promise<any> {
+    let method: string = {
+      [RequestMethod.Get]: 'GET',
+      [RequestMethod.Post]: 'POST',
+    }[request.method];
+
+    this.status.RequestStart(method, request.url);
+
+    return this.http.request(request).toPromise()
       .then(response => response.json())
-    );
+      .catch(reason => {
+        if (reason instanceof Response) {
+          throw new Error(reason.toString());
+
+        } else if (reason instanceof Error) {
+          throw reason;
+
+        } else {
+          throw new Error(reason.toString());
+        }
+      })
+      .then(
+        (value) => {
+          this.status.RequestEnd(method, request.url);
+
+          return value;
+        },
+        (error: Error) => {
+          this.status.RequestEnd(method, request.url, error);
+
+          throw error;
+        }
+      )
+    ;
+  }
+
+  private get(url): Promise<any> {
+    let request = new Request({
+      url: url,
+      method: RequestMethod.Get,
+    });
+
+    return this.request(request);
   }
 
   private post(url, params): Promise<any> {
-    let headers = new Headers({
-      'Content-Type': 'application/json',
+    let request = new Request({
+      url: url,
+      method: RequestMethod.Post,
+      headers: new Headers({
+        'Content-Type': 'application/json',
+      }),
+      body: params,
     });
-    let options = new RequestOptions({ headers: headers });
 
-    return this.status.TrackRequest('post', this.http.post(url, params, options).toPromise()
-      .then(response => response.json())
-    );
+    return this.request(request);
   }
 }

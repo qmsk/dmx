@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
 
-import { Response } from '@angular/http';
-
 export class Status {
   constructor(public icon: string, public message: string, public error?: Error) {
 
@@ -11,7 +9,7 @@ export class Status {
 @Injectable()
 export class StatusService {
   app?: Status;
-  request?: Status;
+  requests?: Status;
   websocket?: Status;
 
   // APIService WebSocket connection
@@ -25,7 +23,14 @@ export class StatusService {
   }
 
   all(): Status[] {
-    return [this.app, this.request, this.websocket].filter(status => !!status);
+    return [this.app, this.requests, this.websocket].filter(status => !!status);
+  }
+  status(): Status {
+    if (this.requests_pending > 0) {
+      return this.requests;
+    } else {
+      return this.websocket;
+    }
   }
 
   AppLoading() {
@@ -62,39 +67,18 @@ export class StatusService {
     }
   }
 
-  RequestOK() {
-    this.request = null;
-  }
-  RequestError(error: Error) {
-    this.request = new Status('warning', error.toString(), error);
-  }
-  TrackRequest(method: string, promise: Promise<any>) {
+  RequestStart(method: string, url: string) {
     this.requests_pending += 1;
 
-    return promise.then(
-      (value) => {
-        this.requests_pending -= 1;
+    this.requests = new Status(method == 'GET' ? 'cloud_download' : 'cloud_upload', method + " " + url);
+  }
+  RequestEnd(method: string, url: string, error?: Error) {
+    this.requests_pending -= 1;
 
-        this.RequestOK();
-
-        return value;
-      },
-      (error) => {
-        this.requests_pending -= 1;
-
-        // XXX: this is horrible in here
-        if (error instanceof Response) {
-          this.RequestError(new Error(error.toString()));
-
-        } else if (error instanceof Error) {
-          this.RequestError(error);
-
-        } else {
-          this.RequestError(new Error(error));
-        }
-
-        throw error;
-      }
-    );
+    if (error) {
+      this.requests = new Status('warning', method + " " + url, error);
+    } else if (this.requests_pending == 0){
+      this.requests = null;
+    }
   }
 }
