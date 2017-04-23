@@ -23,6 +23,7 @@ export class APIService {
   postSubject = new Subject<Post>();
 
   // state
+  loaded: boolean = false;
   heads: Map<string, Head>;
   groups: Map<string, Group>;
   presets: Map<string, Preset>;
@@ -66,14 +67,6 @@ export class APIService {
     this.groups = new Map<string, Group>();
     this.presets = new Map<string, Preset>();
 
-    this.get('/api/').then((api: API) => {
-      console.log("GET OK");
-
-      this.loadHeads(api.Heads);
-      this.loadGroups(api.Groups);
-      this.loadPresets(api.Presets);
-    });
-
     this.postSubject.subscribe(
       post => {
         console.log(`POST ${post.type} ${post.id}...`, post.parameters);
@@ -85,7 +78,7 @@ export class APIService {
       }
     );
 
-    this.webSocket = webSocketService.connect<APIEvents>('/events')
+    this.webSocket = webSocketService.connect<API>('/events')
       .retryWhen(errors =>
         errors.map(error => {
           console.log("WebSocket retry error", error);
@@ -100,13 +93,12 @@ export class APIService {
         })
       )
       .subscribe(
-        (apiEvents: APIEvents) => {
+        (api: API) => {
           this.status.WebsocketEvent();
 
-          console.log("WebSocket APIEvents", apiEvents);
+          console.log("WebSocket event", api);
 
-          this.loadHeads(apiEvents.Heads);
-          this.loadGroups(apiEvents.Groups);
+          this.load(api);
         },
         (error: Error) => {
           console.log("WebSocket fail error", error);
@@ -123,6 +115,17 @@ export class APIService {
 
   }
 
+  private load(api: API) {
+    this.loaded = true;
+
+    this.loadHeads(api.Heads);
+    this.loadGroups(api.Groups);
+
+    if (api.Presets) {
+      this.loadPresets(api.Presets);
+    }
+  }
+
   private loadHeads(apiHeads: APIHeads) {
     for (let id in apiHeads) {
       let head = this.heads.get(id)
@@ -133,8 +136,6 @@ export class APIService {
         this.heads.set(id, new Head(this.postSubject, apiHeads[id]))
       }
     }
-
-    console.log("Loaded heads", this.heads);
   }
 
   private loadGroups(apiGroups: APIGroups) {
