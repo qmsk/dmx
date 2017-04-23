@@ -34,6 +34,14 @@ export class ColorControlsComponent {
     };
   }
 
+  /*
+   * XXX: This replaces the external parameter state with our local control state... any external changes to the
+   *      color state will not update the controls until this component is reloaded.
+   *
+   * TODO: Separate the remote parameter state and our local control state... the local state is needed to
+   *       merge multiple pending changes, but once the changes have been applied, we should update back
+   *       to the external parameter state...
+   */
   apply(color: Color) {
     this.color = color;
     this.colorChange.emit(color);
