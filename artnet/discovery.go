@@ -77,9 +77,9 @@ func (controller *Controller) discovery(pollChan chan pollEvent) {
 				controller.log.Debugf("discovery new %v: %#v", node, nodeConfig)
 
 				nodes[pollEvent.String()] = node
-
-				controller.update(nodes)
 			}
+
+			controller.update(nodes)
 		}
 	}
 }
