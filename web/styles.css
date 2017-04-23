@@ -180,6 +180,31 @@ header .icon {
 
   background-color: #444;
   color: #ccc;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+.controls .tools {
+  background-color: #111;
+
+  padding: 0.5em;
+}
+
+.controls .tools button {
+  color: #444;
+  background-color: #ccc;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+
+  font-size: 2em;
+  font-weight: bold;
+}
+
+.controls .tools button i.icon {
+  font-size: inherit;
 }
 
 /* Flow view with heads */

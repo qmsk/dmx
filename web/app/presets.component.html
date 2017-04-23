@@ -9,6 +9,12 @@
 </div>
 
 <div class="controls">
+  <div class="tools">
+    <button class="tool" (click)="export()" title="Export">
+      <i class="icon material-icons">file_download</i>
+    </button>
+  </div>
+
   <dmx-control label="Intensity" [value]="intensity" (valueChange)="update($event)"></dmx-control>
 
   <div *ngIf="preset">

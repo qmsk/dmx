@@ -55,4 +55,8 @@ export class PresetsComponent {
     return this.preset.Heads.get(head)
   }
 
+  export() {
+    // let the browser deal with it :)
+    window.open('/config/preset.toml');
+  }
 }
