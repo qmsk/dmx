@@ -78,7 +78,7 @@ footer .status li div {
 
 }
 
-footer .icon.error, 
+footer .icon.error,
 footer span.error {
   color: #ff4444;
 }
@@ -93,7 +93,7 @@ header {
 
   display: flex;
   flex-direction: row;
-  justify-content: space-between;;
+  justify-content: space-between;
   align-items: center;
 }
 
