@@ -64,6 +64,11 @@ func (node *Node) String() string {
 	return node.addr.String()
 }
 
+// Last seen via discovery
+func (node *Node) Time() time.Time {
+	return node.discoveryTime
+}
+
 func (node *Node) Config() NodeConfig {
 	// XXX: atomic
 	return node.config

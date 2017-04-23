@@ -68,6 +68,7 @@ func (universe *Universe) String() string {
 }
 
 // any further WriteDMX() will fail
+// XXX: delete from controller?
 func (universe *Universe) close() {
 	var writeChan chan dmx.Universe
 
