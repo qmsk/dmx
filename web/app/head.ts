@@ -56,8 +56,9 @@ export class IntensityParameter {
   get Intensity(): Value {
     return this.intensity;
   }
-  set Intensity(value: Value) {
-    this.post({Intensity: { Intensity: value } });
+
+  apply(intensity: Value) {
+    this.post({Intensity: { Intensity: intensity } });
   }
 }
 
@@ -79,28 +80,6 @@ export class ColorParameter implements Color {
   get Red(): Value { return this.red; }
   get Green(): Value { return this.green; }
   get Blue(): Value { return this.blue; }
-
-  set Red(value: Value) {
-    this.post({Color: {
-      Red: value,
-      Green: this.green,
-      Blue: this.blue,
-    }});
-  }
-  set Green(value: Value) {
-    this.post({Color: {
-      Red: this.red,
-      Green: value,
-      Blue: this.blue,
-    }});
-  }
-  set Blue(value: Value) {
-    this.post({Color: {
-      Red: this.red,
-      Green: this.green,
-      Blue: value,
-    }});
-  }
 
   /* Post RGB values from Color */
   apply(color: Color) {

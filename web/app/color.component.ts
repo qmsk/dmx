@@ -37,22 +37,6 @@ export class ColorComponent {
     return this.groups.has(group);
   }
 
-  colorActive(color: Color): boolean {
-    return this.color
-      && color.Red == this.color.Red
-      && color.Green == this.color.Green
-      && color.Blue == this.color.Blue
-    ;
-  }
-
-  loadColor(color: Color): Color {
-    return {
-      Red:   color.Red,
-      Green: color.Green,
-      Blue:  color.Blue,
-    };
-  }
-
   /* Build new colors map from active heads */
   loadColors(): Colors {
     // XXX: just return from first selected group or head...
@@ -72,13 +56,13 @@ export class ColorComponent {
     this.heads.add(head);
 
     this.colors = this.loadColors();
-    this.color = this.loadColor(head.Color);
+    this.color = head.Color;
   }
   selectGroup(group: Group) {
     this.groups.add(group);
 
     this.colors = this.loadColors();
-    this.color = this.loadColor(group.Color);
+    this.color = group.Color;
   }
 
   unselect() {
@@ -100,24 +84,11 @@ export class ColorComponent {
   }
 
   apply(color: Color) {
-    // XXX: this does not update the <dmx-head-colors> component's color Input?
-    this.color = color;
     this.heads.forEach((head) => {
       head.Color.apply(color);
     });
     this.groups.forEach((group) => {
       group.Color.apply(color);
     });
-  }
-
-  /* Copy and apply color */
-  click(color: Color) {
-    this.apply(this.loadColor(color));
-  }
-
-  /* Change and apply color */
-  change(channel: string, value: Value) {
-    this.color[channel] = value;
-    this.apply(this.color);
   }
 }

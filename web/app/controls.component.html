@@ -2,22 +2,14 @@
 
 <div *ngIf="parameters && parameters.Intensity">
   <h3>Intensity</h3>
-  <dmx-control label="Intensity" [(value)]="parameters.Intensity.Intensity"></dmx-control>
+  <dmx-control label="Intensity"
+    [value]="parameters.Intensity.Intensity"
+    (valueChange)="parameters.Intensity.apply($event)"
+  ></dmx-control>
 </div>
 
-<div *ngIf="parameters && parameters.Color">
-  <h3>Color RGB</h3>
-  <dmx-control label="Red" [(value)]="parameters.Color.Red"></dmx-control>
-  <dmx-control label="Green" [(value)]="parameters.Color.Green"></dmx-control>
-  <dmx-control label="Blue" [(value)]="parameters.Color.Blue"></dmx-control>
-</div>
-
-<div *ngIf="parameters && parameters.Colors">
-  <h3>Colors</h3>
-
-  <dmx-head-colors
-    [colors]="parameters.Colors"
-    [color]="parameters.Color"
-    (colorChange)="parameters.Color.apply($event)"
-  ></dmx-head-colors>
-</div>
+<dmx-color-controls class="controls" *ngIf="parameters && parameters.Color"
+  [color]="parameters.Color"
+  [colors]="parameters.Colors"
+  (colorChange)="parameters.Color.apply($event)"
+></dmx-color-controls>

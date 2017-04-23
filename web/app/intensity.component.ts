@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 
+import { Value } from './types';
 import { Head } from './head';
 import { APIService } from './api.service';
 
@@ -17,4 +18,7 @@ export class IntensityComponent {
     return this.api.listHeads(head => head.ID, head => !!head.Intensity);
   }
 
+  change(head: Head, value: Value) {
+    head.Intensity.apply(value);
+  }
 }

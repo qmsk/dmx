@@ -1,0 +1,21 @@
+<div>
+  <h3>Color RGB</h3>
+
+  <dmx-control label="Red" [value]="color.Red" (valueChange)="change('Red', $event)"></dmx-control>
+  <dmx-control label="Green" [value]="color.Green" (valueChange)="change('Green', $event)"></dmx-control>
+  <dmx-control label="Blue" [value]="color.Blue" (valueChange)="change('Blue', $event)"></dmx-control>
+</div>
+
+<div *ngIf="colors">
+  <h3>Colors</h3>
+
+  <div class="items colors">
+    <button class="item color"
+      *ngFor="let color of makeColors()"
+      [style.background-color]="color | color"
+      [class.active]="active(color)"
+      (click)="click(color)"
+    >
+    </button>
+  </div>
+</div>

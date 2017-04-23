@@ -28,20 +28,8 @@
   </div>
 </div>
 
-<div class="controls">
-  <div *ngIf="color">
-    <h3>RGB</h3>
-
-    <dmx-control label="Red" [value]="color.Red" (valueChange)="change('red', $event)"></dmx-control>
-    <dmx-control label="Green" [value]="color.Green" (valueChange)="change('green', $event)"></dmx-control>
-    <dmx-control label="Blue" [value]="color.Blue" (valueChange)="change('blue', $event)"></dmx-control>
-  </div>
-
-  <div *ngIf="colors">
-    <h3>Colors</h3>
-
-    <dmx-head-colors [colors]="colors" [color]="color" (colorChange)="click($event)">
-
-    </dmx-head-colors>
-  </div>
-</div>
+<dmx-color-controls class="controls" *ngIf="color"
+  [color]="color"
+  [colors]="colors"
+  (colorChange)="apply($event)"
+></dmx-color-controls>

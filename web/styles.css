@@ -258,6 +258,18 @@ header .icon {
   border-radius: 0.5em;
 }
 
+/* Color controls */
+.item.color {
+  width: 4em;
+  height: 4em;
+
+  border-color: #444;
+}
+
+.item.color.active {
+  border-color: #aaa;
+}
+
 /* Tables */
 table {
   width: 100%;

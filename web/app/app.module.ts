@@ -10,10 +10,10 @@ import { AppErrorHandler } from './error-handler'
 import { AppComponent } from './app.component'
 import { ChannelsComponent } from './channels.component'
 import { ColorComponent } from './color.component'
+import { ColorControlsComponent } from './color-controls.component'
 import { ColorPipe } from './color.pipe'
 import { ControlComponent } from './control.component'
 import { ControlsComponent } from './controls.component'
-import { HeadColorsComponent } from './head-colors.component'
 import { IntensityComponent } from './intensity.component'
 import { PresetsComponent } from './presets.component'
 import { PresetParametersComponent } from './preset-parameters.component'
@@ -40,10 +40,10 @@ const routes: Routes = [
     AppComponent,
     ChannelsComponent,
     ColorComponent,
+    ColorControlsComponent,
     ColorPipe,
     ControlComponent,
     ControlsComponent,
-    HeadColorsComponent,
     IntensityComponent,
     PresetsComponent,
     PresetParametersComponent,
