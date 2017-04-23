@@ -9,7 +9,6 @@ import { APIService } from './api.service';
   host: { class: 'view split' },
 
   templateUrl: 'main.component.html',
-  styleUrls: [ 'main.component.css' ],
 })
 export class MainComponent {
   head: Head

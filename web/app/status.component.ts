@@ -7,7 +7,6 @@ import { StatusService } from './status.service'
   selector: 'dmx-status',
   host: { class: 'status' },
   templateUrl: 'status.component.html',
-  styleUrls: [ 'status.component.css' ],
 })
 export class StatusComponent  {
   constructor(private status: StatusService) { }

@@ -9,7 +9,6 @@ import { Parameters } from './head';
   host: { class: 'controls' },
 
   templateUrl: 'controls.component.html',
-  styleUrls: [ 'controls.component.css' ],
 })
 export class ControlsComponent {
   @Input() parameters: Parameters;

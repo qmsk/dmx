@@ -9,7 +9,6 @@ import { APIService } from './api.service';
   moduleId: module.id,
   selector: 'dmx-app',
   templateUrl: 'app.component.html',
-  styleUrls: [ 'app.component.css' ],
   providers: [
     WebSocketService,
     APIService,
