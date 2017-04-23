@@ -55,7 +55,7 @@ type Group struct {
 	id     GroupID
 	config GroupConfig
 	heads  headMap
-	events *Events
+	events Events
 
 	intensity *GroupIntensity
 	color     *GroupColor

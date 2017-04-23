@@ -62,15 +62,19 @@ func (event *APIEvents) addGroups(groups groupMap) {
 	}
 }
 
-type Events struct {
+type events struct {
 	log       logging.Logger
 	eventChan chan web.Event
 }
 
 // push update events via websocket
-func (events *Events) update(event APIEvents) {
+func (events *events) update(event APIEvents) {
 	if events.eventChan != nil {
 		events.log.Infof("update")
 		events.eventChan <- event
 	}
+}
+
+type Events interface {
+	update(event APIEvents)
 }

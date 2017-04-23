@@ -154,7 +154,7 @@ type Head struct {
 	config   HeadConfig
 	headType *HeadType
 	output   *Output
-	events   *Events
+	events   Events
 	groups   groupMap
 
 	channels   HeadChannels

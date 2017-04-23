@@ -132,7 +132,7 @@ func (presetMap presetMap) Index(name string) (web.Resource, error) {
 
 type Preset struct {
 	log    logging.Logger
-	events *Events
+	events Events
 
 	ID     PresetID
 	Config PresetConfig

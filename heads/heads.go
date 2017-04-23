@@ -18,16 +18,57 @@ func (options Options) Heads(config *Config) (*Heads, error) {
 	var heads = Heads{
 		options: options,
 		log:     options.Log.Logger("package", "heads"),
-		config:  config,
 
 		outputs: make(outputMap),
 		heads:   make(headMap),
 		groups:  make(groupMap),
 		presets: make(presetMap),
-		events: &Events{
+		events: &events{
 			log: options.Log.Logger("events", nil),
 		},
 	}
+
+	if err := heads.load(config); err != nil {
+		return nil, err
+	}
+
+	return &heads, nil
+}
+
+type Heads struct {
+	options Options
+	log     logging.Logger
+	config  *Config
+	outputs outputMap
+	heads   headMap
+	groups  groupMap
+	presets presetMap
+	events  *events // optional
+}
+
+func (heads *Heads) output(universe Universe) *Output {
+	output := heads.outputs[universe]
+	if output == nil {
+		output = &Output{
+			events: heads.events,
+		}
+
+		output.init(heads.log, universe)
+
+		heads.outputs[universe] = output
+	}
+
+	return output
+}
+
+// Patch output
+// XXX: not goroutine-safe...
+func (heads *Heads) Output(universe Universe, config OutputConfig, writer dmx.Writer) {
+	heads.output(universe).connect(config, writer)
+}
+
+func (heads *Heads) load(config *Config) error {
+	heads.config = config
 
 	// preload groups
 	for groupID, groupConfig := range config.Groups {
@@ -53,44 +94,11 @@ func (options Options) Heads(config *Config) (*Heads, error) {
 	//  load presets
 	for presetID, presetConfig := range config.Presets {
 		if err := heads.addPreset(presetID, *presetConfig); err != nil {
-			return nil, fmt.Errorf("Load preset=%v: %v", presetID, err)
+			return fmt.Errorf("Load preset=%v: %v", presetID, err)
 		}
 	}
 
-	return &heads, nil
-}
-
-type Heads struct {
-	options Options
-	log     logging.Logger
-	config  *Config
-	outputs outputMap
-	heads   headMap
-	groups  groupMap
-	presets presetMap
-	events  *Events // optional
-}
-
-func (heads *Heads) output(universe Universe) *Output {
-	output := heads.outputs[universe]
-	if output == nil {
-		output = &Output{
-			log:      heads.options.Log.Logger("universe", universe),
-			events:   heads.events,
-			dmx:      dmx.MakeUniverse(),
-			universe: universe,
-		}
-
-		heads.outputs[universe] = output
-	}
-
-	return output
-}
-
-// Patch output
-// XXX: not goroutine-safe...
-func (heads *Heads) Output(universe Universe, config OutputConfig, writer dmx.Writer) {
-	heads.output(universe).connect(config, writer)
+	return nil
 }
 
 func (heads *Heads) addGroup(id GroupID, config GroupConfig) *Group {
@@ -193,7 +201,7 @@ func (heads *Heads) Refresh() error {
 	var refreshErr error
 
 	for _, output := range heads.outputs {
-		if err := output.refresh(); err != nil {
+		if err := output.Refresh(); err != nil {
 			refreshErr = err
 		}
 	}

@@ -41,7 +41,7 @@ type OutputConnection struct {
 
 type Output struct {
 	log    logging.Logger
-	events *Events
+	events Events
 
 	universe   Universe
 	dmx        dmx.Universe
@@ -50,6 +50,12 @@ type Output struct {
 
 func (output *Output) String() string {
 	return fmt.Sprintf("%d", output.universe)
+}
+
+func (output *Output) init(logger logging.Logger, universe Universe) {
+	output.log = logger.Logger("universe", universe)
+	output.universe = universe
+	output.dmx = dmx.MakeUniverse()
 }
 
 func (output *Output) connect(config OutputConfig, dmxWriter dmx.Writer) {
@@ -100,7 +106,7 @@ func (output *Output) SetValue(address dmx.Address, value Value) Value {
 	return Value(dmxChannel) / 255.0
 }
 
-func (output *Output) refresh() error {
+func (output *Output) Refresh() error {
 	// XXX: not goroutine-safe vs connect()
 	if output.connection == nil {
 		return nil
