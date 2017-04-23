@@ -18,6 +18,8 @@ func (options Options) Heads(config *Config) (*Heads, error) {
 	var heads = Heads{
 		options: options,
 		log:     options.Log.Logger("package", "heads"),
+		config:  config,
+
 		outputs: make(outputMap),
 		heads:   make(headMap),
 		groups:  make(groupMap),
@@ -61,6 +63,7 @@ func (options Options) Heads(config *Config) (*Heads, error) {
 type Heads struct {
 	options Options
 	log     logging.Logger
+	config  *Config
 	outputs outputMap
 	heads   headMap
 	groups  groupMap
@@ -156,7 +159,7 @@ func (heads *Heads) addPreset(id PresetID, config PresetConfig) error {
 	}
 
 	for groupID, presetParameters := range preset.Config.Groups {
-		if group := heads.groups[groupID]; group == nil {
+		if group := heads.groups[GroupID(groupID)]; group == nil {
 			return fmt.Errorf("No such group: %v", groupID)
 		} else {
 			preset.initGroup(group, presetParameters)
@@ -164,7 +167,7 @@ func (heads *Heads) addPreset(id PresetID, config PresetConfig) error {
 	}
 
 	for headID, presetParameters := range preset.Config.Heads {
-		if head := heads.heads[headID]; head == nil {
+		if head := heads.heads[HeadID(headID)]; head == nil {
 			return fmt.Errorf("No such head: %v", headID)
 		} else {
 			preset.initHead(head, presetParameters)

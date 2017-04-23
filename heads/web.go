@@ -1,6 +1,8 @@
 package heads
 
 import (
+	"net/http"
+
 	"github.com/qmsk/go-web"
 )
 
@@ -52,4 +54,8 @@ func (heads *Heads) Apply() error {
 	}
 
 	return nil
+}
+
+func (heads *Heads) WebConfigPreset() http.Handler {
+	return httpConfigPreset{heads}
 }

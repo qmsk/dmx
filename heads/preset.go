@@ -1,8 +1,12 @@
 package heads
 
 import (
+	"net/http"
+
 	"github.com/qmsk/dmx/logging"
 	"github.com/qmsk/go-web"
+
+	"github.com/BurntSushi/toml"
 )
 
 // Config
@@ -14,6 +18,33 @@ type PresetParameters struct {
 
 	Intensity *APIIntensity
 	Color     *APIColor
+}
+
+func (presetParameters PresetParameters) IsZero() bool {
+	if presetParameters.Intensity != nil && !presetParameters.Intensity.IsZero() {
+		return false
+	}
+	if presetParameters.Color != nil && !presetParameters.Color.IsZero() {
+		return false
+	}
+	return true
+}
+
+// Do the parameters set in this preset override any of those parameters set in the other preset?
+func (presetParameters PresetParameters) Overrides(other PresetParameters) bool {
+	if presetParameters.Intensity == nil || other.Intensity == nil {
+
+	} else if !presetParameters.Intensity.Equals(*other.Intensity) {
+		return true
+	}
+
+	if presetParameters.Color == nil || other.Color == nil {
+
+	} else if !presetParameters.Color.Equals(*other.Color) {
+		return true
+	}
+
+	return false
 }
 
 func (presetParameters *PresetParameters) init() error {
@@ -84,8 +115,8 @@ func (presetParameters PresetParameters) Apply() error {
 type PresetConfig struct {
 	Name   string
 	All    *PresetParameters
-	Groups map[GroupID]PresetParameters
-	Heads  map[HeadID]PresetParameters
+	Groups map[string]PresetParameters
+	Heads  map[string]PresetParameters
 }
 
 // Heads.Presets
@@ -237,4 +268,73 @@ func (apiPresetParams APIPresetParams) Apply() error {
 	preset.events.update(event)
 
 	return nil
+}
+
+// GET /config/preset.toml
+type httpConfigPreset struct {
+	heads *Heads
+}
+
+// Export a preset configuration from the current state
+func (heads *Heads) ConfigPreset() PresetConfig {
+	var allParameters = PresetParameters{
+		Intensity: &APIIntensity{},
+		Color:     &APIColor{},
+	}
+
+	var presetConfig = PresetConfig{
+		All:    &allParameters,
+		Groups: make(map[string]PresetParameters),
+		Heads:  make(map[string]PresetParameters),
+	}
+
+	for groupID, group := range heads.groups {
+		var presetParameters = PresetParameters{
+			Intensity: group.intensity.makeAPI(),
+			Color:     group.color.makeAPI(),
+		}
+
+		if presetParameters.Overrides(allParameters) {
+
+		} else {
+			continue
+		}
+
+		presetConfig.Groups[string(groupID)] = presetParameters
+	}
+
+	for headID, head := range heads.heads {
+		var presetParameters = PresetParameters{
+			Intensity: head.parameters.Intensity.makeAPI(),
+			Color:     head.parameters.Color.makeAPI(),
+		}
+
+		var baseParameters = allParameters
+
+		for groupID, _ := range head.groups {
+			if groupParameters, exists := presetConfig.Groups[string(groupID)]; exists {
+				baseParameters = groupParameters
+			}
+		}
+
+		if presetParameters.Overrides(baseParameters) {
+
+		} else {
+			continue
+		}
+
+		presetConfig.Heads[string(headID)] = presetParameters
+	}
+
+	return presetConfig
+}
+
+func (httpConfigPreset httpConfigPreset) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/toml")
+
+	var presetConfig = httpConfigPreset.heads.ConfigPreset()
+
+	if err := toml.NewEncoder(w).Encode(presetConfig); err != nil {
+		panic(err)
+	}
 }

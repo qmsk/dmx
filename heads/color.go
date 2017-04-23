@@ -36,6 +36,10 @@ type Color struct {
 	Blue  Value
 }
 
+func (color Color) IsZero() bool {
+	return color.Red == 0.0 && color.Green == 0.0 && color.Blue == 0.0
+}
+
 // Linear RGB intensity scaling
 func (color Color) ScaleIntensity(intensity Intensity) Color {
 	return Color{
@@ -156,6 +160,13 @@ type APIColor struct {
 
 	ScaleIntensity *Intensity
 	Color
+}
+
+func (apiColor APIColor) IsZero() bool {
+	return apiColor.Color.IsZero()
+}
+func (apiColor APIColor) Equals(other APIColor) bool {
+	return apiColor.Color == other.Color
 }
 
 func (apiColor *APIColor) initHead(headColor *HeadColor) error {

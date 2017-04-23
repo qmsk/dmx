@@ -94,6 +94,13 @@ type APIIntensity struct {
 	Intensity
 }
 
+func (apiIntensity APIIntensity) IsZero() bool {
+	return apiIntensity.Intensity == 0.0
+}
+func (apiIntensity APIIntensity) Equals(other APIIntensity) bool {
+	return apiIntensity.Intensity == other.Intensity
+}
+
 func (apiIntensity *APIIntensity) initHead(headIntensity *HeadIntensity) error {
 	if headIntensity == nil {
 		return fmt.Errorf("Head does not support intensity")

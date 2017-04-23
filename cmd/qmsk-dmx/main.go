@@ -3,11 +3,11 @@ package main
 import (
 	"time"
 
+	flags "github.com/jessevdk/go-flags"
+	colorful "github.com/lucasb-eyer/go-colorful"
 	"github.com/qmsk/dmx/artnet"
 	"github.com/qmsk/dmx/heads"
 	"github.com/qmsk/dmx/logging"
-	flags "github.com/jessevdk/go-flags"
-	colorful "github.com/lucasb-eyer/go-colorful"
 	"github.com/qmsk/go-web"
 )
 
@@ -155,6 +155,7 @@ func main() {
 	options.Web.Server(
 		options.Web.RouteEvents("/events", headsHeads.WebEvents()),
 		options.Web.RouteAPI("/api/", headsHeads.WebAPI()),
+		options.Web.Route("/config/preset.toml", headsHeads.WebConfigPreset()),
 		options.Web.RouteStatic("/"),
 	)
 }
