@@ -2,7 +2,7 @@
 Type        = "stairville/ledpar56-5ch"
 Universe    = 1
 Address     = 1
-Count       = 6
+Count       = 1
 Name        = "LED-Par"
 Groups      = ["led-par"]
 
