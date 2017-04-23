@@ -1,13 +1,7 @@
 {
 	"comment": "",
 	"ignore": "test",
-	"rootPath": "github.com/qmsk/dmx",
 	"package": [
-		{
-			"path": "github.com/qmsk/go-web",
-			"revision": "ed3f03f5385332bc2007a29147c469ace3b9d6de",
-			"revisionTime": "2017-01-21T15:08:06Z"
-		},
 		{
 			"path": "github.com/BurntSushi/toml",
 			"revision": "b26d9c308763d68093482582cea63d69be07a0f0",
@@ -29,9 +23,16 @@
 			"revisionTime": "2017-02-23T22:10:28Z"
 		},
 		{
+			"checksumSHA1": "JFSSRHfuI7reSQ+LRAtuah+RCD4=",
+			"path": "github.com/qmsk/go-web",
+			"revision": "bfa13885407ec297c31b413ce69e0269f09910e4",
+			"revisionTime": "2017-04-23T08:00:55Z"
+		},
+		{
 			"path": "golang.org/x/net/websocket",
 			"revision": "7f88271ea9913b72aca44fa7fc8af919eacc17ce",
 			"revisionTime": "2016-02-05T01:48:01Z"
 		}
-	]
+	],
+	"rootPath": "github.com/qmsk/dmx"
 }
