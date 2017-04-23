@@ -1,6 +1,24 @@
 import { DMX, Value, Color, Colors, ChannelType, HeadType, HeadConfig } from './types';
 
 // GET
+export interface APIOutputArtnet {
+  Name: string
+  Description: string
+  Ethernet: string
+  Version: number
+}
+
+export interface APIOutput {
+  Universe:   number
+  Connected:  string
+
+  Address:    string
+  Port:       number
+  Seen:       string
+  Artnet:     APIOutputArtnet
+}
+export type APIOutputs = {[id: string]: APIOutput};
+
 export interface APIChannel {
   ID:       string;
   Type:     ChannelType;
@@ -53,6 +71,7 @@ export interface APIPreset {
 export type APIPresets = {[id: string]: APIPreset}
 
 export interface API {
+  Outputs: APIOutputs
   Heads:   APIHeads
   Groups:  APIGroups
   Presets: APIPresets

@@ -15,6 +15,7 @@ import { ColorPipe } from './color.pipe'
 import { ControlComponent } from './control.component'
 import { ControlsComponent } from './controls.component'
 import { IntensityComponent } from './intensity.component'
+import { OutputsComponent } from './outputs.component'
 import { PresetsComponent } from './presets.component'
 import { PresetParametersComponent } from './preset-parameters.component'
 import { MainComponent } from './main.component'
@@ -23,6 +24,7 @@ import { ValuePipe } from './value.pipe'
 
 const routes: Routes = [
   { path: 'presets', component: PresetsComponent },
+  { path: 'outputs', component: OutputsComponent },
   { path: 'channels', component: ChannelsComponent },
   { path: 'intensity', component: IntensityComponent },
   { path: 'color', component: ColorComponent },
@@ -45,6 +47,7 @@ const routes: Routes = [
     ControlComponent,
     ControlsComponent,
     IntensityComponent,
+    OutputsComponent,
     PresetsComponent,
     PresetParametersComponent,
     MainComponent,

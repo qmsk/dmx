@@ -1,0 +1,22 @@
+<table>
+  <thead>
+    <tr>
+      <th>Universe</th>
+      <th>Address</th>
+      <th>Port</th>
+      <th>Art-Net Name</th>
+      <th>Connected</th>
+      <th>Seen</th>
+    </tr>
+  </thead>
+  <tbody *ngFor="let output of list()">
+    <tr>
+      <td>{{output.Universe}}</td>
+      <td>{{output.Address}}</td>
+      <td>{{output.Port}}</td>
+      <td><span *ngIf="output.Artnet">{{output.Artnet.Name}}</span></td>
+      <td>{{output.Connected}}</td>
+      <td>{{output.Seen}}</td>
+    </tr>
+  </tbody>
+</table>

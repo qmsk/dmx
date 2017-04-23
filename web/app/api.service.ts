@@ -14,7 +14,7 @@ import 'rxjs/add/operator/toPromise';
 import 'rxjs/add/operator/retryWhen';
 import 'rxjs/add/operator/delay';
 
-import { API, APIEvents, APIHeads, APIGroups, APIPresets } from './api';
+import { API, APIEvents, APIOutput, APIOutputs, APIHeads, APIGroups, APIPresets } from './api';
 import { Post, Head, Group, Preset } from './head';
 
 @Injectable()
@@ -24,10 +24,22 @@ export class APIService {
 
   // state
   loaded: boolean = false;
+  outputs: Map<string, APIOutput>;
   heads: Map<string, Head>;
   groups: Map<string, Group>;
   presets: Map<string, Preset>;
 
+  listOutputs(sort?: (APIOutput) => any, filter?: (APIOutput) => boolean): APIOutput[] {
+    let outputs = Array.from(this.outputs.values());
+
+    if (filter)
+      outputs = _.filter(outputs, filter);
+
+    if (sort)
+      outputs = _.sortBy(outputs, sort);
+
+    return outputs;
+  }
   listHeads(sort?: (Head) => any, filter?: (Head) => boolean): Head[] {
     let heads = Array.from(this.heads.values());
 
@@ -63,6 +75,7 @@ export class APIService {
   }
 
   constructor(private http: Http, webSocketService: WebSocketService, public status: StatusService) {
+    this.outputs = new Map<string, APIOutput>();
     this.heads = new Map<string, Head>();
     this.groups = new Map<string, Group>();
     this.presets = new Map<string, Preset>();
@@ -118,11 +131,21 @@ export class APIService {
   private load(api: API) {
     this.loaded = true;
 
+    if (api.Outputs) {
+      this.loadOutputs(api.Outputs);
+    }
+
     this.loadHeads(api.Heads);
     this.loadGroups(api.Groups);
 
     if (api.Presets) {
       this.loadPresets(api.Presets);
+    }
+  }
+
+  private loadOutputs(apiOutputs: APIOutputs) {
+    for (let id in apiOutputs) {
+      this.outputs.set(id, apiOutputs[id]);
     }
   }
 
