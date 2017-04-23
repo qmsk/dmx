@@ -5,11 +5,19 @@ import (
 	"github.com/qmsk/go-web"
 )
 
-// Websocket
+// WebSocket handler
 func (heads *Heads) WebEvents() web.Events {
 	heads.events.eventChan = make(chan web.Event)
 
-	return web.MakeEvents(heads.events.eventChan)
+	return web.MakeEvents(web.EventConfig{
+		EventPush: heads.events.eventChan,
+		StateFunc: func() web.State {
+			heads.log.Info("WebEvents State request")
+
+			// must be goroutine-safe
+			return heads.makeAPI()
+		},
+	})
 }
 
 type APIEvents struct {
@@ -58,6 +66,7 @@ type Events struct {
 	eventChan chan web.Event
 }
 
+// push update events via websocket
 func (events *Events) update(event APIEvents) {
 	if events.eventChan != nil {
 		events.log.Infof("update")

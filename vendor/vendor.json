@@ -23,10 +23,10 @@
 			"revisionTime": "2017-02-23T22:10:28Z"
 		},
 		{
-			"checksumSHA1": "JFSSRHfuI7reSQ+LRAtuah+RCD4=",
+			"checksumSHA1": "PVW3KbBz1w3zoiyX3niOv7m6Ogk=",
 			"path": "github.com/qmsk/go-web",
-			"revision": "bfa13885407ec297c31b413ce69e0269f09910e4",
-			"revisionTime": "2017-04-23T08:00:55Z"
+			"revision": "b8620920c43c463bea270aa53914b6918adc2bac",
+			"revisionTime": "2017-04-23T09:43:33Z"
 		},
 		{
 			"path": "golang.org/x/net/websocket",

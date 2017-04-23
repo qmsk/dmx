@@ -34,13 +34,17 @@ func (heads *Heads) Index(name string) (web.Resource, error) {
 	}
 }
 
-func (heads *Heads) GetREST() (web.Resource, error) {
+func (heads *Heads) makeAPI() API {
 	return API{
 		Outputs: heads.outputs.makeAPI(),
 		Heads:   heads.heads.makeAPI(),
 		Groups:  heads.groups.makeAPI(),
 		Presets: heads.presets,
-	}, nil
+	}
+}
+
+func (heads *Heads) GetREST() (web.Resource, error) {
+	return heads.makeAPI(), nil
 }
 
 func (heads *Heads) Apply() error {
