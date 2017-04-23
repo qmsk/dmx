@@ -19,6 +19,7 @@ import { PresetsComponent } from './presets.component'
 import { PresetParametersComponent } from './preset-parameters.component'
 import { MainComponent } from './main.component'
 import { StatusComponent } from './status.component'
+import { ValuePipe } from './value.pipe'
 
 const routes: Routes = [
   { path: 'presets', component: PresetsComponent },
@@ -48,6 +49,7 @@ const routes: Routes = [
     PresetParametersComponent,
     MainComponent,
     StatusComponent,
+    ValuePipe,
   ],
   providers: [
     StatusService,
