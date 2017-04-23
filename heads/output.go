@@ -33,16 +33,19 @@ func (outputMap outputMap) GetREST() (web.Resource, error) {
 	return outputMap.makeAPI(), nil
 }
 
+type OutputConnection struct {
+	time      time.Time
+	config    OutputConfig
+	dmxWriter dmx.Writer // or nil
+}
+
 type Output struct {
-	log logging.Logger
+	log    logging.Logger
+	events *Events
 
-	universe Universe
-	dmx      dmx.Universe
-
-	// when connected
-	connectTime time.Time
-	config      OutputConfig
-	dmxWriter   dmx.Writer // or nil
+	universe   Universe
+	dmx        dmx.Universe
+	connection *OutputConnection
 }
 
 func (output *Output) String() string {
@@ -50,12 +53,28 @@ func (output *Output) String() string {
 }
 
 func (output *Output) connect(config OutputConfig, dmxWriter dmx.Writer) {
-	if output.connectTime.IsZero() {
-		output.connectTime = time.Now()
+	if output.connection == nil {
+		output.connection = &OutputConnection{
+			time:      time.Now(),
+			config:    config,
+			dmxWriter: dmxWriter,
+		}
+	} else {
+		output.connection.config = config
+		output.connection.dmxWriter = dmxWriter
 	}
 
-	output.config = config
-	output.dmxWriter = dmxWriter
+	output.apply()
+}
+
+func (output *Output) apply() {
+	var id = output.String()
+
+	output.events.update(APIEvents{
+		Outputs: APIOutputs{
+			id: output.makeAPI(),
+		},
+	})
 }
 
 func (output *Output) GetDMX(address dmx.Address) dmx.Channel {
@@ -82,14 +101,15 @@ func (output *Output) SetValue(address dmx.Address, value Value) Value {
 }
 
 func (output *Output) refresh() error {
-	if output.dmxWriter == nil {
+	// XXX: not goroutine-safe vs connect()
+	if output.connection == nil {
 		return nil
 	}
 
-	output.log.Debugf("Output len=%v writer=%v:", len(output.dmx), output.dmxWriter)
+	output.log.Debugf("Output len=%v writer=%v:", len(output.dmx), output.connection.dmxWriter)
 	output.log.Debug(output.dmx)
 
-	if err := output.dmxWriter.WriteDMX(output.dmx); err != nil {
+	if err := output.connection.dmxWriter.WriteDMX(output.dmx); err != nil {
 		return err
 	}
 
@@ -101,17 +121,22 @@ type APIOutputs map[string]APIOutput
 
 type APIOutput struct {
 	Universe  Universe
-	Connected time.Time
+	Connected *time.Time
 
-	OutputConfig
+	*OutputConfig
 }
 
 func (output *Output) makeAPI() APIOutput {
-	return APIOutput{
-		Universe:     output.universe,
-		Connected:    output.connectTime,
-		OutputConfig: output.config,
+	var apiOutput = APIOutput{
+		Universe: output.universe,
 	}
+
+	if output.connection != nil {
+		apiOutput.Connected = &output.connection.time
+		apiOutput.OutputConfig = &output.connection.config
+	}
+
+	return apiOutput
 }
 
 func (output *Output) GetREST() (web.Resource, error) {

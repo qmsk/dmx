@@ -21,8 +21,9 @@ func (heads *Heads) WebEvents() web.Events {
 }
 
 type APIEvents struct {
-	Heads  APIHeads
-	Groups APIGroups
+	Outputs APIOutputs
+	Heads   APIHeads
+	Groups  APIGroups
 }
 
 func (event *APIEvents) addHead(head *Head) {

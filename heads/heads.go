@@ -76,6 +76,7 @@ func (heads *Heads) output(universe Universe) *Output {
 	if output == nil {
 		output = &Output{
 			log:      heads.options.Log.Logger("universe", universe),
+			events:   heads.events,
 			dmx:      dmx.MakeUniverse(),
 			universe: universe,
 		}
