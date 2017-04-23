@@ -7,7 +7,7 @@ import (
 )
 
 type API struct {
-	Outputs []APIOutput
+	Outputs APIOutputs
 	Heads   APIHeads
 	Groups  APIGroups
 	Presets presetMap

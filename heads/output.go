@@ -2,38 +2,59 @@ package heads
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/qmsk/dmx"
-	"github.com/qmsk/dmx/artnet"
 	"github.com/qmsk/dmx/logging"
 	"github.com/qmsk/go-web"
 )
 
 type OutputConfig struct {
-	Universe   Universe
-	ArtNetNode *artnet.NodeConfig
+	Seen    time.Time
+	Address string
+	Port    int
+
+	Artnet interface{} // metadata
 }
 
 type outputMap map[Universe]*Output
 
+func (outputMap outputMap) makeAPI() APIOutputs {
+	var apiOutputs = make(APIOutputs)
+
+	for _, output := range outputMap {
+		apiOutputs[output.String()] = output.makeAPI()
+	}
+
+	return apiOutputs
+}
+
+func (outputMap outputMap) GetREST() (web.Resource, error) {
+	return outputMap.makeAPI(), nil
+}
+
 type Output struct {
-	log      logging.Logger
-	config   OutputConfig
+	log logging.Logger
+
 	universe Universe
 	dmx      dmx.Universe
 
-	dmxWriter dmx.Writer // or nil
-
-	dirty bool
+	// when connected
+	connectTime time.Time
+	config      OutputConfig
+	dmxWriter   dmx.Writer // or nil
 }
 
 func (output *Output) String() string {
 	return fmt.Sprintf("%d", output.universe)
 }
 
-func (output *Output) init(config OutputConfig, dmxWriter dmx.Writer) {
+func (output *Output) connect(config OutputConfig, dmxWriter dmx.Writer) {
+	if output.connectTime.IsZero() {
+		output.connectTime = time.Now()
+	}
+
 	output.config = config
-	output.universe = config.Universe
 	output.dmxWriter = dmxWriter
 }
 
@@ -46,7 +67,6 @@ func (output *Output) GetValue(address dmx.Address) Value {
 }
 
 func (output *Output) SetDMX(address dmx.Address, value dmx.Channel) {
-	output.dirty = true
 	output.dmx.Set(address, value)
 }
 
@@ -73,32 +93,23 @@ func (output *Output) refresh() error {
 		return err
 	}
 
-	output.dirty = false
-
 	return nil
 }
 
-func (outputMap outputMap) makeAPI() []APIOutput {
-	var apiOutputs []APIOutput
-
-	for _, output := range outputMap {
-		apiOutputs = append(apiOutputs, output.makeAPI())
-	}
-
-	return apiOutputs
-}
-
-func (outputMap outputMap) GetREST() (web.Resource, error) {
-	return outputMap.makeAPI(), nil
-}
-
 // Web API
+type APIOutputs map[string]APIOutput
+
 type APIOutput struct {
+	Universe  Universe
+	Connected time.Time
+
 	OutputConfig
 }
 
 func (output *Output) makeAPI() APIOutput {
 	return APIOutput{
+		Universe:     output.universe,
+		Connected:    output.connectTime,
 		OutputConfig: output.config,
 	}
 }

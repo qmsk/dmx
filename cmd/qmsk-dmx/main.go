@@ -46,17 +46,19 @@ func discovery(artnetController *artnet.Controller, hh *heads.Heads) {
 			for i, outputPort := range config.OutputPorts {
 				logging.Log.Infof("\tOutput %d: %v", i, outputPort.Address)
 
-				// patch outputs
-				universe := artnetController.Universe(outputPort.Address)
+				// map to a running artnet Universe
+				artnetWriter := artnetController.Universe(outputPort.Address)
 
 				var outputConfig = heads.OutputConfig{
-					Universe: heads.Universe(outputPort.Address.Integer()),
+					Address: node.String(),
+					Port:    i + 1,
+					Seen:    node.Time(),
 
-					ArtNetNode: &config,
+					Artnet: config,
 				}
 
-				// XXX: not safe
-				hh.Output(outputConfig, universe)
+				// patch output; assumed to be goroutine-safe
+				hh.Output(heads.Universe(outputPort.Address.Integer()), outputConfig, artnetWriter)
 			}
 		}
 	}

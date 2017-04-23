@@ -75,8 +75,9 @@ func (heads *Heads) output(universe Universe) *Output {
 	output := heads.outputs[universe]
 	if output == nil {
 		output = &Output{
-			log: heads.options.Log.Logger("universe", universe),
-			dmx: dmx.MakeUniverse(),
+			log:      heads.options.Log.Logger("universe", universe),
+			dmx:      dmx.MakeUniverse(),
+			universe: universe,
 		}
 
 		heads.outputs[universe] = output
@@ -86,8 +87,9 @@ func (heads *Heads) output(universe Universe) *Output {
 }
 
 // Patch output
-func (heads *Heads) Output(config OutputConfig, dmxWriter dmx.Writer) {
-	heads.output(config.Universe).init(config, dmxWriter)
+// XXX: not goroutine-safe...
+func (heads *Heads) Output(universe Universe, config OutputConfig, writer dmx.Writer) {
+	heads.output(universe).connect(config, writer)
 }
 
 func (heads *Heads) addGroup(id GroupID, config GroupConfig) *Group {
