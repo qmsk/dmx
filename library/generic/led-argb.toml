@@ -1,0 +1,13 @@
+[[Channels]]
+Intensity = true
+
+[[Channels]]
+Color    = "red"
+
+[[Channels]]
+Color    = "green"
+
+[[Channels]]
+Color    = "blue"
+
+
