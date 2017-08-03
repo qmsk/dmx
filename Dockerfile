@@ -7,14 +7,18 @@ RUN apt-get update && apt-get install -y \
 
 ENV GOPATH=/go
 RUN mkdir -p /go/src/github.com/qmsk/dmx
-ADD web/package.json /go/src/github.com/qmsk/dmx/web/
+RUN go get -u github.com/kardianos/govendor
 
+ADD web/package.json /go/src/github.com/qmsk/dmx/web/
 WORKDIR /go/src/github.com/qmsk/dmx/web
 RUN npm install
 
-ADD . /go/src/github.com/qmsk/dmx
+ADD vendor/vendor.json /go/src/github.com/qmsk/dmx/vendor/
 WORKDIR /go/src/github.com/qmsk/dmx
-RUN go get -d ./cmd/... && go install -v ./cmd/...
+RUN /go/bin/govendor sync -v
+
+ADD . /go/src/github.com/qmsk/dmx
+RUN go install -v ./cmd/...
 
 WORKDIR /go/src/github.com/qmsk/dmx/web
 RUN ./node_modules/typescript/bin/tsc
