@@ -2,10 +2,24 @@
 
 ## Web UI
 
-![EMTS Contact field](https://raw.githubusercontent.com/qmsk/dmx/master/docs/web-main.png)
+![qmsk::dmx Web UI](https://raw.githubusercontent.com/qmsk/dmx/master/docs/web-main.png)
 
+## Usage
 
-## `github.com/qmsk/dmx/cmd/qmsk-dmx`
+#### Docker
+The recommended way to build and run the project is using Docker:
+
+    $ git clone https://github.com/qmsk/dmx.git qmsk-dmx && cd qmsk-dmx
+    $ docker build -t qmsk/dmx .
+    $ docker run --rm --name qmsk-dmx -v $PWD/config:/go/src/github.com/qmsk/dmx/config:ro -e ARTNET_DISCOVERY=2.255.255.255 -p 8000:8000 qmsk/dmx
+
+The `-v $PWD/config:/go/src/github.com/qmsk/dmx/config:ro` allows editing the config and reloading it use `docker restart qmsk-dmx`.
+
+The `-e ARTNET_DISCOVERY=2.255.255.255` allows configuring a comma-separated list of broadcast/unicast addresses for ArtNet discovery.
+
+The `-p 8000:8000` allows accessing the API/UI at `http://localhost:8000` on the machine running the Docker container.
+
+### `github.com/qmsk/dmx/cmd/qmsk-dmx`
 
 ```
 
