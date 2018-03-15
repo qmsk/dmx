@@ -6,16 +6,18 @@ RUN apt-get update && apt-get install -y \
   nodejs nodejs-legacy npm
 
 ENV GOPATH=/go
+ADD https://github.com/golang/dep/releases/download/v0.4.1/dep-linux-amd64 /usr/local/bin/dep
+RUN chmod +x /usr/local/bin/dep
+
 RUN mkdir -p /go/src/github.com/qmsk/dmx
-RUN go get -u github.com/kardianos/govendor
 
 ADD web/package.json /go/src/github.com/qmsk/dmx/web/
 WORKDIR /go/src/github.com/qmsk/dmx/web
 RUN npm install
 
-ADD vendor/vendor.json /go/src/github.com/qmsk/dmx/vendor/
+ADD Gopkg.* /go/src/github.com/qmsk/dmx/
 WORKDIR /go/src/github.com/qmsk/dmx
-RUN /go/bin/govendor sync -v
+RUN dep ensure -vendor-only
 
 ADD . /go/src/github.com/qmsk/dmx
 RUN go install -v ./cmd/...
