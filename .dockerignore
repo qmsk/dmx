@@ -1,5 +1,14 @@
 Dockerfile
+.dockerignore
+
 .git
-web/node_modules
+.gitignore
+
 vendor
-!vendor/vendor.json
+
+web/node_modules
+web/app/*.js
+web/app/*.js.map
+web/lib/*/*.js
+web/lib/*/*.js.map
+
