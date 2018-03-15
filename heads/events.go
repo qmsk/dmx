@@ -6,16 +6,16 @@ import (
 )
 
 // WebSocket handler
-func (heads *Heads) WebEvents() web.Events {
-	heads.events.eventChan = make(chan web.Event)
+func (controller *Controller) WebEvents() web.Events {
+	controller.events.eventChan = make(chan web.Event)
 
 	return web.MakeEvents(web.EventConfig{
-		EventPush: heads.events.eventChan,
+		EventPush: controller.events.eventChan,
 		StateFunc: func() web.State {
-			heads.log.Info("WebEvents State request")
+			controller.log.Info("WebEvents State request")
 
 			// must be goroutine-safe
-			return heads.makeAPI()
+			return controller.makeAPI()
 		},
 	})
 }

@@ -272,11 +272,11 @@ func (apiPresetParams APIPresetParams) Apply() error {
 
 // GET /config/preset.toml
 type httpConfigPreset struct {
-	heads *Heads
+	controller *Controller
 }
 
 // Export a preset configuration from the current state
-func (heads *Heads) ConfigPreset() PresetConfig {
+func (controller *Controller) ConfigPreset() PresetConfig {
 	var allParameters = PresetParameters{
 		Intensity: &APIIntensity{},
 		Color:     &APIColor{},
@@ -288,7 +288,7 @@ func (heads *Heads) ConfigPreset() PresetConfig {
 		Heads:  make(map[string]PresetParameters),
 	}
 
-	for groupID, group := range heads.groups {
+	for groupID, group := range controller.groups {
 		var presetParameters = PresetParameters{
 			Intensity: group.intensity.makeAPI(),
 			Color:     group.color.makeAPI(),
@@ -303,7 +303,7 @@ func (heads *Heads) ConfigPreset() PresetConfig {
 		presetConfig.Groups[string(groupID)] = presetParameters
 	}
 
-	for headID, head := range heads.heads {
+	for headID, head := range controller.heads {
 		var presetParameters = PresetParameters{
 			Intensity: head.parameters.Intensity.makeAPI(),
 			Color:     head.parameters.Color.makeAPI(),
