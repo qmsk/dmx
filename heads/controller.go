@@ -19,7 +19,6 @@ func MakeController() Controller {
 
 type Controller struct {
 	log     logging.Logger
-	config  api.Config
 	outputs outputMap
 	heads   headMap
 	groups  groupMap
@@ -49,22 +48,17 @@ func (controller *Controller) Output(universe Universe, config OutputConfig, wri
 }
 
 func (controller *Controller) Load(config api.Config) error {
-	controller.config = config
-
 	// preload groups
 	for groupID, groupConfig := range config.Groups {
-		controller.addGroup(groupID, *groupConfig)
+		controller.addGroup(groupID, groupConfig)
 	}
 
-	for headID, headConfig := range config.Heads {
-		if headConfig.Count > 0 {
-			var index uint
-			for index = 0; index < headConfig.Count; index++ {
-				controller.addHead(headID.index(index), headConfig.index(index), headConfig.headType)
-			}
-		} else {
-			controller.addHead(headID, *headConfig, headConfig.headType)
-		}
+	if err := loadHeads(config, func(headID api.HeadID, headConfig api.HeadConfig, headType api.HeadType) error {
+		controller.addHead(headID, headConfig, headType)
+
+		return nil
+	}); err != nil {
+		return err
 	}
 
 	// once all heads are patched, init groups
@@ -74,8 +68,8 @@ func (controller *Controller) Load(config api.Config) error {
 
 	//  load presets
 	for presetID, presetConfig := range config.Presets {
-		if err := controller.addPreset(presetID, *presetConfig); err != nil {
-			return fmt.Errorf("Load preset=%v: %v", presetID, err)
+		if err := controller.addPreset(presetID, presetConfig); err != nil {
+			return fmt.Errorf("Load preset %v: %v", presetID, err)
 		}
 	}
 

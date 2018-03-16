@@ -220,3 +220,38 @@ func loadHeadType(config api.Config, headConfig api.HeadConfig) (api.HeadType, e
 		return headType, nil
 	}
 }
+
+// Config
+func loadHeadID(headID api.HeadID, index int) api.HeadID {
+	return api.HeadID(fmt.Sprintf("%s.%d", headID, index+1))
+}
+
+func loadHeadConfig(headConfig api.HeadConfig, index int, headType api.HeadType) api.HeadConfig {
+	var step = len(headType.Channels)
+
+	headConfig.Address = headConfig.Address + api.DMXAddress(index*step)
+
+	return headConfig
+}
+
+func loadHeads(config api.Config, f func(headID api.HeadID, headConfig api.HeadConfig, headType api.HeadType) error) error {
+	for headID, headConfig := range config.Heads {
+		var err error
+
+		if headType, headTypeErr := loadHeadType(config, headConfig); headTypeErr != nil {
+			err = headTypeErr
+		} else if headConfig.Count == 0 {
+			err = f(headID, headConfig, headType)
+		} else {
+			for index := 0; index < int(headConfig.Count); index++ {
+				err = f(loadHeadID(headID, index), loadHeadConfig(headConfig, index, headType), headType)
+			}
+		}
+
+		if err != nil {
+			return fmt.Errorf("Load head %v: %v", headID, err)
+		}
+	}
+
+	return nil
+}
