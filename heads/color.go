@@ -2,6 +2,7 @@ package heads
 
 import (
 	"fmt"
+	"github.com/qmsk/dmx/api"
 	"github.com/qmsk/go-web"
 )
 
@@ -117,7 +118,7 @@ func (headColor HeadColor) PostREST() (web.Resource, error) {
 
 // Group.Color
 type GroupColor struct {
-	headColors map[HeadID]HeadColor
+	headColors map[api.HeadID]HeadColor
 }
 
 func (groupColor GroupColor) exists() bool {

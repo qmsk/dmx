@@ -2,6 +2,7 @@ package heads
 
 import (
 	"fmt"
+	"github.com/qmsk/dmx/api"
 	"github.com/qmsk/go-web"
 )
 
@@ -53,7 +54,7 @@ func (headIntensity HeadIntensity) PostREST() (web.Resource, error) {
 
 // Group.Intensity
 type GroupIntensity struct {
-	heads map[HeadID]HeadIntensity
+	heads map[api.HeadID]HeadIntensity
 }
 
 func (groupIntensity GroupIntensity) exists() bool {

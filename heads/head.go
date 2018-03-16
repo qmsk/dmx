@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/qmsk/dmx"
+	"github.com/qmsk/dmx/api"
 	"github.com/qmsk/dmx/logging"
 	"github.com/qmsk/go-web"
 )
@@ -34,54 +35,18 @@ func (headType HeadType) IsColor() bool {
 	return false
 }
 
-// Config
-type HeadID string
-
-func (headID HeadID) index(index uint) HeadID {
-	return HeadID(fmt.Sprintf("%s.%d", headID, index+1))
-}
-
-type HeadConfig struct {
-	Type     TypeID
-	Universe Universe
-	Address  dmx.Address
-	Name     string
-	Count    uint // Clone multiple copies of the head at id.N
-	Groups   []GroupID
-
-	headType *HeadType
-}
-
-// Number of channels used by head for count indexing
-func (headConfig HeadConfig) step() uint {
-	return uint(len(headConfig.headType.Channels))
-}
-
-// Return an indexed copy of the head, step addresses ahead
-func (headConfig HeadConfig) index(index uint) HeadConfig {
-	// copy
-	var indexed HeadConfig = headConfig
-
-	indexed.Address = indexed.Address + dmx.Address(index*headConfig.step())
-
-	return indexed
-}
-
 // Top-level map
-type headMap map[HeadID]*Head
+type headList []*Head
 
-type APIHeads map[HeadID]APIHead
+func (heads headList) makeAPI() []api.Head {
+	var apiHeads = make([]APIHead, 0, len(heads))
 
-func (heads headMap) makeAPI() APIHeads {
-	var apiHeads = make(APIHeads)
-
-	for headID, head := range heads {
-		apiHeads[headID] = head.makeAPI()
+	for _, head := range heads {
+		apiHeads = append(apiHeads, head.makeAPI())
 	}
-	return apiHeads
-}
 
-type headList headMap
+	return apiHeads, nil
+}
 
 func (heads headList) GetREST() (web.Resource, error) {
 	var apiHeads []APIHead
@@ -93,17 +58,38 @@ func (heads headList) GetREST() (web.Resource, error) {
 	return apiHeads, nil
 }
 
-func (headMap headMap) Index(name string) (web.Resource, error) {
+type heads map[api.HeadID]*Head
+
+func (heads heads) list() headList {
+	var list = make(headList, 0, len(heads))
+
+	for _, head := range heads {
+		list = append(list, head)
+	}
+
+	return list
+}
+
+func (heads heads) makeAPI() api.Heads {
+	var apiHeads = make(api.Heads)
+
+	for headID, head := range heads {
+		apiHeads[headID] = head.makeAPI()
+	}
+	return apiHeads
+}
+
+func (heads heads) Index(name string) (web.Resource, error) {
 	switch name {
 	case "":
-		return headList(headMap), nil
+		return heads.list(), nil
 	default:
-		return headMap[HeadID(name)], nil
+		return heads[api.HeadID(name)], nil
 	}
 }
 
-func (headMap headMap) GetREST() (web.Resource, error) {
-	return headMap.makeAPI(), nil
+func (heads heads) GetREST() (web.Resource, error) {
+	return heads.makeAPI(), nil
 }
 
 // Channels
@@ -150,9 +136,9 @@ type HeadParameters struct {
 type Head struct {
 	log logging.Logger
 
-	id       HeadID
-	config   HeadConfig
-	headType *HeadType
+	id       api.HeadID
+	config   api.HeadConfig
+	headType api.HeadType
 	output   *Output
 	events   Events
 	groups   groupMap
@@ -228,9 +214,9 @@ func (head *Head) Parameters() HeadParameters {
 
 // Web API GET
 type APIHead struct {
-	ID     HeadID
-	Config HeadConfig
-	Type   *HeadType
+	ID     api.HeadID
+	Config api.HeadConfig
+	Type   api.HeadType
 
 	Channels  map[string]APIChannel `json:",omitempty"`
 	Intensity *APIIntensity         `json:",omitempty"`

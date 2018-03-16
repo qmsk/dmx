@@ -3,6 +3,7 @@ package heads
 import (
 	"net/http"
 
+	"github.com/qmsk/dmx/api"
 	"github.com/qmsk/dmx/logging"
 	"github.com/qmsk/go-web"
 
@@ -137,13 +138,13 @@ type Preset struct {
 	ID     PresetID
 	Config PresetConfig
 
-	allHeads  headMap
+	allHeads  heads
 	allGroups groupMap
 	Groups    map[GroupID]PresetParameters
-	Heads     map[HeadID]PresetParameters
+	Heads     map[api.HeadID]PresetParameters
 }
 
-func (preset *Preset) initAll(heads headMap, groups groupMap) {
+func (preset *Preset) initAll(heads heads, groups groupMap) {
 	preset.allHeads = heads
 	preset.allGroups = groups
 }

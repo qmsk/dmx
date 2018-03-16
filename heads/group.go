@@ -1,6 +1,7 @@
 package heads
 
 import (
+	"github.com/qmsk/dmx/api"
 	"github.com/qmsk/dmx/logging"
 	"github.com/qmsk/go-web"
 )
@@ -9,7 +10,7 @@ import (
 type GroupID string
 
 type GroupConfig struct {
-	Heads []HeadID
+	Heads []api.HeadID
 	Name  string
 }
 
@@ -54,7 +55,7 @@ type Group struct {
 	log    logging.Logger
 	id     GroupID
 	config GroupConfig
-	heads  headMap
+	heads  heads
 	events Events
 
 	intensity *GroupIntensity
@@ -127,14 +128,14 @@ type APIGroupParams struct {
 type APIGroup struct {
 	GroupConfig
 	ID     GroupID
-	Heads  []HeadID
+	Heads  []api.HeadID
 	Colors ColorMap
 
 	APIGroupParams
 }
 
-func (group *Group) makeAPIHeads() []HeadID {
-	var heads = make([]HeadID, 0)
+func (group *Group) makeAPIHeads() []api.HeadID {
+	var heads = make([]api.HeadID, 0)
 
 	for headID, _ := range group.heads {
 		heads = append(heads, headID)

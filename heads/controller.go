@@ -10,7 +10,7 @@ import (
 func MakeController() Controller {
 	return Controller{
 		outputs: make(outputMap),
-		heads:   make(headMap),
+		heads:   make(heads),
 		groups:  make(groupMap),
 		presets: make(presetMap),
 		events:  &events{},
@@ -20,7 +20,7 @@ func MakeController() Controller {
 type Controller struct {
 	log     logging.Logger
 	outputs outputMap
-	heads   headMap
+	heads   heads
 	groups  groupMap
 	presets presetMap
 	events  *events // optional
@@ -76,7 +76,7 @@ func (controller *Controller) Load(config api.Config) error {
 	return nil
 }
 
-func (controller *Controller) addGroup(id GroupID, config GroupConfig) *Group {
+func (controller *Controller) addGroup(id api.GroupID, config api.GroupConfig) *Group {
 	group := controller.groups[id]
 
 	if group == nil {
@@ -84,7 +84,7 @@ func (controller *Controller) addGroup(id GroupID, config GroupConfig) *Group {
 			log:    controller.options.Log.Logger("group", id),
 			id:     id,
 			config: config,
-			heads:  make(headMap),
+			heads:  make(heads),
 			colors: make(ColorMap),
 			events: controller.events,
 		}
@@ -95,7 +95,7 @@ func (controller *Controller) addGroup(id GroupID, config GroupConfig) *Group {
 	return group
 }
 
-func (controller *Controller) group(id GroupID) *Group {
+func (controller *Controller) group(id api.GroupID) *Group {
 	if group := controller.groups[id]; group == nil {
 		return controller.addGroup(id, GroupConfig{})
 	} else {
@@ -104,7 +104,7 @@ func (controller *Controller) group(id GroupID) *Group {
 }
 
 // Patch head
-func (controller *Controller) addHead(id HeadID, config HeadConfig, headType *HeadType) *Head {
+func (controller *Controller) addHead(id api.HeadID, config api.HeadConfig, headType api.HeadType) *Head {
 	var output = controller.output(config.Universe)
 	var head = Head{
 		log:      controller.options.Log.Logger("head", id),
@@ -130,7 +130,7 @@ func (controller *Controller) addHead(id HeadID, config HeadConfig, headType *He
 	return &head
 }
 
-func (controller *Controller) addPreset(id PresetID, config PresetConfig) error {
+func (controller *Controller) addPreset(id api.PresetID, config api.PresetConfig) error {
 	var preset = Preset{
 		log:    controller.options.Log.Logger("preset", id),
 		events: controller.events,
@@ -172,7 +172,7 @@ func (controller *Controller) Each(fn func(head *Head)) {
 }
 
 // refresh outputs
-func (controller *Controller) Refresh() error {
+func (controller *Controller) RefreshOutputs() error {
 	var refreshErr error
 
 	for _, output := range controller.outputs {
