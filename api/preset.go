@@ -1,15 +1,18 @@
 package api
 
-type PresetParameterConfig struct {
+type PresetConfigParameters struct {
 	Intensity *Intensity
 	Color     *Color
 }
 
+type PresetGroups map[GroupID]PresetConfigParameters
+type PresetHeads map[HeadID]PresetConfigParameters
+
 type PresetConfig struct {
 	Name   string
-	All    *PresetParameterConfig
-	Groups map[string]PresetParameterConfig
-	Heads  map[string]PresetParameterConfig
+	All    *PresetConfigParameters
+	Groups PresetGroups
+	Heads  PresetHeads
 }
 
 type PresetID string

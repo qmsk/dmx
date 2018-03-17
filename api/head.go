@@ -29,9 +29,9 @@ type Head struct {
 	Config HeadConfig
 	Type   HeadType
 
-	Channels  map[string]Channel `json:",omitempty"`
-	Intensity *Intensity         `json:",omitempty"`
-	Color     *Color             `json:",omitempty"`
+	Channels  Channels   `json:",omitempty"`
+	Intensity *Intensity `json:",omitempty"`
+	Color     *Color     `json:",omitempty"`
 }
 
 type HeadParams struct {
