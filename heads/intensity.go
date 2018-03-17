@@ -6,12 +6,6 @@ import (
 	"github.com/qmsk/go-web"
 )
 
-type Intensity Value // 0.0 .. 1.0
-
-func (intensity Intensity) ScaleIntensity(scale Intensity) Intensity {
-	return intensity * scale
-}
-
 // Head.Intensity
 type HeadIntensity struct {
 	channel *Channel
@@ -21,27 +15,20 @@ func (it HeadIntensity) exists() bool {
 	return it.channel != nil
 }
 
-func (it HeadIntensity) Get() Intensity {
+func (it HeadIntensity) Get() api.Intensity {
 	if it.channel != nil {
-		return Intensity(it.channel.GetValue())
+		return api.Intensity{it.channel.GetValue()}
 	} else {
-		return Intensity(INVALID)
+		return api.Intensity{}
 	}
 }
 
-func (it HeadIntensity) Set(intensity Intensity) Intensity {
-	return Intensity(it.channel.SetValue(Value(intensity)))
+func (it HeadIntensity) Set(intensity api.Intensity) api.Intensity {
+	return api.Intensity{it.channel.SetValue(intensity.Intensity)}
 }
 
-func (headIntensity *HeadIntensity) makeAPI() *APIIntensity {
-	if headIntensity == nil {
-		return nil
-	}
-
-	return &APIIntensity{
-		headIntensity: headIntensity,
-		Intensity:     headIntensity.Get(),
-	}
+func (headIntensity *HeadIntensity) makeAPI() api.Intensity {
+	return headIntensity.Get()
 }
 
 func (headIntensity HeadIntensity) GetREST() (web.Resource, error) {
@@ -61,29 +48,22 @@ func (groupIntensity GroupIntensity) exists() bool {
 	return len(groupIntensity.heads) > 0
 }
 
-func (groupIntensity GroupIntensity) Get() (intensity Intensity) {
+func (groupIntensity GroupIntensity) Get() (intensity api.Intensity) {
 	for _, headIntensity := range groupIntensity.heads {
 		return headIntensity.Get()
 	}
 	return
 }
 
-func (groupIntensity GroupIntensity) Set(intensity Intensity) Intensity {
+func (groupIntensity GroupIntensity) Set(intensity api.Intensity) api.Intensity {
 	for _, headIntensity := range groupIntensity.heads {
 		headIntensity.Set(intensity)
 	}
 	return intensity
 }
 
-func (groupIntensity *GroupIntensity) makeAPI() *APIIntensity {
-	if groupIntensity == nil {
-		return nil
-	}
-
-	return &APIIntensity{
-		groupIntensity: groupIntensity,
-		Intensity:      groupIntensity.Get(),
-	}
+func (groupIntensity *GroupIntensity) makeAPI() api.Intensity {
+	return groupIntensity.Get()
 }
 
 // Web API
@@ -91,8 +71,8 @@ type APIIntensity struct {
 	headIntensity  *HeadIntensity
 	groupIntensity *GroupIntensity
 
-	ScaleIntensity *Intensity
-	Intensity
+	ScaleIntensity *api.Value
+	api.Intensity
 }
 
 func (apiIntensity APIIntensity) IsZero() bool {

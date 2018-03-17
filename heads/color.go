@@ -6,50 +6,6 @@ import (
 	"github.com/qmsk/go-web"
 )
 
-// Config Channels
-type ColorChannel string
-
-const (
-	ColorChannelRed   = "red"
-	ColorChannelGreen = "green"
-	ColorChannelBlue  = "blue"
-)
-
-// Config
-type ColorID string
-
-type ColorMap map[ColorID]Color
-
-// Merge in new colors from given map
-// Preserves existing colors
-func (colorMap ColorMap) Merge(mergeMap ColorMap) {
-	for colorID, color := range mergeMap {
-		if _, exists := colorMap[colorID]; !exists {
-			colorMap[colorID] = color
-		}
-	}
-}
-
-// Types
-type Color struct {
-	Red   Value
-	Green Value
-	Blue  Value
-}
-
-func (color Color) IsZero() bool {
-	return color.Red == 0.0 && color.Green == 0.0 && color.Blue == 0.0
-}
-
-// Linear RGB intensity scaling
-func (color Color) ScaleIntensity(intensity Intensity) Color {
-	return Color{
-		Red:   color.Red * Value(intensity),
-		Green: color.Green * Value(intensity),
-		Blue:  color.Blue * Value(intensity),
-	}
-}
-
 // Head.Color
 type HeadColor struct {
 	red       *Channel
@@ -62,7 +18,7 @@ func (it HeadColor) exists() bool {
 	return it.red != nil || it.green != nil || it.blue != nil
 }
 
-func (hc HeadColor) Get() (color Color) {
+func (hc HeadColor) Get() (color api.Color) {
 	if hc.red != nil {
 		color.Red = hc.red.GetValue()
 	}
@@ -75,7 +31,7 @@ func (hc HeadColor) Get() (color Color) {
 	return
 }
 
-func (hc HeadColor) Set(color Color) Color {
+func (hc HeadColor) Set(color api.Color) api.Color {
 	if hc.red != nil {
 		color.Red = hc.red.SetValue(color.Red)
 	}
@@ -89,24 +45,17 @@ func (hc HeadColor) Set(color Color) Color {
 }
 
 // Set color with intensity, using either head intensity channel or linear RGB scaling
-func (hc HeadColor) SetIntensity(color Color, intensity Intensity) {
+func (hc HeadColor) SetIntensity(color api.Color, intensity api.Value) {
 	if hc.intensity != nil {
 		hc.Set(color)
-		hc.intensity.SetValue(Value(intensity))
+		hc.intensity.SetValue(intensity)
 	} else {
-		hc.Set(color.ScaleIntensity(intensity))
+		hc.Set(color.Scale(intensity))
 	}
 }
 
-func (headColor *HeadColor) makeAPI() *APIColor {
-	if headColor == nil {
-		return nil
-	}
-
-	return &APIColor{
-		headColor: headColor,
-		Color:     headColor.Get(),
-	}
+func (headColor HeadColor) makeAPI() api.Color {
+	return headColor.Get()
 }
 
 func (headColor HeadColor) GetREST() (web.Resource, error) {
@@ -126,7 +75,7 @@ func (groupColor GroupColor) exists() bool {
 }
 
 // Return one color for the group
-func (groupColor GroupColor) Get() (color Color) {
+func (groupColor GroupColor) Get() (color api.Color) {
 	for _, headColor := range groupColor.headColors {
 		// This works fine assuming they are all the same color :)
 		return headColor.Get()
@@ -135,7 +84,7 @@ func (groupColor GroupColor) Get() (color Color) {
 	return
 }
 
-func (groupColor GroupColor) Set(color Color) Color {
+func (groupColor GroupColor) Set(color api.Color) api.Color {
 	for _, headColor := range groupColor.headColors {
 		headColor.Set(color)
 	}
@@ -143,15 +92,8 @@ func (groupColor GroupColor) Set(color Color) Color {
 	return color
 }
 
-func (groupColor *GroupColor) makeAPI() *APIColor {
-	if groupColor == nil {
-		return nil
-	}
-
-	return &APIColor{
-		groupColor: groupColor,
-		Color:      groupColor.Get(),
-	}
+func (groupColor GroupColor) makeAPI() api.Color {
+	return groupColor.Get()
 }
 
 // Web API
@@ -159,8 +101,8 @@ type APIColor struct {
 	headColor  *HeadColor
 	groupColor *GroupColor
 
-	ScaleIntensity *Intensity
-	Color
+	ScaleIntensity *api.Value
+	api.Color
 }
 
 func (apiColor APIColor) IsZero() bool {
@@ -192,7 +134,7 @@ func (apiColor *APIColor) initGroup(groupColor *GroupColor) error {
 
 func (apiColor *APIColor) Apply() error {
 	if apiColor.ScaleIntensity != nil {
-		apiColor.Color = apiColor.Color.ScaleIntensity(*apiColor.ScaleIntensity)
+		apiColor.Color = apiColor.Color.Scale(*apiColor.ScaleIntensity)
 	}
 
 	if apiColor.headColor != nil {

@@ -6,61 +6,50 @@ import (
 	"github.com/qmsk/go-web"
 )
 
-// Config
-type GroupID string
+type groups map[api.GroupID]*Group
 
-type GroupConfig struct {
-	Heads []api.HeadID
-	Name  string
-}
+func (groups groups) makeAPI() api.Groups {
+	apiGroups := make(api.Groups)
 
-// heads
-type groupMap map[GroupID]*Group
-
-type APIGroups map[GroupID]APIGroup
-
-func (groupMap groupMap) makeAPI() APIGroups {
-	apiGroups := make(APIGroups)
-
-	for groupID, group := range groupMap {
+	for groupID, group := range groups {
 		apiGroups[groupID] = group.makeAPI()
 	}
 
 	return apiGroups
 }
 
-func (groupMap groupMap) makeAPIList() (apiGroups []APIGroup) {
-	for _, group := range groupMap {
+func (groups groups) makeAPIList() (apiGroups []api.Group) {
+	for _, group := range groups {
 		apiGroups = append(apiGroups, group.makeAPI())
 	}
 
 	return
 }
 
-func (groupMap groupMap) GetREST() (web.Resource, error) {
-	return groupMap.makeAPI(), nil
+func (groups groups) GetREST() (web.Resource, error) {
+	return groups.makeAPI(), nil
 }
 
-func (groupMap groupMap) Index(name string) (web.Resource, error) {
+func (groups groups) Index(name string) (web.Resource, error) {
 	switch name {
 	case "":
-		return groupMap.makeAPIList(), nil
+		return groups.makeAPIList(), nil
 	default:
-		return groupMap[GroupID(name)], nil
+		return groups[api.GroupID(name)], nil
 	}
 }
 
 // Group
 type Group struct {
 	log    logging.Logger
-	id     GroupID
-	config GroupConfig
+	id     api.GroupID
+	config api.GroupConfig
 	heads  heads
 	events Events
 
 	intensity *GroupIntensity
 	color     *GroupColor
-	colors    ColorMap
+	colors    api.Colors
 }
 
 func (group *Group) addHead(head *Head) {
@@ -92,7 +81,7 @@ func (group *Group) init() {
 
 func (group *Group) makeIntensity() GroupIntensity {
 	var groupIntensity = GroupIntensity{
-		heads: make(map[HeadID]HeadIntensity),
+		heads: make(map[api.HeadID]HeadIntensity),
 	}
 
 	for headID, head := range group.heads {
@@ -106,7 +95,7 @@ func (group *Group) makeIntensity() GroupIntensity {
 
 func (group *Group) makeColor() GroupColor {
 	var groupColor = GroupColor{
-		headColors: make(map[HeadID]HeadColor),
+		headColors: make(map[api.HeadID]HeadColor),
 	}
 
 	for headID, head := range group.heads {
@@ -118,22 +107,6 @@ func (group *Group) makeColor() GroupColor {
 	return groupColor
 }
 
-// Web API
-type APIGroupParams struct {
-	group     *Group
-	Intensity *APIIntensity `json:",omitempty"`
-	Color     *APIColor     `json:",omitempty"`
-}
-
-type APIGroup struct {
-	GroupConfig
-	ID     GroupID
-	Heads  []api.HeadID
-	Colors ColorMap
-
-	APIGroupParams
-}
-
 func (group *Group) makeAPIHeads() []api.HeadID {
 	var heads = make([]api.HeadID, 0)
 
@@ -143,17 +116,31 @@ func (group *Group) makeAPIHeads() []api.HeadID {
 	return heads
 }
 
-func (group *Group) makeAPI() APIGroup {
-	return APIGroup{
+func (group *Group) makeAPIParams() api.GroupParams {
+	var params api.GroupParams
+
+	if group.intensity != nil {
+		var intensity = group.intensity.makeAPI()
+
+		params.Intensity = &intensity
+	}
+
+	if group.color != nil {
+		var color = group.color.makeAPI()
+
+		params.Color = &color
+	}
+
+	return params
+}
+
+func (group *Group) makeAPI() api.Group {
+	return api.Group{
 		GroupConfig: group.config,
 		ID:          group.id,
 		Heads:       group.makeAPIHeads(),
 		Colors:      group.colors,
-		APIGroupParams: APIGroupParams{
-			group:     group,
-			Intensity: group.intensity.makeAPI(),
-			Color:     group.color.makeAPI(),
-		},
+		GroupParams: group.makeAPIParams(),
 	}
 }
 
@@ -162,6 +149,13 @@ func (group *Group) GetREST() (web.Resource, error) {
 }
 func (group *Group) PostREST() (web.Resource, error) {
 	return &APIGroupParams{group: group}, nil
+}
+
+// Web API
+type APIGroupParams struct {
+	group     *Group
+	Intensity *APIIntensity `json:",omitempty"`
+	Color     *APIColor     `json:",omitempty"`
 }
 
 func (apiGroupParams APIGroupParams) Apply() error {
@@ -188,9 +182,9 @@ func (apiGroupParams APIGroupParams) Apply() error {
 func (group *Group) Apply() error {
 	group.log.Info("Apply")
 
-	group.events.update(APIEvents{
+	group.events.update(api.Event{
 		Heads: group.heads.makeAPI(),
-		Groups: APIGroups{
+		Groups: api.Groups{
 			group.id: group.makeAPI(),
 		},
 	})

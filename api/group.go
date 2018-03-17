@@ -10,10 +10,10 @@ type GroupID string
 type Groups map[GroupID]Group
 
 type Group struct {
-	GroupConfig
-	ID     GroupID
-	Heads  []HeadID
-	Colors Colors
+	GroupConfig // TODO: separate config field
+	ID          GroupID
+	Heads       []HeadID
+	Colors      Colors
 
 	GroupParams
 }

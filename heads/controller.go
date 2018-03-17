@@ -9,24 +9,24 @@ import (
 
 func MakeController() Controller {
 	return Controller{
-		outputs: make(outputMap),
+		outputs: make(outputs),
 		heads:   make(heads),
-		groups:  make(groupMap),
-		presets: make(presetMap),
+		groups:  make(groups),
+		presets: make(presets),
 		events:  &events{},
 	}
 }
 
 type Controller struct {
 	log     logging.Logger
-	outputs outputMap
+	outputs outputs
 	heads   heads
-	groups  groupMap
-	presets presetMap
+	groups  groups
+	presets presets
 	events  *events // optional
 }
 
-func (controller *Controller) output(universe Universe) *Output {
+func (controller *Controller) output(universe api.Universe) *Output {
 	output := controller.outputs[universe]
 	if output == nil {
 		output = &Output{
@@ -43,7 +43,7 @@ func (controller *Controller) output(universe Universe) *Output {
 
 // Patch output
 // XXX: not goroutine-safe...
-func (controller *Controller) Output(universe Universe, config OutputConfig, writer dmx.Writer) {
+func (controller *Controller) Output(universe api.Universe, config OutputConfig, writer dmx.Writer) {
 	controller.output(universe).connect(config, writer)
 }
 
@@ -81,11 +81,11 @@ func (controller *Controller) addGroup(id api.GroupID, config api.GroupConfig) *
 
 	if group == nil {
 		group = &Group{
-			log:    controller.options.Log.Logger("group", id),
+			//XXX: log:    controller.options.Log.Logger("group", id),
 			id:     id,
 			config: config,
 			heads:  make(heads),
-			colors: make(ColorMap),
+			colors: make(api.Colors),
 			events: controller.events,
 		}
 
@@ -97,7 +97,7 @@ func (controller *Controller) addGroup(id api.GroupID, config api.GroupConfig) *
 
 func (controller *Controller) group(id api.GroupID) *Group {
 	if group := controller.groups[id]; group == nil {
-		return controller.addGroup(id, GroupConfig{})
+		return controller.addGroup(id, api.GroupConfig{})
 	} else {
 		return group
 	}
@@ -107,13 +107,13 @@ func (controller *Controller) group(id api.GroupID) *Group {
 func (controller *Controller) addHead(id api.HeadID, config api.HeadConfig, headType api.HeadType) *Head {
 	var output = controller.output(config.Universe)
 	var head = Head{
-		log:      controller.options.Log.Logger("head", id),
+		// XXX: log:      controller.options.Log.Logger("head", id),
 		id:       id,
 		config:   config,
 		headType: headType,
 		output:   output,
 		events:   controller.events,
-		groups:   make(groupMap),
+		groups:   make(groups),
 	}
 
 	// load head parameters
@@ -132,12 +132,12 @@ func (controller *Controller) addHead(id api.HeadID, config api.HeadConfig, head
 
 func (controller *Controller) addPreset(id api.PresetID, config api.PresetConfig) error {
 	var preset = Preset{
-		log:    controller.options.Log.Logger("preset", id),
+		// XXX: log:    controller.options.Log.Logger("preset", id),
 		events: controller.events,
 		ID:     id,
 		Config: config,
-		Groups: make(map[GroupID]PresetParameters),
-		Heads:  make(map[HeadID]PresetParameters),
+		Groups: make(map[api.GroupID]PresetParameters),
+		Heads:  make(map[api.HeadID]PresetParameters),
 	}
 
 	if preset.Config.All != nil {
@@ -145,7 +145,7 @@ func (controller *Controller) addPreset(id api.PresetID, config api.PresetConfig
 	}
 
 	for groupID, presetParameters := range preset.Config.Groups {
-		if group := controller.groups[GroupID(groupID)]; group == nil {
+		if group := controller.groups[api.GroupID(groupID)]; group == nil {
 			return fmt.Errorf("No such group: %v", groupID)
 		} else {
 			preset.initGroup(group, presetParameters)
@@ -153,7 +153,7 @@ func (controller *Controller) addPreset(id api.PresetID, config api.PresetConfig
 	}
 
 	for headID, presetParameters := range preset.Config.Heads {
-		if head := controller.heads[HeadID(headID)]; head == nil {
+		if head := controller.heads[api.HeadID(headID)]; head == nil {
 			return fmt.Errorf("No such head: %v", headID)
 		} else {
 			preset.initHead(head, presetParameters)

@@ -25,7 +25,7 @@ type eventBuilder api.Event
 
 func (eventBuilder *eventBuilder) addHead(head *Head) {
 	if eventBuilder.Heads == nil {
-		eventBuilder.Heads = APIHeads{head.id: head.makeAPI()}
+		eventBuilder.Heads = api.Heads{head.id: head.makeAPI()}
 	} else {
 		eventBuilder.Heads[head.id] = head.makeAPI()
 	}
@@ -43,13 +43,13 @@ func (eventBuilder *eventBuilder) addHeads(heads heads) {
 
 func (eventBuilder *eventBuilder) addGroup(group *Group) {
 	if eventBuilder.Groups == nil {
-		eventBuilder.Groups = APIGroups{group.id: group.makeAPI()}
+		eventBuilder.Groups = api.Groups{group.id: group.makeAPI()}
 	} else {
 		eventBuilder.Groups[group.id] = group.makeAPI()
 	}
 }
 
-func (eventBuilder *eventBuilder) addGroups(groups groupMap) {
+func (eventBuilder *eventBuilder) addGroups(groups groups) {
 	if eventBuilder.Groups == nil {
 		eventBuilder.Groups = groups.makeAPI()
 	} else {

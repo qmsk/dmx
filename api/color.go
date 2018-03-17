@@ -25,6 +25,19 @@ type Color struct {
 	Blue  Value
 }
 
+func (color Color) IsZero() bool {
+	return color.Red == 0.0 && color.Green == 0.0 && color.Blue == 0.0
+}
+
+// Linear RGB intensity scaling
+func (color Color) Scale(intensity Value) Color {
+	return Color{
+		Red:   color.Red * intensity,
+		Green: color.Green * intensity,
+		Blue:  color.Blue * intensity,
+	}
+}
+
 type ColorParams struct {
 	ScaleIntensity *Value
 	Color

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/qmsk/dmx"
+	"github.com/qmsk/dmx/api"
 	"github.com/qmsk/dmx/logging"
 	"github.com/qmsk/go-web"
 )
@@ -17,20 +18,20 @@ type OutputConfig struct {
 	Artnet interface{} // metadata
 }
 
-type outputMap map[Universe]*Output
+type outputs map[api.Universe]*Output
 
-func (outputMap outputMap) makeAPI() APIOutputs {
-	var apiOutputs = make(APIOutputs)
+func (outputs outputs) makeAPI() api.Outputs {
+	var apiOutputs = make(api.Outputs)
 
-	for _, output := range outputMap {
+	for _, output := range outputs {
 		apiOutputs[output.String()] = output.makeAPI()
 	}
 
 	return apiOutputs
 }
 
-func (outputMap outputMap) GetREST() (web.Resource, error) {
-	return outputMap.makeAPI(), nil
+func (outputs outputs) GetREST() (web.Resource, error) {
+	return outputs.makeAPI(), nil
 }
 
 type OutputConnection struct {
@@ -43,7 +44,7 @@ type Output struct {
 	log    logging.Logger
 	events Events
 
-	universe   Universe
+	universe   api.Universe
 	dmx        dmx.Universe
 	connection *OutputConnection
 }
@@ -52,7 +53,7 @@ func (output *Output) String() string {
 	return fmt.Sprintf("%d", output.universe)
 }
 
-func (output *Output) init(logger logging.Logger, universe Universe) {
+func (output *Output) init(logger logging.Logger, universe api.Universe) {
 	output.log = logger.Logger("universe", universe)
 	output.universe = universe
 	output.dmx = dmx.MakeUniverse()

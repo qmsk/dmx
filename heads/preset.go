@@ -11,14 +11,12 @@ import (
 )
 
 // Config
-type PresetID string
-
 type PresetParameters struct {
 	head  *Head
 	group *Group
 
-	Intensity *APIIntensity
-	Color     *APIColor
+	Intensity *api.Intensity
+	Color     *api.Color
 }
 
 func (presetParameters PresetParameters) IsZero() bool {
@@ -78,17 +76,17 @@ func (presetParameters *PresetParameters) init() error {
 	return nil
 }
 
-func (presetParameters PresetParameters) scaleIntensity(scaleIntensity Intensity) PresetParameters {
+func (presetParameters PresetParameters) scale(scale api.Value) PresetParameters {
 	if presetParameters.Intensity != nil {
 		apiIntensity := *presetParameters.Intensity
-		apiIntensity.ScaleIntensity = &scaleIntensity
+		apiIntensity.ScaleIntensity = &scale
 
 		presetParameters.Intensity = &apiIntensity
 	}
 
 	if presetParameters.Color != nil {
 		apiColor := *presetParameters.Color
-		apiColor.ScaleIntensity = &scaleIntensity
+		apiColor.ScaleIntensity = &scale
 
 		presetParameters.Color = &apiColor
 	}
@@ -113,47 +111,40 @@ func (presetParameters PresetParameters) Apply() error {
 	return nil
 }
 
-type PresetConfig struct {
-	Name   string
-	All    *PresetParameters
-	Groups map[string]PresetParameters
-	Heads  map[string]PresetParameters
-}
-
 // Heads.Presets
-type presetMap map[PresetID]*Preset
+type presets map[api.PresetID]*Preset
 
-func (presetMap presetMap) GetREST() (web.Resource, error) {
-	return presetMap, nil
+func (presets presets) GetREST() (web.Resource, error) {
+	return presets, nil
 }
 
-func (presetMap presetMap) Index(name string) (web.Resource, error) {
-	return presetMap[PresetID(name)], nil
+func (presets presets) Index(name string) (web.Resource, error) {
+	return presets[api.PresetID(name)], nil
 }
 
 type Preset struct {
 	log    logging.Logger
 	events Events
 
-	ID     PresetID
-	Config PresetConfig
+	ID     api.PresetID
+	Config api.PresetConfig
 
 	allHeads  heads
-	allGroups groupMap
-	Groups    map[GroupID]PresetParameters
+	allGroups groups
+	Groups    map[api.GroupID]PresetParameters
 	Heads     map[api.HeadID]PresetParameters
 }
 
-func (preset *Preset) initAll(heads heads, groups groupMap) {
+func (preset *Preset) initAll(heads heads, groups groups) {
 	preset.allHeads = heads
 	preset.allGroups = groups
 }
 
-func (preset *Preset) initGroup(group *Group, presetParameters PresetParameters) error {
+func (preset *Preset) initGroup(group *Group, params api.PresetConfigParameters) error {
 	var groupParameters = PresetParameters{
 		group:     group,
-		Intensity: presetParameters.Intensity,
-		Color:     presetParameters.Color,
+		Intensity: params.Intensity,
+		Color:     params.Color,
 	}
 
 	if err := groupParameters.init(); err != nil {
@@ -165,11 +156,11 @@ func (preset *Preset) initGroup(group *Group, presetParameters PresetParameters)
 	return nil
 }
 
-func (preset *Preset) initHead(head *Head, presetParameters PresetParameters) error {
+func (preset *Preset) initHead(head *Head, params api.PresetConfigParameters) error {
 	var headParameters = PresetParameters{
 		head:      head,
-		Intensity: presetParameters.Intensity,
-		Color:     presetParameters.Color,
+		Intensity: params.Intensity,
+		Color:     params.Color,
 	}
 
 	if err := headParameters.init(); err != nil {
@@ -193,7 +184,7 @@ func (preset *Preset) PostREST() (web.Resource, error) {
 type APIPresetParams struct {
 	preset *Preset
 
-	Intensity *Intensity
+	Intensity *api.Value // TODO: rename to scale
 }
 
 func (apiPresetParams APIPresetParams) Apply() error {
@@ -277,7 +268,7 @@ type httpConfigPreset struct {
 }
 
 // Export a preset configuration from the current state
-func (controller *Controller) ConfigPreset() PresetConfig {
+func (controller *Controller) ConfigPreset() api.PresetConfig {
 	var allParameters = PresetParameters{
 		Intensity: &APIIntensity{},
 		Color:     &APIColor{},

@@ -1,74 +1,13 @@
 package heads
 
 import (
-	"fmt"
-
 	"github.com/qmsk/dmx"
 	"github.com/qmsk/dmx/api"
 	"github.com/qmsk/dmx/logging"
 	"github.com/qmsk/go-web"
 )
 
-// Config type
-type TypeID string
-
-type HeadType struct {
-	Vendor string
-	Model  string
-	Mode   string
-	URL    string
-
-	Channels []ChannelType
-	Colors   ColorMap
-}
-
-func (headType HeadType) String() string {
-	return fmt.Sprintf("%v/%v=%v", headType.Vendor, headType.Model, headType.Mode)
-}
-
-func (headType HeadType) IsColor() bool {
-	for _, channelType := range headType.Channels {
-		if channelType.Color != "" {
-			return true
-		}
-	}
-	return false
-}
-
-// Top-level map
-type headList []*Head
-
-func (heads headList) makeAPI() []api.Head {
-	var apiHeads = make([]APIHead, 0, len(heads))
-
-	for _, head := range heads {
-		apiHeads = append(apiHeads, head.makeAPI())
-	}
-
-	return apiHeads, nil
-}
-
-func (heads headList) GetREST() (web.Resource, error) {
-	var apiHeads []APIHead
-
-	for _, head := range heads {
-		apiHeads = append(apiHeads, head.makeAPI())
-	}
-
-	return apiHeads, nil
-}
-
 type heads map[api.HeadID]*Head
-
-func (heads heads) list() headList {
-	var list = make(headList, 0, len(heads))
-
-	for _, head := range heads {
-		list = append(list, head)
-	}
-
-	return list
-}
 
 func (heads heads) makeAPI() api.Heads {
 	var apiHeads = make(api.Heads)
@@ -79,10 +18,20 @@ func (heads heads) makeAPI() api.Heads {
 	return apiHeads
 }
 
+func (heads heads) makeAPIList() []api.Head {
+	var apiHeads = make([]api.Head, 0, len(heads))
+
+	for _, head := range heads {
+		apiHeads = append(apiHeads, head.makeAPI())
+	}
+
+	return apiHeads
+}
+
 func (heads heads) Index(name string) (web.Resource, error) {
 	switch name {
 	case "":
-		return heads.list(), nil
+		return headsView{heads}, nil
 	default:
 		return heads[api.HeadID(name)], nil
 	}
@@ -92,39 +41,13 @@ func (heads heads) GetREST() (web.Resource, error) {
 	return heads.makeAPI(), nil
 }
 
-// Channels
-type HeadChannels map[ChannelType]*Channel
-
-func (headChannels HeadChannels) GetID(id string) *Channel {
-	for channelType, channel := range headChannels {
-		if channelType.String() == id {
-			return channel
-		}
-	}
-
-	return nil
+// GET /heads/ => []api.Head
+type headsView struct {
+	heads heads
 }
 
-func (headChannels HeadChannels) makeAPI() APIChannels {
-	var apiChannels = make(APIChannels)
-
-	for channelType, channel := range headChannels {
-		apiChannels[channelType.String()] = channel.makeAPI()
-	}
-
-	return apiChannels
-}
-
-func (headChannels HeadChannels) GetREST() (web.Resource, error) {
-	return headChannels.makeAPI(), nil
-}
-
-func (headChannels HeadChannels) Index(name string) (web.Resource, error) {
-	if channel := headChannels.GetID(name); channel == nil {
-		return nil, nil
-	} else {
-		return web.GetPostResource(channel), nil
-	}
+func (view headsView) GetREST() (web.Resource, error) {
+	return view.heads.makeAPIList(), nil
 }
 
 type HeadParameters struct {
@@ -141,9 +64,9 @@ type Head struct {
 	headType api.HeadType
 	output   *Output
 	events   Events
-	groups   groupMap
+	groups   groups
 
-	channels   HeadChannels
+	channels   channels
 	parameters HeadParameters
 }
 
@@ -160,26 +83,27 @@ func (head *Head) Name() string {
 }
 
 func (head *Head) init() {
-	head.channels = make(HeadChannels)
+	head.channels = make(channels)
 
-	for channelIndex, channelType := range head.headType.Channels {
+	for index, channelConfig := range head.headType.Channels {
 		var channel = &Channel{
-			channelType: channelType,
-			index:       uint(channelIndex),
-			output:      head.output,
-			address:     head.config.Address + dmx.Address(channelIndex),
+			id:      channelConfig.ID(),
+			config:  channelConfig,
+			index:   uint(index),
+			output:  head.output,
+			address: dmx.Address(head.config.Address) + dmx.Address(index),
 		}
 
 		channel.init()
 
-		head.channels[channelType] = channel
+		head.channels[channel.id] = channel
 	}
 
 	// set parameters
-	if headIntensity := head.getIntensity(); headIntensity.exists() {
+	if headIntensity := head.Intensity(); headIntensity.exists() {
 		head.parameters.Intensity = &headIntensity
 	}
-	if headColor := head.getColor(); headColor.exists() {
+	if headColor := head.Color(); headColor.exists() {
 		head.parameters.Color = &headColor
 	}
 }
@@ -189,22 +113,22 @@ func (head *Head) initGroup(group *Group) {
 	head.groups[group.id] = group
 }
 
-func (head *Head) getChannel(channelType ChannelType) *Channel {
-	return head.channels[channelType]
+func (head *Head) Channel(config api.ChannelConfig) *Channel {
+	return head.channels[config.ID()]
 }
 
-func (head *Head) getIntensity() HeadIntensity {
+func (head *Head) Intensity() HeadIntensity {
 	return HeadIntensity{
-		channel: head.getChannel(ChannelType{Intensity: true}),
+		channel: head.Channel(api.ChannelConfig{Intensity: true}),
 	}
 }
 
-func (head *Head) getColor() HeadColor {
+func (head *Head) Color() HeadColor {
 	return HeadColor{
-		red:       head.getChannel(ChannelType{Color: ColorChannelRed}),
-		green:     head.getChannel(ChannelType{Color: ColorChannelGreen}),
-		blue:      head.getChannel(ChannelType{Color: ColorChannelBlue}),
-		intensity: head.getChannel(ChannelType{Intensity: true}),
+		red:       head.Channel(api.ChannelConfig{Color: api.ChannelColorRed}),
+		green:     head.Channel(api.ChannelConfig{Color: api.ChannelColorGreen}),
+		blue:      head.Channel(api.ChannelConfig{Color: api.ChannelColorBlue}),
+		intensity: head.Channel(api.ChannelConfig{Intensity: true}),
 	}
 }
 
@@ -212,27 +136,28 @@ func (head *Head) Parameters() HeadParameters {
 	return head.parameters
 }
 
-// Web API GET
-type APIHead struct {
-	ID     api.HeadID
-	Config api.HeadConfig
-	Type   api.HeadType
-
-	Channels  map[string]APIChannel `json:",omitempty"`
-	Intensity *APIIntensity         `json:",omitempty"`
-	Color     *APIColor             `json:",omitempty"`
-}
-
-func (head *Head) makeAPI() APIHead {
-	return APIHead{
+func (head *Head) makeAPI() api.Head {
+	var apiHead = api.Head{
 		ID:     head.id,
 		Config: head.config,
 		Type:   head.headType,
 
-		Channels:  head.channels.makeAPI(),
-		Intensity: head.parameters.Intensity.makeAPI(),
-		Color:     head.parameters.Color.makeAPI(),
+		Channels: head.channels.makeAPI(),
 	}
+
+	if head.parameters.Intensity != nil {
+		var intensity = head.parameters.Intensity.makeAPI()
+
+		apiHead.Intensity = &intensity
+	}
+
+	if head.parameters.Color != nil {
+		var color = head.parameters.Color.makeAPI()
+
+		apiHead.Color = &color
+	}
+
+	return apiHead
 }
 
 func (head *Head) GetREST() (web.Resource, error) {
@@ -243,9 +168,9 @@ func (head *Head) GetREST() (web.Resource, error) {
 type APIHeadParams struct {
 	head *Head
 
-	Channels  map[string]APIChannelParams `json:",omitempty"`
-	Intensity *APIIntensity               `json:",omitempty"`
-	Color     *APIColor                   `json:",omitempty"`
+	Channels  map[string]api.ChannelParams `json:",omitempty"`
+	Intensity *api.Intensity               `json:",omitempty"`
+	Color     *api.Color                   `json:",omitempty"`
 }
 
 func (head *Head) PostREST() (web.Resource, error) {

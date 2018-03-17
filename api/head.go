@@ -1,5 +1,9 @@
 package api
 
+import (
+	"fmt"
+)
+
 type TypeID string
 type HeadType struct {
 	Vendor string
@@ -9,6 +13,10 @@ type HeadType struct {
 
 	Channels []ChannelConfig
 	Colors   Colors
+}
+
+func (headType HeadType) String() string {
+	return fmt.Sprintf("%v/%v=%v", headType.Vendor, headType.Model, headType.Mode)
 }
 
 type HeadConfig struct {
