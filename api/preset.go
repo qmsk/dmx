@@ -19,10 +19,10 @@ type Preset struct {
 	ID     PresetID
 	Config PresetConfig
 
-	Groups map[GroupID]PresetParameterConfig
-	Heads  map[HeadID]PresetParameterConfig
+	Groups PresetGroups
+	Heads  PresetHeads
 }
 
 type PresetParams struct {
-	Intensity *Intensity
+	Intensity *Value // TODO: rename to Scale
 }
