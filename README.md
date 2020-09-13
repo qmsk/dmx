@@ -11,7 +11,7 @@ The recommended way to build and run the project is using Docker:
 
     $ git clone https://github.com/qmsk/dmx.git qmsk-dmx && cd qmsk-dmx
     $ docker build -t qmsk/dmx .
-    $ docker run --rm --name qmsk-dmx -v $PWD/config:/go/src/github.com/qmsk/dmx/config:ro -e ARTNET_DISCOVERY=2.255.255.255 -p 8000:8000 qmsk/dmx
+    $ docker run --rm --name qmsk-dmx -v $PWD/config:/etc/qmsk-dmx:ro -e ARTNET_DISCOVERY=2.255.255.255 -p 8000:8000 qmsk/dmx
 
 The `-v $PWD/config:/go/src/github.com/qmsk/dmx/config:ro` allows editing the config and reloading it use `docker restart qmsk-dmx`.
 
