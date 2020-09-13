@@ -16,11 +16,11 @@ func (controller *Controller) Index(name string) (web.Resource, error) {
 	case "":
 		return controller, nil
 	case "groups":
-		return controller.groups, nil
+		return &groupsView{controller.groups}, nil
 	case "outputs":
-		return controller.outputs, nil
+		return &outputsView{controller.outputs}, nil
 	case "heads":
-		return controller.heads, nil
+		return &headsView{controller.heads}, nil
 	case "presets":
 		return controller.presets, nil
 	default:

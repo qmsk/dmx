@@ -1,16 +1,36 @@
 package api
 
-type PresetConfigParameters struct {
-	Intensity *Intensity
-	Color     *Color
+type PresetConfigParams struct {
+	Intensity *IntensityParams
+	Color     *ColorParams
 }
 
-type PresetGroups map[GroupID]PresetConfigParameters
-type PresetHeads map[HeadID]PresetConfigParameters
+func (params PresetConfigParams) Scale(scale Value) PresetConfigParams {
+	var ret PresetConfigParams
+
+	if params.Intensity != nil {
+		var intensity = *params.Intensity
+
+		ret.Intensity = &intensity
+		ret.Intensity.ScaleIntensity = &scale
+	}
+
+	if params.Color != nil {
+		var color = *params.Color
+
+		ret.Color = &color
+		ret.Color.ScaleIntensity = &scale
+	}
+
+	return ret
+}
+
+type PresetGroups map[GroupID]PresetConfigParams
+type PresetHeads map[HeadID]PresetConfigParams
 
 type PresetConfig struct {
 	Name   string
-	All    *PresetConfigParameters
+	All    *PresetConfigParams
 	Groups PresetGroups
 	Heads  PresetHeads
 }
@@ -22,6 +42,7 @@ type Preset struct {
 	ID     PresetID
 	Config PresetConfig
 
+	// TODO: superfluous re config?
 	Groups PresetGroups
 	Heads  PresetHeads
 }

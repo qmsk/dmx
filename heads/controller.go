@@ -82,11 +82,12 @@ func (controller *Controller) addGroup(id api.GroupID, config api.GroupConfig) *
 	if group == nil {
 		group = &Group{
 			//XXX: log:    controller.options.Log.Logger("group", id),
-			id:     id,
-			config: config,
-			heads:  make(heads),
-			colors: make(api.Colors),
-			events: controller.events,
+			id:      id,
+			config:  config,
+			heads:   make(heads),
+			colors:  make(api.Colors),
+			events:  controller.events,
+			outputs: controller.outputs,
 		}
 
 		controller.groups[id] = group
@@ -134,29 +135,29 @@ func (controller *Controller) addPreset(id api.PresetID, config api.PresetConfig
 	var preset = Preset{
 		// XXX: log:    controller.options.Log.Logger("preset", id),
 		events: controller.events,
-		ID:     id,
-		Config: config,
-		Groups: make(map[api.GroupID]PresetParameters),
-		Heads:  make(map[api.HeadID]PresetParameters),
+		id:     id,
+		config: config,
+		groups: make(map[api.GroupID]PresetParameters),
+		heads:  make(map[api.HeadID]PresetParameters),
 	}
 
-	if preset.Config.All != nil {
+	if config.All != nil {
 		preset.initAll(controller.heads, controller.groups)
 	}
 
-	for groupID, presetParameters := range preset.Config.Groups {
+	for groupID, params := range config.Groups {
 		if group := controller.groups[api.GroupID(groupID)]; group == nil {
-			return fmt.Errorf("No such group: %v", groupID)
+			return fmt.Errorf("Unknown group for preset %v: %v", id, groupID)
 		} else {
-			preset.initGroup(group, presetParameters)
+			preset.initGroup(group, params)
 		}
 	}
 
-	for headID, presetParameters := range preset.Config.Heads {
+	for headID, params := range config.Heads {
 		if head := controller.heads[api.HeadID(headID)]; head == nil {
-			return fmt.Errorf("No such head: %v", headID)
+			return fmt.Errorf("Unknown head for preset %v: %v", id, headID)
 		} else {
-			preset.initHead(head, presetParameters)
+			preset.initHead(head, params)
 		}
 	}
 

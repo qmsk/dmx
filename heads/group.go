@@ -26,26 +26,32 @@ func (groups groups) makeAPIList() (apiGroups []api.Group) {
 	return
 }
 
-func (groups groups) GetREST() (web.Resource, error) {
-	return groups.makeAPI(), nil
+type groupsView struct {
+	groups groups
 }
 
-func (groups groups) Index(name string) (web.Resource, error) {
-	switch name {
-	case "":
-		return groups.makeAPIList(), nil
-	default:
-		return groups[api.GroupID(name)], nil
+func (view groupsView) GetREST() (web.Resource, error) {
+	return view.groups.makeAPI(), nil
+}
+
+func (view groupsView) Index(name string) (web.Resource, error) {
+	if name == "" {
+		return view, nil
+	} else if group := view.groups[api.GroupID(name)]; group != nil {
+		return groupView{group: group}, nil
+	} else {
+		return nil, nil
 	}
 }
 
 // Group
 type Group struct {
-	log    logging.Logger
-	id     api.GroupID
-	config api.GroupConfig
-	heads  heads
-	events Events
+	log     logging.Logger
+	id      api.GroupID
+	config  api.GroupConfig
+	heads   heads
+	events  Events
+	outputs outputs
 
 	intensity *GroupIntensity
 	color     *GroupColor
@@ -85,7 +91,7 @@ func (group *Group) makeIntensity() GroupIntensity {
 	}
 
 	for headID, head := range group.heads {
-		if headIntensity := head.parameters.Intensity; headIntensity != nil {
+		if headIntensity := head.intensity; headIntensity != nil {
 			groupIntensity.heads[headID] = *headIntensity
 		}
 	}
@@ -99,7 +105,7 @@ func (group *Group) makeColor() GroupColor {
 	}
 
 	for headID, head := range group.heads {
-		if headColor := head.parameters.Color; headColor != nil {
+		if headColor := head.color; headColor != nil {
 			groupColor.headColors[headID] = *headColor
 		}
 	}
@@ -116,78 +122,73 @@ func (group *Group) makeAPIHeads() []api.HeadID {
 	return heads
 }
 
-func (group *Group) makeAPIParams() api.GroupParams {
-	var params api.GroupParams
-
-	if group.intensity != nil {
-		var intensity = group.intensity.makeAPI()
-
-		params.Intensity = &intensity
-	}
-
-	if group.color != nil {
-		var color = group.color.makeAPI()
-
-		params.Color = &color
-	}
-
-	return params
-}
-
 func (group *Group) makeAPI() api.Group {
-	return api.Group{
+	var apiGroup = api.Group{
 		GroupConfig: group.config,
 		ID:          group.id,
 		Heads:       group.makeAPIHeads(),
 		Colors:      group.colors,
-		GroupParams: group.makeAPIParams(),
-	}
-}
-
-func (group *Group) GetREST() (web.Resource, error) {
-	return group.makeAPI(), nil
-}
-func (group *Group) PostREST() (web.Resource, error) {
-	return &APIGroupParams{group: group}, nil
-}
-
-// Web API
-type APIGroupParams struct {
-	group     *Group
-	Intensity *APIIntensity `json:",omitempty"`
-	Color     *APIColor     `json:",omitempty"`
-}
-
-func (apiGroupParams APIGroupParams) Apply() error {
-	if apiGroupParams.Intensity != nil {
-		if err := apiGroupParams.Intensity.initGroup(apiGroupParams.group.intensity); err != nil {
-			return web.RequestError(err)
-		} else if err := apiGroupParams.Intensity.Apply(); err != nil {
-			return err
-		}
 	}
 
-	if apiGroupParams.Color != nil {
-		if err := apiGroupParams.Color.initGroup(apiGroupParams.group.color); err != nil {
-			return web.RequestError(err)
-		} else if err := apiGroupParams.Color.Apply(); err != nil {
-			return err
-		}
+	if group.intensity != nil {
+		var intensity = group.intensity.GetIntensity()
+
+		apiGroup.Intensity = &intensity
+	}
+
+	if group.color != nil {
+		var color = group.color.GetColor()
+
+		apiGroup.Color = &color
+	}
+
+	return apiGroup
+}
+
+func (group *Group) applyAPI(params api.GroupParams) error {
+	if params.Intensity != nil {
+		group.intensity.SetIntensity(*params.Intensity)
+	}
+
+	if params.Color != nil {
+		group.color.SetColor(*params.Color)
 	}
 
 	return nil
 }
 
-// Web API Events
-func (group *Group) Apply() error {
+func (group *Group) update() error {
 	group.log.Info("Apply")
 
+	group.outputs.Refresh()
+
 	group.events.update(api.Event{
-		Heads: group.heads.makeAPI(),
-		Groups: api.Groups{
-			group.id: group.makeAPI(),
-		},
+		Heads:  group.heads.makeAPI(),
+		Groups: api.Groups{group.id: group.makeAPI()},
 	})
 
 	return nil
+}
+
+type groupView struct {
+	group  *Group
+	params api.GroupParams
+}
+
+func (view *groupView) IntoREST() interface{} {
+	return &view.params
+}
+
+func (view *groupView) GetREST() (web.Resource, error) {
+	return view.group.makeAPI(), nil
+}
+
+func (view *groupView) PostREST() (web.Resource, error) {
+	if err := view.group.applyAPI(view.params); err != nil {
+		return nil, err
+	} else if err := view.group.update(); err != nil {
+		return nil, err
+	} else {
+		return view.group.makeAPI(), nil
+	}
 }

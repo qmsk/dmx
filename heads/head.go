@@ -28,31 +28,22 @@ func (heads heads) makeAPIList() []api.Head {
 	return apiHeads
 }
 
-func (heads heads) Index(name string) (web.Resource, error) {
-	switch name {
-	case "":
-		return headsView{heads}, nil
-	default:
-		return heads[api.HeadID(name)], nil
-	}
-}
-
-func (heads heads) GetREST() (web.Resource, error) {
-	return heads.makeAPI(), nil
-}
-
-// GET /heads/ => []api.Head
 type headsView struct {
 	heads heads
 }
 
-func (view headsView) GetREST() (web.Resource, error) {
-	return view.heads.makeAPIList(), nil
+func (view headsView) Index(name string) (web.Resource, error) {
+	if name == "" {
+		return view, nil
+	} else if head := view.heads[api.HeadID(name)]; head != nil {
+		return headView{head: head}, nil
+	} else {
+		return nil, nil
+	}
 }
 
-type HeadParameters struct {
-	Intensity *HeadIntensity `json:"intensity,omitempty"`
-	Color     *HeadColor     `json:"color,omitempty"`
+func (view headsView) GetREST() (web.Resource, error) {
+	return view.heads.makeAPIList(), nil
 }
 
 // A single DMX receiver using multiple consecutive DMX channels from a base address within a single universe
@@ -66,8 +57,9 @@ type Head struct {
 	events   Events
 	groups   groups
 
-	channels   channels
-	parameters HeadParameters
+	channels  channels
+	intensity *HeadIntensity
+	color     *HeadColor
 }
 
 func (head *Head) String() string {
@@ -99,12 +91,12 @@ func (head *Head) init() {
 		head.channels[channel.id] = channel
 	}
 
-	// set parameters
+	// setup parameters
 	if headIntensity := head.Intensity(); headIntensity.exists() {
-		head.parameters.Intensity = &headIntensity
+		head.intensity = &headIntensity
 	}
 	if headColor := head.Color(); headColor.exists() {
-		head.parameters.Color = &headColor
+		head.color = &headColor
 	}
 }
 
@@ -132,10 +124,6 @@ func (head *Head) Color() HeadColor {
 	}
 }
 
-func (head *Head) Parameters() HeadParameters {
-	return head.parameters
-}
-
 func (head *Head) makeAPI() api.Head {
 	var apiHead = api.Head{
 		ID:     head.id,
@@ -145,14 +133,14 @@ func (head *Head) makeAPI() api.Head {
 		Channels: head.channels.makeAPI(),
 	}
 
-	if head.parameters.Intensity != nil {
-		var intensity = head.parameters.Intensity.makeAPI()
+	if head.intensity != nil {
+		var intensity = head.intensity.GetIntensity()
 
 		apiHead.Intensity = &intensity
 	}
 
-	if head.parameters.Color != nil {
-		var color = head.parameters.Color.makeAPI()
+	if head.color != nil {
+		var color = head.color.GetColor()
 
 		apiHead.Color = &color
 	}
@@ -160,83 +148,83 @@ func (head *Head) makeAPI() api.Head {
 	return apiHead
 }
 
-func (head *Head) GetREST() (web.Resource, error) {
-	return head.makeAPI(), nil
-}
+func (head *Head) applyAPI(params api.HeadParams) error {
+	head.log.Info("Apply: %#v", params)
 
-// Web API POST
-type APIHeadParams struct {
-	head *Head
-
-	Channels  map[string]api.ChannelParams `json:",omitempty"`
-	Intensity *api.Intensity               `json:",omitempty"`
-	Color     *api.Color                   `json:",omitempty"`
-}
-
-func (head *Head) PostREST() (web.Resource, error) {
-	// parameters only, not configuration
-	return &APIHeadParams{head: head}, nil
-}
-
-func (post *APIHeadParams) Apply() error {
-	post.head.log.Info("Apply parameters: %#v", post)
-
-	for channelID, channelParams := range post.Channels {
-		if channel := post.head.channels.GetID(channelID); channel == nil {
-			return web.Errorf(404, "Channel not found: %v", channelID)
+	for channelID, channelParams := range params.Channels {
+		if channel := head.channels[channelID]; channel == nil {
+			return web.Errorf(422, "No channel for head %v: %v", head.id, channelID)
 		} else {
-			channelParams.channel = channel
-		}
-
-		if err := channelParams.Apply(); err != nil {
-			return err
+			channel.SetChannel(channelParams)
 		}
 	}
 
-	if post.Intensity != nil {
-		if err := post.Intensity.initHead(post.head.parameters.Intensity); err != nil {
-			return web.RequestError(err)
-		} else if err := post.Intensity.Apply(); err != nil {
-			return err
+	if params.Intensity != nil {
+		if head.intensity == nil {
+			return web.Errorf(422, "No intensity for head %v", head.id)
+		} else {
+			head.intensity.SetIntensity(*params.Intensity)
 		}
 	}
 
-	if post.Color != nil {
-		if err := post.Color.initHead(post.head.parameters.Color); err != nil {
-			return web.RequestError(err)
-		} else if err := post.Color.Apply(); err != nil {
-			return err
+	if params.Color != nil {
+		if head.color == nil {
+			return web.Errorf(422, "No color for head %v", head.id)
+		} else {
+			head.color.SetColor(*params.Color)
 		}
 	}
 
 	return nil
 }
 
-func (head *Head) Index(name string) (web.Resource, error) {
+func (head *Head) update() error {
+	head.log.Info("Apply")
+
+	head.output.Refresh()
+
+	head.events.update(api.Event{
+		Heads:  api.Heads{head.id: head.makeAPI()},
+		Groups: head.groups.makeAPI(),
+	})
+
+	return nil
+}
+
+// GET /heads/:id => api.Head
+type headView struct {
+	head   *Head
+	params api.HeadParams
+}
+
+func (view *headView) Index(name string) (web.Resource, error) {
 	switch name {
 	case "":
-		return head, nil
+		return view, nil
 	case "channels":
-		return head.channels, nil
+		return &channelsView{view.head.channels}, nil
 	case "intensity":
-		return head.parameters.Intensity, nil
+		return &intensityView{handler: view.head.intensity}, nil
 	case "color":
-		return head.parameters.Color, nil
+		return &colorView{handler: view.head.color}, nil
 	default:
 		return nil, nil
 	}
 }
 
-// Web API Events
-func (head *Head) Apply() error {
-	head.log.Info("Apply")
+func (view *headView) IntoREST() interface{} {
+	return &view.params
+}
 
-	head.events.update(APIEvents{
-		Heads: APIHeads{
-			head.id: head.makeAPI(),
-		},
-		Groups: head.groups.makeAPI(),
-	})
-
-	return nil
+func (view *headView) GetREST() (web.Resource, error) {
+	return view.head.makeAPI(), nil
+}
+func (view *headView) PostREST() (web.Resource, error) {
+	if err := view.head.applyAPI(view.params); err != nil {
+		return nil, err
+	} else if err := view.head.update(); err != nil {
+		return nil, err
+	} else {
+		return view.head.makeAPI(), nil
+	}
 }

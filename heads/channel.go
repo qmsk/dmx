@@ -13,22 +13,25 @@ func (channels channels) makeAPI() api.Channels {
 	var apiChannels = make(api.Channels)
 
 	for id, channel := range channels {
-		apiChannels[id] = channel.makeAPI()
+		apiChannels[id] = channel.GetChannel()
 	}
 
 	return apiChannels
 }
 
-func (channels channels) GetREST() (web.Resource, error) {
-	return channels.makeAPI(), nil
+type channelsView struct {
+	channels channels
 }
 
-func (channels channels) Index(name string) (web.Resource, error) {
-	if channel := channels[api.ChannelID(name)]; channel == nil {
+func (view channelsView) Index(name string) (web.Resource, error) {
+	if channel := view.channels[api.ChannelID(name)]; channel == nil {
 		return nil, nil
 	} else {
 		return channel, nil
 	}
+}
+func (view channelsView) GetREST() (web.Resource, error) {
+	return view.channels.makeAPI(), nil
 }
 
 type Channel struct {
@@ -58,7 +61,16 @@ func (channel *Channel) SetValue(value api.Value) api.Value {
 	return api.Value(channel.output.SetValue(channel.address, Value(value)))
 }
 
-func (channel *Channel) makeAPI() api.Channel {
+func (channel *Channel) SetChannel(params api.ChannelParams) {
+	if params.DMX != nil {
+		channel.SetDMX(*params.DMX)
+	}
+	if params.Value != nil {
+		channel.SetValue(*params.Value)
+	}
+}
+
+func (channel *Channel) GetChannel() api.Channel {
 	return api.Channel{
 		ID:      channel.id,
 		Index:   channel.index,
@@ -69,37 +81,22 @@ func (channel *Channel) makeAPI() api.Channel {
 	}
 }
 
-func (channel *Channel) GetREST() (web.Resource, error) {
-	return channel.makeAPI(), nil
-}
-
-type APIChannelParams struct {
+// API
+type channelView struct {
 	channel *Channel
-
-	DMX   *dmx.Channel `json:",omitempty"`
-	Value *Value       `json:",omitempty"`
+	params  api.ChannelParams
 }
 
-func (channel *Channel) PostREST() (web.Resource, error) {
-	return &APIChannelParams{channel: channel}, nil
+func (view *channelView) GetREST() (web.Resource, error) {
+	return view.channel.GetChannel(), nil
 }
 
-func (params *APIChannelParams) Apply() error {
-	if params.DMX != nil {
-		params.channel.SetDMX(*params.DMX)
-	}
-	if params.Value != nil {
-		*params.Value = params.channel.SetValue(*params.Value)
-	}
+func (view *channelView) IntoREST() interface{} {
+	return &view.params
+}
 
-	if params.DMX == nil {
-		var dmxValue = params.channel.GetDMX()
-		params.DMX = &dmxValue
-	}
-	if params.Value == nil {
-		var value = params.channel.GetValue()
-		params.Value = &value
-	}
+func (view *channelView) PostREST() (web.Resource, error) {
+	view.channel.SetChannel(view.params)
 
-	return nil
+	return view.channel.GetChannel(), nil
 }

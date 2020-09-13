@@ -43,7 +43,7 @@ type Head struct {
 }
 
 type HeadParams struct {
-	Channels  map[string]ChannelParams `json:",omitempty"`
-	Intensity *Intensity               `json:",omitempty"`
-	Color     *Color                   `json:",omitempty"`
+	Channels  map[ChannelID]ChannelParams `json:",omitempty"`
+	Intensity *IntensityParams            `json:",omitempty"`
+	Color     *ColorParams                `json:",omitempty"`
 }

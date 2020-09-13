@@ -15,10 +15,11 @@ type Group struct {
 	Heads       []HeadID
 	Colors      Colors
 
-	GroupParams
+	Intensity *Intensity
+	Color     *Color
 }
 
 type GroupParams struct {
-	Intensity *Intensity `json:",omitempty"`
-	Color     *Color     `json:",omitempty"`
+	Intensity *IntensityParams `json:",omitempty"`
+	Color     *ColorParams     `json:",omitempty"`
 }

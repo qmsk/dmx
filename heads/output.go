@@ -20,18 +20,28 @@ type OutputConfig struct {
 
 type outputs map[api.Universe]*Output
 
+func (outputs outputs) Refresh() {
+	for _, output := range outputs {
+		output.Refresh()
+	}
+}
+
 func (outputs outputs) makeAPI() api.Outputs {
 	var apiOutputs = make(api.Outputs)
 
 	for _, output := range outputs {
-		apiOutputs[output.String()] = output.makeAPI()
+		apiOutputs[api.OutputID(output.String())] = output.makeAPI()
 	}
 
 	return apiOutputs
 }
 
-func (outputs outputs) GetREST() (web.Resource, error) {
-	return outputs.makeAPI(), nil
+type outputsView struct {
+	outputs outputs
+}
+
+func (view outputsView) GetREST() (web.Resource, error) {
+	return view.outputs.makeAPI(), nil
 }
 
 type OutputConnection struct {
@@ -71,16 +81,14 @@ func (output *Output) connect(config OutputConfig, dmxWriter dmx.Writer) {
 		output.connection.dmxWriter = dmxWriter
 	}
 
-	output.apply()
+	output.update()
 }
 
-func (output *Output) apply() {
-	var id = output.String()
+func (output *Output) update() {
+	var id = api.OutputID(output.String())
 
-	output.events.update(APIEvents{
-		Outputs: APIOutputs{
-			id: output.makeAPI(),
-		},
+	output.events.update(api.Event{
+		Outputs: api.Outputs{id: output.makeAPI()},
 	})
 }
 
@@ -123,29 +131,20 @@ func (output *Output) Refresh() error {
 	return nil
 }
 
-// Web API
-type APIOutputs map[string]APIOutput
-
-type APIOutput struct {
-	Universe  Universe
-	Connected *time.Time
-
-	*OutputConfig
-}
-
-func (output *Output) makeAPI() APIOutput {
-	var apiOutput = APIOutput{
+func (output *Output) makeAPI() api.Output {
+	var apiOutput = api.Output{
 		Universe: output.universe,
 	}
 
 	if output.connection != nil {
 		apiOutput.Connected = &output.connection.time
-		apiOutput.OutputConfig = &output.connection.config
+		apiOutput.OutputStatus = api.OutputStatus{
+			Seen:    output.connection.config.Seen,
+			Address: output.connection.config.Address,
+			Port:    output.connection.config.Port,
+			Artnet:  output.connection.config.Artnet,
+		}
 	}
 
 	return apiOutput
-}
-
-func (output *Output) GetREST() (web.Resource, error) {
-	return output.makeAPI(), nil
 }
