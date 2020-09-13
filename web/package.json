@@ -21,7 +21,7 @@
     "@angular/platform-browser-dynamic": "~4.3.3",
     "@angular/router": "~4.3.3",
     "core-js": "^2.4.1",
-    "lodash": "^4.16.6",
+    "lodash": "4.17.4",
     "material-design-icons": "^3.0.1",
     "normalize.css": "7.0.0",
     "reflect-metadata": "^0.1.8",
@@ -32,7 +32,7 @@
   },
   "devDependencies": {
     "typescript": "~2.4.2",
-    "@types/node": "^8.0.19",
-    "@types/lodash": "^4.14.59"
+    "@types/node": "8.0.19",
+    "@types/lodash": "4.14.71"
   }
 }
