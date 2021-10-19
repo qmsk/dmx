@@ -10,6 +10,8 @@ type Options struct {
 	Log logging.Option `long:"log.heads"`
 
 	LibraryPath []string `long:"heads-library" value-name:"PATH"`
+
+	DMXSyncer dmx.Syncer
 }
 
 func (options Options) Heads(config *Config) (*Heads, error) {
@@ -202,6 +204,12 @@ func (heads *Heads) Refresh() error {
 
 	for _, output := range heads.outputs {
 		if err := output.Refresh(); err != nil {
+			refreshErr = err
+		}
+	}
+
+	if heads.options.DMXSyncer != nil {
+		if err := heads.options.DMXSyncer.SyncDMX(); err != nil {
 			refreshErr = err
 		}
 	}

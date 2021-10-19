@@ -137,6 +137,9 @@ func main() {
 	// heads
 	var headsHeads *heads.Heads
 
+	// sync all outputs via a single controller
+	options.Heads.DMXSyncer = artnetController
+
 	if headsConfig, err := options.Heads.Config(options.Args.HeadsConfig); err != nil {
 		logging.Log.Fatalf("heads.Config %v: %v", options.Args.HeadsConfig, err)
 	} else if heads, err := options.Heads.Heads(headsConfig); err != nil {

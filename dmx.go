@@ -66,3 +66,7 @@ func (universe *Universe) Set(address Address, value Channel) {
 type Writer interface {
 	WriteDMX(dmx Universe) error
 }
+
+type Syncer interface {
+	SyncDMX() error
+}
