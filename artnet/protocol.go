@@ -40,4 +40,5 @@ var (
 	OpPoll      = OpCode{0x00, 0x20}
 	OpPollReply = OpCode{0x00, 0x21}
 	OpDmx       = OpCode{0x00, 0x50}
+	OpSync      = OpCode{0x00, 0x52}
 )

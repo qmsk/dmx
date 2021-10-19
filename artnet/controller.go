@@ -182,3 +182,17 @@ func (controller *Controller) SendDMX(address Address, universe dmx.Universe) er
 
 	return nil
 }
+
+// Send ArtSync packet using broadcast
+func (controller *Controller) SyncDMX() error {
+	// always using broadcast
+	for _, addr := range controller.discoveryAddrs {
+		if err := controller.transport.SendSync(addr); err != nil {
+			return fmt.Errorf("SendSync broadcast %v: %v", addr, err)
+		} else {
+			controller.log.Debugf("SendSync: broadcast %v ", addr)
+		}
+	}
+
+	return nil
+}

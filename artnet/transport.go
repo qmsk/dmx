@@ -71,6 +71,11 @@ func (t *Transport) decode(header ArtHeader, buf []byte) (ArtPacket, error) {
 			ArtHeader: header,
 		}
 
+	case OpSync:
+		packet = &ArtSync{
+			ArtHeader: header,
+		}
+
 	default:
 		return nil, fmt.Errorf("Unknown opcode: %04x", header.OpCode)
 	}
